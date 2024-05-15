@@ -15,8 +15,11 @@
 
             <!-- <button class="begin-btn">GET STARTED</button>
             <router-link :to="{ name: 'Study'}">Study</router-link> -->
-            <a href="#signup">Sign Up</a>
-            <a href="#signin">Sign In</a>
+            <!-- <a href="#signup">Sign Up</a>
+            <a href="#signin">Sign In</a> -->
+            <router-link :to="{ name: 'Login'}">Log in</router-link>
+            <router-link :to="{ name: 'Signup'}">Sign up</router-link>
+            
         </div>
       </header>
     <router-view/>
