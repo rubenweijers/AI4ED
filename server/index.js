@@ -14,39 +14,6 @@ app.use(cors());
 app.use(express.json());
 // app.use(express.urlencoded({ extended: false }));
 
-// let db;
-// MongoClient.connect('mongodb://localhost:2000/login-practice', { useUnifiedTopology: true }, (err, client) => {
-//   if (err) throw err;
-//   db = client.db('login-practice'); // use 'mydb' database
-// });
-
-
-// Manual proxy configuration
-// app.use('/api', proxy('http://localhost:8080')); 
-
-// app.post('/api/signup', async (req, res) => {
-//     try {
-//       const { username, password } = req.body;
-  
-//       // Check if the user already exists
-//       const existingUser = await db.collection('users').findOne({ username });
-//       if (existingUser) {
-//         return res.status(409).json({ error: 'User already exists' });
-//       }
-  
-//       // Hash the password
-//       const hashedPassword = await bcrypt.hash(password, 10);
-  
-//       // Store the user in the database
-//       await db.collection('users').insertOne({ username, password: hashedPassword });
-  
-//       res.status(201).json({ message: 'Account created successfully' });
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ error: 'An error occurred while creating the account' });
-//     }
-//   });
-
 // V1, DIDNT WORK
 // Register user (API endpoint)
 app.post('/api/signup', async (req, res) => {
@@ -118,3 +85,44 @@ app.get('*', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 })
+
+// End of working code
+
+
+
+
+
+
+// Some old code that doesn't work:
+// let db;
+// MongoClient.connect('mongodb://localhost:2000/login-practice', { useUnifiedTopology: true }, (err, client) => {
+//   if (err) throw err;
+//   db = client.db('login-practice'); // use 'mydb' database
+// });
+
+
+// Manual proxy configuration
+// app.use('/api', proxy('http://localhost:8080')); 
+
+// app.post('/api/signup', async (req, res) => {
+//     try {
+//       const { username, password } = req.body;
+  
+//       // Check if the user already exists
+//       const existingUser = await db.collection('users').findOne({ username });
+//       if (existingUser) {
+//         return res.status(409).json({ error: 'User already exists' });
+//       }
+  
+//       // Hash the password
+//       const hashedPassword = await bcrypt.hash(password, 10);
+  
+//       // Store the user in the database
+//       await db.collection('users').insertOne({ username, password: hashedPassword });
+  
+//       res.status(201).json({ message: 'Account created successfully' });
+//     } catch (err) {
+//       console.error(err);
+//       res.status(500).json({ error: 'An error occurred while creating the account' });
+//     }
+//   });
