@@ -17,32 +17,33 @@
 </template>
   
 <script>
-  export default {
+export default {
     data() {
-      return {
+        return {
         username: '',
         password: '',
-      };
+        error: null, // To store error messages from the backend
+        };
     },
-    methods: {
-      async login() {
-        try {
-          const response = await axios.post('/api/login', {
-            username: this.username,
-            password: this.password,
-          });
-  
-          // Handle successful login (e.g., store token, redirect)
-          console.log('Login successful:', response.data);
-          // You would typically do something like:
-          // this.$router.push('/dashboard'); // Redirect to a protected route
-        } catch (error) {
-          // Handle login errors (e.g., display error message)
-          console.error('Login failed:', error.response.data);
-        }
-      },
+methods: {
+    async login() {
+    try {
+        const response = await axios.post('/api/login', {
+        username: this.username,
+        password: this.password,
+        });
+
+        // Handle successful login (e.g., store token, redirect)
+        console.log('Login successful:', response.data);
+        // You would typically do something like:
+        // this.$router.push('/dashboard'); // Redirect to a protected route
+    } catch (error) {
+        // Handle login errors (e.g., display error message)
+        console.error('Login failed:', error.response.data);
+    }
     },
-  };
+},
+};
 </script>
   
 <style scoped>
