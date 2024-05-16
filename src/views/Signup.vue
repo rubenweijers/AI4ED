@@ -64,10 +64,60 @@ data() {
 
 </script>
   
-  <style scoped>
-  /* Your existing styles or add new styles for error messages */
-  .error-message {
-    color: red;
-  }
-  </style>
-  
+
+// Add the following styles to the Signup.vue file:
+<style scoped>
+.form-container {
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 400px; /* Limit form width */
+  margin: 0 auto;  /* Center horizontally */
+  text-align: left;
+}
+
+h2 {
+  color: rgb(29, 29, 184); /* Dark blue header */
+  margin-bottom: 20px;
+  font-family: 'Roboto', sans-serif; /* Set font to Roboto */
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.submit-btn {
+  background-color: rgb(29, 29, 184); /* Dark blue button */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s; /* Smooth transition on hover */
+}
+
+.submit-btn:hover {
+  background-color: rgb(23, 23, 250); /* Lighter blue on hover */
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+</style>

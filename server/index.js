@@ -1,20 +1,24 @@
 const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
+const { createProxyMiddleware } = require('http-proxy-middleware'); // Currently not being used
 const path = require('path');  // Corrected import of the 'path' module
 const bcrypt = require('bcrypt');
 const collection = require('./config');
-const cors = require('cors');
+const cors = require('cors'); // Currently not being used
 const proxy = require('express-http-proxy');
 const MongoClient = require('mongodb').MongoClient;
 
 const app = express();
 const port = 2000;
 
-app.use(cors());
+// CORS CURRENTLY NOT USED
+// app.use(cors());
 app.use(express.json());
+
+// THIS NOT USED CURRENTLY
 // app.use(express.urlencoded({ extended: false }));
 
-// V1, DIDNT WORK
+
+
 // Register user (API endpoint)
 app.post('/api/signup', async (req, res) => {
     console.log('Signup request received:', req.body);
@@ -44,7 +48,8 @@ app.post('/api/signup', async (req, res) => {
 });
 
 // Login user (API endpoint)
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
+    console.log('Login request received:', req.body);
     try {
         const data = {
             name: req.body.username,
@@ -63,10 +68,9 @@ app.post('/login', async (req, res) => {
 
         if (!passwordMatch) {
             return res.status(400).send("Invalid password");
+        }else {
+            res.status(200).send("Login successful");
         }
-
-        // If the password is correct, send the user to the home page
-        res.render('home', { username: data.name });
 
     } catch (err) {
         console.error('Error logging in:', err);
@@ -74,19 +78,28 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// ... (other API endpoints) ...
+
 
 // Catch-all route to serve your Vue app for all other paths
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
-
+// Start the server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 })
 
 // End of working code
+
+
+
+
+
+
+
+
+
 
 
 
