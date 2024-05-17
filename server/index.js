@@ -7,6 +7,13 @@ const cors = require('cors'); // Currently not being used
 const proxy = require('express-http-proxy');
 const MongoClient = require('mongodb').MongoClient;
 
+// Use cookie-parser for login/logout functionality
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+// Import jsonwebtoken for authentication
+const jwt = require('jsonwebtoken');
+
 const app = express();
 const port = 2000;
 
@@ -69,6 +76,10 @@ app.post('/api/login', async (req, res) => {
         if (!passwordMatch) {
             return res.status(400).send("Invalid password");
         }else {
+            // Generate a JWT
+            const token = jwt.sign({ username: data.name }, 'your-secret-key', { expiresIn: '1h' });
+
+            res.cookie('token', token, { maxAge: 3600000, httpOnly: true });
             res.status(200).send("Login successful");
         }
 
@@ -84,8 +95,11 @@ app.post('/api/questionnaire/submit', async (req, res) => {
     try {
       // Assuming you have authentication in place
       // and the authenticated user's ID is available as req.user.id
-      const userId = req.user.id; 
+      const userId = req.body.userId; 
       const responses = req.body;
+
+      // Remove the userId from the responses object
+      delete responses.userId;
   
       const newResponse = new Response({ userId, ...responses });
       await newResponse.save();

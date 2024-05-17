@@ -11,11 +11,11 @@ const routes = [
     name: 'Home',
     component: Home
   },
-  {
-    path: '/login',
-    name: 'Login',
-    component: Login
-  },
+  // {
+  //   path: '/login',
+  //   name: 'Login',
+  //   component: Login
+  // },
   {
     path: '/signup',
     name: 'Signup',
@@ -34,6 +34,23 @@ const routes = [
   { 
     path: '/:catchAll(.*)', // Catch-all route
     redirect: '/'  // Redirect unmatched paths to Home
+  },
+  // Tutorial routes
+  {
+    path: '/secret',
+    name: 'secret',
+    component: () => import('../views/SecretView.vue'),
+  meta: { requiresAuth: true }
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView
+  },
+  {
+    path: '/unauthorized',
+    name: 'unauthorized',
+    component: UnauthorizedView
   }
 
 ]

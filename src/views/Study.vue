@@ -33,12 +33,12 @@ export default {
         return {
         questions: [
             { n:1, questionText: "I have strong beliefs about what is right and wrong, good and bad", type: "radio" },
-            { n:2, questionText: "I often act without considering the possible consequences.", type: "radio" },
-            { n:3, questionText: "I tend to solve problems using a step-by-step approach.", type: "radio"},
-            { n:4, questionText: "I believe that formal procedures and policies restrict people.", type: "radio"},
-            { n:5, questionText: "I have a reputation for saying what I think, simply and directly.", type: "radio"},
-            { n:6, questionText: "I often find that actions based on feelings are as sound as those based on careful thought and analysis.", type: "radio"},
-            { n:7, questionText: "I like the sort of work where I have time for thorough preparation and implementation.", type: "radio"},
+            // { n:2, questionText: "I often act without considering the possible consequences.", type: "radio" },
+            // { n:3, questionText: "I tend to solve problems using a step-by-step approach.", type: "radio"},
+            // { n:4, questionText: "I believe that formal procedures and policies restrict people.", type: "radio"},
+            // { n:5, questionText: "I have a reputation for saying what I think, simply and directly.", type: "radio"},
+            // { n:6, questionText: "I often find that actions based on feelings are as sound as those based on careful thought and analysis.", type: "radio"},
+            // { n:7, questionText: "I like the sort of work where I have time for thorough preparation and implementation.", type: "radio"},
         ],
         answers: {}
         }
@@ -47,8 +47,11 @@ export default {
       async submitQuestionnaire() {
             console.log('Submitting Answers:', this.answers);
 
+            // REPLACE WITH USER ID
+            const userId = 'hardcoded-user-id';
+
             try {
-                const response = await axios.post('/api/questionnaire/submit', this.answers);
+                const response = await axios.post('/api/questionnaire/submit', { userId, ...this.answers });
                 console.log('Submission successful:', response.data);
                 // TODO: Handle success (e.g., show a success message, navigate to another page)
             } catch (error) {
