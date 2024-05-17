@@ -1,21 +1,33 @@
 <template>
-    <div class="form-container">
-      <h2>Login</h2>
-      <form @submit.prevent="login">
-        <div class="form-group">
-          <label for="username">Name:</label>
-          <input type="text" id="username" v-model="username" placeholder="Enter your name" required autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input type="password" id="password" v-model="password" placeholder="Password" required>
-        </div>
-        <button type="submit" class="submit-btn">Login</button>
-      </form>
-      <p>Don't have an account? <span class="signup-link"><router-link to="/signup">Signup</router-link></span></p>
-    </div>
+
+  <div v-if="showPopup" class="popup">
+      Login successful!
+  </div>
+
+  <div class="form-container">
+    <h2>Login</h2>
+    <form @submit.prevent="login">
+      <div class="form-group">
+        <label for="username">Name:</label>
+        <input type="text" id="username" v-model="username" placeholder="Enter your name" required autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" v-model="password" placeholder="Password" required>
+      </div>
+
+      <div v-if="error" class="error-message">
+      {{ error }}
+      </div>
+
+      <button type="submit" class="submit-btn">Login</button>
+
+      <p>Don't have an account? <span class="signup-link"><router-link to="/signup">Sign up</router-link></span></p>
+    </form>
+  </div>
+
 </template>
-  
+
 <script>
 import axios from 'axios';
 
@@ -24,6 +36,7 @@ export default {
         return {
         username: '',
         password: '',
+        showPopup: false,
         error: null, // To store error messages from the backend
         };
     },
@@ -38,9 +51,17 @@ methods: {
         });
 
         // Handle successful login (e.g., store token, redirect)
-        console.log('Login successful:', response.data);
-        // You would typically do something like:
-        // this.$router.push('/dashboard'); // Redirect to a protected route
+        console.log('Status:', response.data);
+        // Show popup
+        this.showPopup = true;
+
+        // Redirect to the study page after 1.5 seconds
+        setTimeout(() => {
+            this.showPopup = false; // Hide the popup after 3 seconds
+            this.$router.push('/study'); // Redirect to login
+            this.redirecting = false;
+          }, 1500);
+
     } catch (error) {
         // Handle login errors (e.g., display error message)
         console.error('Login failed:', error.response.data);
@@ -125,6 +146,18 @@ a:hover{
 .signup-link {
   font-weight: bold;
   cursor: pointer;
+}
+
+.popup {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, -10%);
+  background-color: rgb(27, 0, 63); /* Semi-transparent black background */
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000; /* Ensure it's on top of other elements */
 }
 
 </style>

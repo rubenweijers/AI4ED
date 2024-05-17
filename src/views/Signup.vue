@@ -1,23 +1,40 @@
 <template>
-    <div class="form-container">
-      <h2>Sign Up</h2>
-      <form @submit.prevent="signup">
-        <div class="form-group">
-          <label for="username">Name:</label>
-          <input type="text" id="username" v-model="username" placeholder="Enter your name" required>
-        </div>
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input type="password" id="password" v-model="password" placeholder="Password" required>
-        </div>
-  
-        <div v-if="error" class="error-message">
-          {{ error }}
-        </div>
-  
-        <button type="submit" class="submit-btn">Sign Up</button>
-      </form>
-    </div>
+
+  <div v-if="showPopup" class="popup">
+    Signup successful!
+  </div>
+
+  <div class="form-container">
+    <h2>Sign Up</h2>
+    <form @submit.prevent="signup">
+      <div class="form-group">
+        <label for="username">Name:</label>
+        <input type="text" id="username" v-model="username" placeholder="Enter your name" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" v-model="password" placeholder="Password" required>
+      </div>
+
+      <div v-if="error" class="error-message">
+        {{ error }}
+      </div>
+
+      <!-- Sign up button that redirect to login page -->
+      <div class="signup-button-container">
+        <button type="submit" class="submit-btn" :disabled="redirecting">
+          Sign Up
+        </button>
+        <div v-if="redirecting" class="spinner"></div>
+      </div>
+
+
+      <!-- Old login button -->
+      <!-- <button type="submit" class="submit-btn">Sign Up</button> -->
+
+      <p>Already have an account? <span class="signup-link"><router-link to="/login">Log in</router-link></span></p>
+    </form>
+  </div>
 </template>
   
 <script>
@@ -28,6 +45,8 @@ data() {
     return {
     username: '',
     password: '',
+    showPopup: false,
+    redirecting: false,
     error: null, // To store error messages from the backend
     };
 },
@@ -43,13 +62,20 @@ data() {
 
           // Handle successful signup
           console.log('Signup successful:', response.data);
+          this.showPopup = true;
+          this.redirecting = true; // Show the "redirecting" message and spinning wheel
+
+          // Redirect to login page after 3 seconds
+          setTimeout(() => {
+            this.showPopup = false; // Hide the popup after 3 seconds
+            this.$router.push('/login'); // Redirect to login
+            this.redirecting = false;
+          }, 3000);
 
           // Clear the form
           this.username = '';
           this.password = '';
 
-          // Redirect to login or display a success message
-          this.$router.push('/login');  
           console.log('Signup response:', response);
       } catch (error) {
         if (error.response) {
@@ -120,4 +146,46 @@ input[type="password"] {
   color: red;
   margin-top: 10px;
 }
+
+.popup {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, -10%);
+  background-color: rgb(27, 0, 63); /* Semi-transparent black background */
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000; /* Ensure it's on top of other elements */
+}
+
+/* Signup Link */
+.signup-link {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.signup-button-container {
+  display: flex;
+  align-items: center;
+}
+
+.spinner {
+  margin-left: 10px;
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  animation: spin 0.7s linear infinite; /* Reduced from 2s to 1s for faster spinning */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); border-color: #f3f3f3; border-top-color: #3498db; } /* Blue */
+  25% { transform: rotate(90deg); border-color: #f3f3f3; border-top-color: #9b59b6; } /* Purple */
+  50% { transform: rotate(180deg); border-color: #f3f3f3; border-top-color: #e74c3c; } /* Red */
+  75% { transform: rotate(270deg); border-color: #f3f3f3; border-top-color: #f1c40f; } /* Yellow */
+  100% { transform: rotate(360deg); border-color: #f3f3f3; border-top-color: #2ecc71; } /* Green */
+}
+
 </style>
