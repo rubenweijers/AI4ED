@@ -78,6 +78,27 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Send questionnaire data to the database (API endpoint)
+// ... your imports ...
+app.post('/api/questionnaire/submit', async (req, res) => {
+    try {
+      // Assuming you have authentication in place
+      // and the authenticated user's ID is available as req.user.id
+      const userId = req.user.id; 
+      const responses = req.body;
+  
+      const newResponse = new Response({ userId, ...responses });
+      await newResponse.save();
+  
+      res.status(201).json({ message: 'Responses saved successfully' });
+    } catch (error) {
+      console.error('Error saving responses:', error);
+      res.status(500).json({ error: 'An error occurred while saving responses' });
+    }
+  });
+  
+  // ... other routes
+  
 
 
 // Catch-all route to serve your Vue app for all other paths

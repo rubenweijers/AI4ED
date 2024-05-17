@@ -26,6 +26,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     data() {
         return {
@@ -42,20 +44,26 @@ export default {
         }
     },
     methods: {
-        submitQuestionnaire() {
-        // Here you will implement the fetch/Axios call in the next steps.
-        console.log('Submitting Answers:', this.answers); // Placeholder for now
+      async submitQuestionnaire() {
+            console.log('Submitting Answers:', this.answers);
+
+            try {
+                const response = await axios.post('/api/questionnaire/submit', this.answers);
+                console.log('Submission successful:', response.data);
+                // TODO: Handle success (e.g., show a success message, navigate to another page)
+            } catch (error) {
+                console.error('Submission failed:', error.response ? error.response.data : error.message);
+                // TODO: Handle error (e.g., display an error message to the user)
+            }
         },
-        
         // Toggle checkbox upon click
         toggleCheckbox(questionText, option) {
             // This time, only set the opposite option to false
             const oppositeOption = option === 'Agree' ? '-disagree' : '-agree';
             this.answers[questionText + oppositeOption] = false;
         },
-
-    }
-}
+  }
+};
 </script>
 
 <style scoped>
