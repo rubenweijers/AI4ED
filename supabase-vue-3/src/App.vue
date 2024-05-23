@@ -2,7 +2,7 @@
   <div>
     <header class="header">
       <div class="logo-container">
-        <img src="/bookie.png" alt="Bookie Logo">
+        <img @click="redirect" src="/bookie.png" alt="Bookie Logo">
         <h1 @click="redirect">ai4ed</h1>
       </div>
       <nav class="nav">
@@ -13,7 +13,11 @@
         <div class="user-actions">
           <router-link :to="{ name: 'Study'}" class="begin-btn">GET STARTED</router-link>
           <div v-if="user">
-            <span class="user-name">{{ user.display_name || 'User' }}</span>
+            <span class="user-name">
+              <template v-for="(char, index) in user.display_name.split('')" :key="index">
+                <span>{{ char }}</span>
+              </template>
+            </span>
             <button @click="handleLogout" class="logout-btn">Log out</button>
           </div>
           <div v-else>
@@ -96,6 +100,7 @@ body {
   font-weight: bold;
   color: white;
   font-family: 'Roboto', sans-serif;
+  cursor: pointer;
 }
 
 .logo-container img {
@@ -183,4 +188,37 @@ body {
     margin-top: 10px;
   }
 }
+
+@keyframes rainbow-flow {
+  0% { color: red; }
+  10% { color: orange; }
+  20% { color: yellow; }
+  30% { color: lime; }
+  40% { color: green; }
+  50% { color: cyan; }
+  60% { color: blue; }
+  70% { color: indigo; }
+  80% { color: violet; }
+  90% { color: pink; }
+  100% { color: red; }
+}
+
+.user-name span {
+  display: inline-block;
+  animation-name: rainbow-flow;
+  animation-duration: 5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.user-name span:nth-child(1) { animation-delay: 0s; }
+.user-name span:nth-child(2) { animation-delay: 0.2s; }
+.user-name span:nth-child(3) { animation-delay: 0.4s; }
+.user-name span:nth-child(4) { animation-delay: 0.6s; }
+.user-name span:nth-child(5) { animation-delay: 0.8s; }
+.user-name span:nth-child(6) { animation-delay: 1s; }
+.user-name span:nth-child(7) { animation-delay: 1.2s; }
+.user-name span:nth-child(8) { animation-delay: 1.4s; }
+.user-name span:nth-child(9) { animation-delay: 1.6s; }
+.user-name span:nth-child(10) { animation-delay: 1.8s; }
 </style>
