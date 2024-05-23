@@ -2,7 +2,7 @@
   <div>
     <header class="header">
         <div class="logo-container">
-            <img src="@/assets/bookie.png" alt="b">
+            <img src="src/assets/bookie.png" alt="b">
             <h1 @click="redirect">ai4ed</h1>
         </div>
         <nav class="nav">
