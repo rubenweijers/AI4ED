@@ -1,155 +1,199 @@
 <template>
   <div v-if="loading">
-    <!-- Optionally, you can display a loading spinner or a message here -->
     <p>Loading...</p>
   </div>
   <div v-else-if="user">
     <div class="study-container">
       <h2>Study Questionnaire</h2>
-      <form>
-        <div v-for="(question, index) in questions" :key="index">
-          <label :for="'question-' + index">{{ question.n }}. {{ question.questionText }}</label>
-          <div class="options">
+      <form @submit.prevent="submitAnswers">
+        <div v-for="question in questions" :key="question.id" class="question">
+          <div class="option">
             <input type="checkbox"
-                :id="'question-' + index + '-agree'"
-                :value="question.questionText + '-agree'"
-                v-model="answers[question.questionText + '-agree']"
-                @click="toggleCheckbox(question.questionText, 'Agree')">
-            <label :for="'question-' + index + '-agree'">Agree</label>
-
-            <input type="checkbox"
-                :id="'question-' + index + '-disagree'"
-                :value="question.questionText + '-disagree'"
-                v-model="answers[question.questionText + '-disagree']"
-                @click="toggleCheckbox(question.questionText, 'Disagree')">
-            <label :for="'question-' + index + '-disagree'">Disagree</label>
+              :id="'question-' + question.question_number"
+              :name="'question-' + question.question_number"
+              v-model="answers[question.id]"
+            >
           </div>
+          <label :for="'question-' + question.question_number">{{ question.question_number }}. {{ question.question_text }}</label>
         </div>
         <button type="submit" class="submit-button">Submit Questionnaire</button>
       </form>
     </div>
   </div>
+  <div v-else>
+    <p>Please log in to start the study.</p>
+    <router-link to="/login">Log in</router-link>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { supabase } from '../supabase'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { supabase } from '../supabase';
 
-const user = ref(null)
-const loading = ref(true)
-const router = useRouter()
+const user = ref(null);
+const loading = ref(true);
+const questions = ref([]);
+const answers = ref({});
+const router = useRouter();
+
+const learningStyleQuestions = {
+  activist: [2, 4, 6, 10, 17, 23, 24, 32, 34, 38, 40, 43, 45, 48, 58, 64, 71, 72, 74, 79],
+  reflector: [7, 13, 15, 16, 25, 28, 29, 31, 33, 36, 39, 41, 46, 52, 55, 60, 62, 66, 67, 76],
+  theorist: [1, 3, 8, 12, 14, 18, 20, 22, 26, 30, 42, 47, 51, 57, 61, 63, 68, 75, 77, 78],
+  pragmatist: [5, 9, 11, 19, 21, 27, 35, 37, 44, 49, 50, 53, 54, 56, 59, 65, 69, 70, 73, 80]
+};
 
 const checkUser = async () => {
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   if (currentUser) {
     user.value = currentUser;
+    await fetchQuestions();
   } else {
     router.push('/login'); // Redirect to login if no user is found
   }
   loading.value = false;
-}
+};
+
+const fetchQuestions = async () => {
+  const { data, error } = await supabase.from('questions').select('*').order('question_number', { ascending: true });
+  if (error) {
+    console.error('Error fetching questions:', error.message);
+    return;
+  }
+  console.log('Raw fetched data:', data);
+  if (data.length === 0) {
+    console.warn('No questions found in the database.');
+  } else {
+    console.log('Fetched questions:', data);
+  }
+  questions.value = data;
+
+  // Initialize answers with default "Unchecked"
+  questions.value.forEach(question => {
+    answers.value[question.id] = false;
+  });
+};
+
+const submitAnswers = async () => {
+  const userId = user.value.id;
+  const answerEntries = questions.value.map(question => ({
+    user_id: userId,
+    question_id: question.id,
+    answer: answers.value[question.id] ? 'Checked' : 'Unchecked',
+    question_number: question.question_number,
+  }));
+
+  const { data, error } = await supabase.from('answers').upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
+  if (error) {
+    console.error('Error submitting answers:', error.message);
+    return;
+  }
+
+  // Calculate learning style scores
+  const scores = {
+    activist: 0,
+    reflector: 0,
+    theorist: 0,
+    pragmatist: 0
+  };
+
+  questions.value.forEach(question => {
+    if (answers.value[question.id]) {
+      if (learningStyleQuestions.activist.includes(question.question_number)) {
+        scores.activist++;
+      }
+      if (learningStyleQuestions.reflector.includes(question.question_number)) {
+        scores.reflector++;
+      }
+      if (learningStyleQuestions.theorist.includes(question.question_number)) {
+        scores.theorist++;
+      }
+      if (learningStyleQuestions.pragmatist.includes(question.question_number)) {
+        scores.pragmatist++;
+      }
+    }
+  });
+
+  // Determine dominant learning style
+  const dominantLearningStyle = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+
+  // Update user profile with scores and dominant learning style
+  const { error: profileError } = await supabase.from('profiles').update({
+    activist_score: scores.activist,
+    reflector_score: scores.reflector,
+    theorist_score: scores.theorist,
+    pragmatist_score: scores.pragmatist,
+    dominant_learning_style: dominantLearningStyle
+  }).eq('id', userId);
+
+  if (profileError) {
+    console.error('Error updating profile:', profileError.message);
+    return;
+  }
+
+  // Proceed to the next step (e.g., pre-test)
+  router.push('/pre-test');
+};
 
 onMounted(() => {
   checkUser();
 });
-
-const questions = ref([
-  { n: 1, questionText: "I have strong beliefs about what is right and wrong, good and bad", type: "radio" },
-  { n: 2, questionText: "I often act without considering the possible consequences.", type: "radio" },
-  { n: 3, questionText: "I tend to solve problems using a step-by-step approach.", type: "radio" },
-  { n: 4, questionText: "I believe that formal procedures and policies restrict people.", type: "radio" },
-  { n: 5, questionText: "I have a reputation for saying what I think, simply and directly.", type: "radio" },
-  { n: 6, questionText: "I often find that actions based on feelings are as sound as those based on careful thought and analysis.", type: "radio" },
-  { n: 7, questionText: "I like the sort of work where I have time for thorough preparation and implementation.", type: "radio" },
-]);
-const answers = ref({})
-
-const toggleCheckbox = (questionText, option) => {
-  const oppositeOption = option === 'Agree' ? '-disagree' : '-agree';
-  answers.value[questionText + oppositeOption] = false;
-}
 </script>
 
 <style scoped>
-.study-container { /* A wrapper for the entire questionnaire */
-  max-width: 600px; /* Limit width for better readability */
-  margin: 50px auto; /* Center the form */
+.study-container {
+  max-width: 1000px;
+  margin: 50px auto;
   padding: 30px;
-  background-color: #fff; /* Light background */
+  background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
   text-align: left;
 }
 
-.study-container h2 { /* Add a heading */
+.study-container h2 {
   text-align: center;
   margin-bottom: 20px;
   color: rgb(29, 29, 184); 
 }
 
+.question {
+  display: flex;
+  align-items: center; /* Center the checkbox vertically with the question text */
+  margin-bottom: 100px; /* Increased distance between each question */
+}
+
 label {
-  display: block;
-  margin-bottom: 5px;
+  margin-left: 10px;
   font-weight: 600;
+  color: black;
+  text-transform: none; /* Make the question text not capitalized */
+  font-size: 16px;
 }
 
-input[type="text"], textarea, select {
-  width: 100%; 
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box; 
-} 
-
-.options {
-    display: flex;
-    flex-direction: column;
-    /* justify-content: flex-start; */
-    margin-top: -10px;
-    margin-bottom: 50px;
+.option {
+  display: flex;
+  align-items: center;
 }
 
-.options label {
-    margin-bottom: -10px;
-}
-
-.options input[type="checkbox"] {
-  /* Hide the default checkbox */
-  opacity: 0; 
-  position: left; 
-}
-
-.options input[type="checkbox"] + label::before {
-  content: '';
-  display: inline-block;
-  width: 18px; 
-  height: 18px;
-  margin-right: 10px; 
-  border: 1px solid #ddd;
-  border-radius: 3px; 
-  background-color: #fff;
-}
-
-.options input[type="checkbox"]:checked + label::before {
-  background-color: rgb(29, 29, 184); 
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e"); 
-  background-size: 10px;
+input[type="checkbox"] {
+  margin-right: 10px;
+  transform: scale(1.3); /* Make the checkbox 30% bigger */
 }
 
 .submit-button {
-  background-color: rgb(29, 29, 184);  /* Main button color */
-  color: white;                       /* Text color */
+  background-color: rgb(29, 29, 184);
+  color: white;
   border: none;
-  border-radius: 5px;                 /* Slightly rounded corners */
-  padding: 12px 30px;                 /* Adjust padding as needed */
+  border-radius: 5px;
+  padding: 12px 30px;
   cursor: pointer;
-  transition: background-color 0.3s;  /* Smooth hover transition */
+  transition: background-color 0.3s;
 }
 
 .submit-button:hover {
-  background-color: rgb(23, 23, 250); /* Slightly darker on hover  */
-  transform: translateY(-3px); /* Moves the button slightly upwards */
+  background-color: rgb(23, 23, 250);
+  transform: translateY(-3px);
 }
 </style>
