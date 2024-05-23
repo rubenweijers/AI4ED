@@ -5,7 +5,7 @@
   <div v-else-if="user">
     <div class="study-container">
       <h2>Study Questionnaire</h2>
-      <form @submit.prevent="submitAnswers">
+      <form @submit.prevent="confirmSubmission">
         <div v-for="question in questions" :key="question.id" class="question">
           <div class="option">
             <input type="checkbox"
@@ -75,65 +75,87 @@ const fetchQuestions = async () => {
   });
 };
 
+const confirmSubmission = () => {
+  if (confirm("Are you sure you want to submit?")) {
+    submitAnswers();
+  }
+};
+
 const submitAnswers = async () => {
-  const userId = user.value.id;
-  const answerEntries = questions.value.map(question => ({
-    user_id: userId,
-    question_id: question.id,
-    answer: answers.value[question.id] ? 'Checked' : 'Unchecked',
-    question_number: question.question_number,
-  }));
+  try {
+    const userId = user.value.id;
+    console.log('User ID:', userId); // Log the user ID to ensure it's correct
 
-  const { data, error } = await supabase.from('answers').upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
-  if (error) {
-    console.error('Error submitting answers:', error.message);
-    return;
-  }
+    const answerEntries = questions.value.map(question => ({
+      user_id: userId,
+      question_id: question.id,
+      answer: answers.value[question.id] ? 'Checked' : 'Unchecked',
+      question_number: question.question_number,
+    }));
 
-  // Calculate learning style scores
-  const scores = {
-    activist: 0,
-    reflector: 0,
-    theorist: 0,
-    pragmatist: 0
-  };
-
-  questions.value.forEach(question => {
-    if (answers.value[question.id]) {
-      if (learningStyleQuestions.activist.includes(question.question_number)) {
-        scores.activist++;
-      }
-      if (learningStyleQuestions.reflector.includes(question.question_number)) {
-        scores.reflector++;
-      }
-      if (learningStyleQuestions.theorist.includes(question.question_number)) {
-        scores.theorist++;
-      }
-      if (learningStyleQuestions.pragmatist.includes(question.question_number)) {
-        scores.pragmatist++;
-      }
+    const { data: answerData, error: answerError } = await supabase.from('answers').upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
+    if (answerError) {
+      console.error('Error submitting answers:', answerError.message);
+      return;
     }
-  });
 
-  // Determine dominant learning style
-  const dominantLearningStyle = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+    // Calculate learning style scores
+    const scores = {
+      activist: 0,
+      reflector: 0,
+      theorist: 0,
+      pragmatist: 0
+    };
 
-  // Update user profile with scores and dominant learning style
-  const { error: profileError } = await supabase.from('profiles').update({
-    activist_score: scores.activist,
-    reflector_score: scores.reflector,
-    theorist_score: scores.theorist,
-    pragmatist_score: scores.pragmatist,
-    dominant_learning_style: dominantLearningStyle
-  }).eq('id', userId);
+    questions.value.forEach(question => {
+      if (answers.value[question.id]) {
+        if (learningStyleQuestions.activist.includes(question.question_number)) {
+          scores.activist++;
+        }
+        if (learningStyleQuestions.reflector.includes(question.question_number)) {
+          scores.reflector++;
+        }
+        if (learningStyleQuestions.theorist.includes(question.question_number)) {
+          scores.theorist++;
+        }
+        if (learningStyleQuestions.pragmatist.includes(question.question_number)) {
+          scores.pragmatist++;
+        }
+      }
+    });
 
-  if (profileError) {
-    console.error('Error updating profile:', profileError.message);
-    return;
+    // Determine dominant learning style
+    const dominantLearningStyle = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+
+    console.log('Scores:', scores);
+    console.log('Dominant Learning Style:', dominantLearningStyle);
+
+    // Update user profile with scores and dominant learning style
+    const { data: profileData, error: profileError } = await supabase.from('profiles').update({
+      activist_score: scores.activist,
+      reflector_score: scores.reflector,
+      theorist_score: scores.theorist,
+      pragmatist_score: scores.pragmatist,
+      dominant_learning_style: dominantLearningStyle
+    }).eq('user_id', userId); // Ensure the column name is correct and matches user_id
+
+    if (profileError) {
+      console.error('Error updating profile:', profileError.message);
+      return;
+    }
+
+    console.log('Profile updated successfully:', profileData);
+
+    // Show success message with dominant learning style
+    alert(`
+    Form submission successful! 
+    Your learning style is "${dominantLearningStyle}"`);
+
+    // Proceed to the next step (e.g., pre-test)
+    router.push('/pre-test');
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
   }
-
-  // Proceed to the next step (e.g., pre-test)
-  router.push('/pre-test');
 };
 
 onMounted(() => {
