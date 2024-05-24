@@ -38,6 +38,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const user = ref(null)
+const dominant_learning_style = ref(null)
 
 const checkUser = () => {
   const storedUser = localStorage.getItem('user');
@@ -206,7 +207,7 @@ body {
 .user-name span {
   display: inline-block;
   animation-name: rainbow-flow;
-  animation-duration: 5s;
+  animation-duration: 20s;
   animation-iteration-count: infinite;
   animation-timing-function: linear;
 }
