@@ -3,6 +3,10 @@ import Home from '../views/Home.vue'
 import Study from '../views/Study.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
+import Chat from '../views/Chat.vue'
+import PreTest from '../views/PreTest.vue'
+import PostTest from '../views/PostTest.vue'
+import Survey from '../views/Survey.vue'
 
 const routes = [
   {
@@ -24,6 +28,26 @@ const routes = [
     path: '/study',
     name: 'Study',
     component: Study
+  },
+  {
+    path: '/pretest',
+    name: 'PreTest',
+    component: PreTest
+  },
+  {
+    path: '/posttest',
+    name: 'PostTest',
+    component: PostTest
+  },
+  {
+    path: '/chat',
+    name: 'Chat',
+    component: Chat
+  },
+  {
+    path: '/survey',
+    name: 'Survey',
+    component: Survey
   },
   { 
     path: '/:catchAll(.*)', // Catch-all route

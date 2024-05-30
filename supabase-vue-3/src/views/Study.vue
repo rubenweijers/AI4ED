@@ -151,8 +151,8 @@ const submitAnswers = async () => {
     Form submission successful! 
     Your learning style is "${dominantLearningStyle}"`);
 
-    // Proceed to the next step (e.g., pre-test)
-    router.push('/pre-test');
+    // Proceed to the next step (e.g., chat interaction)
+    router.push('/pretest');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
@@ -162,6 +162,7 @@ onMounted(() => {
   checkUser();
 });
 </script>
+
 
 <style scoped>
 .study-container {

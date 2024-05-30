@@ -180,6 +180,28 @@ body {
   transform: translateY(-3px);
 }
 
+.content {
+  margin-top: 50px;
+  color: white;
+}
+
+.cta-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #1d1db8;
+  color: white;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.cta-btn:hover {
+  background-color: #1717fa;
+  transform: translateY(-3px);
+}
+
+
 @media (max-width: 600px) {
   .header {
     flex-direction: column;
