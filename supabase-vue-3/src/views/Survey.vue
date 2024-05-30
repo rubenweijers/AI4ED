@@ -5,7 +5,7 @@
     <div v-else-if="user">
       <div class="survey-container">
         <h2>Post-Study Survey</h2>
-        <p>Imported Questions from database</p>
+        <p>Imported Questions</p>
         <form @submit.prevent="submitSurvey">
           <div class="survey-question" v-for="(question, index) in surveyQuestions" :key="index">
             <label :for="'question-' + index">{{ question.text }}</label>
