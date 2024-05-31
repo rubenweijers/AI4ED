@@ -22,4 +22,6 @@ def predict(message, history):
               partial_message = partial_message + chunk.choices[0].delta.content
               yield partial_message
 
+    print(history_openai_format)
+
 gr.ChatInterface(predict).launch(share=True)
