@@ -29,7 +29,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -68,12 +67,7 @@ const fetchQuestions = async () => {
   if (data.length === 0) {
     console.warn('No questions found in the database.');
   } else {
-    // Sort the questions by question_type
-    surveyQuestions.value = data.sort((a, b) => {
-      if (a.question_type < b.question_type) return -1;
-      if (a.question_type > b.question_type) return 1;
-      return 0;
-    });
+    surveyQuestions.value = data;
     answers.value = surveyQuestions.value.map(() => ''); // Initialize answers array with empty strings
   }
   loading.value = false; // Set loading to false after fetching questions
@@ -84,14 +78,17 @@ const submitSurvey = async () => {
     const userId = user.value.id;
     const surveyEntries = surveyQuestions.value.map((question, index) => ({
       user_id: userId,
-      question_id: question.id, // Assuming 'id' is the primary key of the question in the database
-      question_number: index + 1, // Numbering questions starting from 1
+      question_id: question.id,
+      question_number: index + 1,
       answer: answers.value[index],
     }));
 
-    const { data: surveyData, error: surveyError } = await supabase.from('survey_answers').insert(surveyEntries);
-    if (surveyError) {
-      console.error('Error submitting survey:', surveyError.message);
+    const { data, error } = await supabase
+      .from('survey_answers')
+      .upsert(surveyEntries, { onConflict: ['user_id', 'question_id'] });
+
+    if (error) {
+      console.error('Error submitting survey answers:', error.message);
       return;
     }
 
@@ -111,9 +108,7 @@ onMounted(async () => {
 });
 </script>
 
-
 <style scoped>
-
 .survey-container {
   max-width: 800px;
   margin: 50px auto;
@@ -188,5 +183,4 @@ textarea {
   background-color: rgb(23, 23, 250);
   transform: translateY(-3px);
 }
-
 </style>

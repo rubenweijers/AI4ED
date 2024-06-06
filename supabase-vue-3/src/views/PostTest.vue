@@ -13,7 +13,7 @@
 
     const submitTest = () => {
         // Logic to handle the test submission can be added here if needed
-        router.push('/chat'); // Redirect to Chat.vue
+        router.push('/survey'); // Redirect to Chat.vue
     };
 </script>
   
