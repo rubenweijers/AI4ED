@@ -1,8 +1,16 @@
 from openai import OpenAI
 import gradio as gr
+import datetime
+import os
+from supabase import create_client, Client
 
-api_key = "sk-proj-HMSGxl7bl04I5hqudiSpT3BlbkFJJMgKbVr267Uw5XPJGkDy"  # Replace with your key
-client = OpenAI(api_key=api_key)
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
+
+user_data = supabase.auth.get_user()
+
+client = OpenAI(api_key=os.environ.get(CHATGPT_API_KEY))
 
 def predict(message, history):
     history_openai_format = []
@@ -24,4 +32,12 @@ def predict(message, history):
 
     print(history_openai_format)
 
-gr.ChatInterface(predict).launch(share=True)
+    time = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+
+    data, count = supabase.table('chat_history').insert({"user_id": user_data, 
+    "chat_history": history_openai_format, "llm_type":"gpt-3.5-turbo", "time_spent": time}).execute()
+
+    print(data, count)
+
+if __name__ == "__main__":
+    gr.ChatInterface(predict).launch(share=True)
