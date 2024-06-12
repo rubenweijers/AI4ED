@@ -83,6 +83,7 @@ const submitSurvey = async () => {
       answer: answers.value[index],
     }));
 
+    // Ensure the table has a unique constraint on (user_id, question_id)
     const { data, error } = await supabase
       .from('survey_answers')
       .upsert(surveyEntries, { onConflict: ['user_id', 'question_id'] });
@@ -96,7 +97,7 @@ const submitSurvey = async () => {
     alert('Survey submission successful! Thank you for your feedback.');
 
     // Redirect to a thank you or home page
-    router.push('/');
+    router.push('/ThankYou.vue');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
@@ -107,6 +108,7 @@ onMounted(async () => {
   await fetchQuestions();
 });
 </script>
+
 
 <style scoped>
 .survey-container {

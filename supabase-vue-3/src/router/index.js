@@ -7,6 +7,7 @@ import Chat from '../views/Chat.vue'
 import PreTest from '../views/PreTest.vue'
 import PostTest from '../views/PostTest.vue'
 import Survey from '../views/Survey.vue'
+import ThankYou from '../views/ThankYou.vue'
 
 const routes = [
   {
@@ -52,7 +53,12 @@ const routes = [
   { 
     path: '/:catchAll(.*)', // Catch-all route
     redirect: '/'  // Redirect unmatched paths to Home
-  }
+  },
+  {
+    path: '/thankyou',
+    name: 'ThankYou',
+    component: ThankYou
+  },
 
 ]
 
