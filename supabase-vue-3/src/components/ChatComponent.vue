@@ -1,10 +1,10 @@
+<!-- ChatComponent.vue -->
+
 <template>
-  <div class="chat-container">
-    <div class="chat-box" v-for="(message, index) in chatHistory" :key="index">
-      <div class="user-message" v-if="message.role === 'user'">{{ message.content }}</div>
-      <div class="assistant-message" v-else>{{ message.content }}</div>
-    </div>
-    <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Type your message..." />
+  <div>
+    <h1>Chat with GPT-3.5</h1>
+    <iframe v-if="gradioUrl" id="gradio-interface" width="100%" height="500px" :src="gradioUrl" frameborder="0"></iframe>
+    <p v-else>Loading Gradio interface...</p>
   </div>
 </template>
 
@@ -12,56 +12,22 @@
 import axios from 'axios'
 
 export default {
+  name: 'ChatComponent',
   data() {
     return {
-      chatHistory: [],
-      newMessage: ''
+      gradioUrl: ''
     }
   },
-  methods: {
-    async sendMessage() {
-      if (this.newMessage.trim() === '') return
-
-      const userMessage = { role: 'user', content: this.newMessage }
-      this.chatHistory.push(userMessage)
-
-      try {
-        const response = await axios.post('https://ai4ed.vercel.app', {
-          message: this.newMessage,
-          history: this.chatHistory
-        })
-
-        this.chatHistory.push({ role: 'assistant', content: response.data.response })
-        this.newMessage = ''
-      } catch (error) {
-        console.error('Error sending message:', error)
-      }
-    }
+  mounted() {
+    axios.get('/gradio')
+      .then(response => {
+        console.log(response.data)
+        // Assuming the URL of the Gradio interface is returned by the /gradio endpoint
+        this.gradioUrl = 'https://ai4ed.vercel.app/gradio' // Adjust if needed
+      })
+      .catch(error => {
+        console.error('Error fetching Gradio URL:', error)
+      })
   }
 }
 </script>
-
-<style scoped>
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  justify-content: flex-end;
-}
-.chat-box {
-  padding: 10px;
-}
-.user-message {
-  background-color: #dcf8c6;
-  align-self: flex-end;
-}
-.assistant-message {
-  background-color: #ece5dd;
-  align-self: flex-start;
-}
-input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  width: 100%;
-}
-</style>
