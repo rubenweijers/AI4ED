@@ -8,7 +8,6 @@ import PreTest from '../views/PreTest.vue'
 import PostTest from '../views/PostTest.vue'
 import Survey from '../views/Survey.vue'
 import ThankYou from '../views/ThankYou.vue'
-import { supabase } from '../supabase'
 import Chat from '../views/ChatLearningStyle.vue'
 
 const routes = [
