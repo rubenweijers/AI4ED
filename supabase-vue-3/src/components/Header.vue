@@ -2,7 +2,7 @@
   <div>
     <header class="header">
       <div class="logo-container" @click="redirect">
-        <img src="/ai4edlogo.png" alt="Bookie Logo">
+        <img src="/ai4edlogo-removebg.png" alt="Bookie Logo">
       </div>
       <nav class="nav">
         <a href="#examples">Examples</a>
@@ -109,6 +109,9 @@ const redirect = () => {
   color: #000;
   cursor: pointer;
   padding: 0;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1em;
+  transition: color 0.3s, transform 0.3s;
 }
 
 .user-name span {
@@ -117,14 +120,23 @@ const redirect = () => {
   animation-duration: 20s;
   animation-iteration-count: infinite;
   animation-timing-function: linear;
+  font-size: 1.2em;
+  color: #000;
+  transition: color 0.3s, transform 0.3s;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes rainbow-flow {
-  0% { color: #b3e5fc; }
-  20% { color: #bae1ff; }
-  40% { color: #e0f7fa; }
-  60% { color: #baffc9; }
-  80% { color: #ffffba; }
-  100% { color: #ffecb3; }
+  0% { color: #000; }
+  10% { color: #575757; }
+  20% { color: #a0a0a0; }
+  30% { color: #d9d9d9; }
+  40% { color: #ffffff; }
+  50% { color: #d9d9d9; }
+  60% { color: #a0a0a0; }
+  70% { color: #575757; }
+  80% { color: #000; }
+  90% { color: #575757; }
+  100% { color: #a0a0a0; }
 }
 </style>
