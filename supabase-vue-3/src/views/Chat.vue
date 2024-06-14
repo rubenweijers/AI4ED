@@ -1,14 +1,11 @@
 <template>
-  <div>
-    <ChatComponent />
-  </div>
+  <ChatComponent />
 </template>
 
 <script>
-import ChatComponent from '@/components/ChatComponent.vue'
+import ChatComponent from './components/ChatComponent.vue'
 
 export default {
-  name: 'Chat',
   components: {
     ChatComponent
   }

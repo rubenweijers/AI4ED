@@ -7,6 +7,7 @@
 
 <script setup>
 import Header from './components/Header.vue'
+import ChatComponent from './components/ChatComponent.vue'
 </script>
 
 <style>

@@ -1,31 +1,64 @@
-<!-- ChatComponent.vue -->
-
 <template>
-  <div>
-    <h1>Chat with GPT-3.5</h1>
-    <iframe id="gradio-interface" width="100%" height="500px" :src="gradioUrl" frameborder="0"></iframe>
+  <div class="chat-container">
+    <div class="chat-box" v-for="(message, index) in chatHistory" :key="index">
+      <div class="user-message" v-if="message.role === 'user'">{{ message.content }}</div>
+      <div class="assistant-message" v-else>{{ message.content }}</div>
+    </div>
+    <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Type your message..." />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import { supabase } from '../supabase.js' // Adjust the import path as needed
 
 export default {
-  name: 'ChatComponent',
   data() {
     return {
-      gradioUrl: ''
+      chatHistory: [],
+      newMessage: ''
     }
   },
-  mounted() {
-    axios.get('https://ai4ed.vercel.app/gradio')
-      .then(response => {
-        console.log(response.data)
-        this.gradioUrl = 'https://ai4ed.vercel.app/gradio' // Update with the actual URL if needed
+  methods: {
+    async sendMessage() {
+      if (this.newMessage.trim() === '') return
+
+      const userMessage = { role: 'user', content: this.newMessage }
+      this.chatHistory.push(userMessage)
+
+      const response = await axios.post('https://ai4ed.vercel.app', {
+        message: this.newMessage,
+        history: this.chatHistory
       })
-      .catch(error => {
-        console.error(error)
-      })
+
+      this.chatHistory.push({ role: 'assistant', content: response.data })
+      this.newMessage = ''
+    }
   }
 }
 </script>
+
+<style scoped>
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: flex-end;
+}
+.chat-box {
+  padding: 10px;
+}
+.user-message {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+}
+.assistant-message {
+  background-color: #ece5dd;
+  align-self: flex-start;
+}
+input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  width: 100%;
+}
+</style>
