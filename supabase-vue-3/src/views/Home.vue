@@ -7,6 +7,7 @@
         <p>Reducing misconceptions in physics using state of the art AI models.</p>
         <!-- <button @click="learnMore" class="learn-more-button">Learn More</button> -->
         <router-link :to="{ name: 'Study'}" class="learn-more-button">Learn more</router-link>
+        <router-link :to="{ name: 'Chat'}" class="learn-more-button">go to chat</router-link>
       </div>
     </div>
   </div>
