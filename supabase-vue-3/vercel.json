@@ -1,11 +1,19 @@
 {
   "version": 2,
+  "name": "my-vue-app",
   "builds": [
-    { "src": "server.py", "use": "@vercel/python" }
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
   ],
-  
   "routes": [
-    { "src": "/(.*)", "dest": "server.py" }
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
   ]
 }
-  
