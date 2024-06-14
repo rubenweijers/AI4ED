@@ -2,7 +2,7 @@
   <div>
     <header class="header">
       <div class="logo-container" @click="redirect">
-        <img src="/ai4edlogo-removebg.png" alt="Bookie Logo">
+        <img src="/ai4edlogo-removebg.png" alt="Bookie Logo" />
       </div>
       <nav class="nav">
         <a href="#examples">Examples</a>
@@ -26,11 +26,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '../supabase'
 
 const router = useRouter()
+const route = useRoute()
 const user = ref(null)
 
 const checkUser = () => {
@@ -41,6 +42,11 @@ const checkUser = () => {
 }
 
 onMounted(() => {
+  checkUser()
+})
+
+// Watch for route changes to re-check user
+watch(route, () => {
   checkUser()
 })
 
@@ -90,7 +96,9 @@ const redirect = () => {
   align-items: center;
 }
 
-.nav a, .nav .user-name, .nav .logout-btn {
+.nav a,
+.nav .user-name,
+.nav .logout-btn {
   margin-left: 15px;
   text-decoration: none;
   color: #000;
@@ -98,7 +106,8 @@ const redirect = () => {
   transition: color 0.3s, transform 0.3s;
 }
 
-.nav a:hover, .nav .logout-btn:hover {
+.nav a:hover,
+.nav .logout-btn:hover {
   color: #575757;
   transform: translateY(-3px);
 }
@@ -127,16 +136,38 @@ const redirect = () => {
 }
 
 @keyframes rainbow-flow {
-  0% { color: #000; }
-  10% { color: #575757; }
-  20% { color: #a0a0a0; }
-  30% { color: #d9d9d9; }
-  40% { color: #ffffff; }
-  50% { color: #d9d9d9; }
-  60% { color: #a0a0a0; }
-  70% { color: #575757; }
-  80% { color: #000; }
-  90% { color: #575757; }
-  100% { color: #a0a0a0; }
+  0% {
+    color: #000;
+  }
+  10% {
+    color: #575757;
+  }
+  20% {
+    color: #a0a0a0;
+  }
+  30% {
+    color: #d9d9d9;
+  }
+  40% {
+    color: #ffffff;
+  }
+  50% {
+    color: #d9d9d9;
+  }
+  60% {
+    color: #a0a0a0;
+  }
+  70% {
+    color: #575757;
+  }
+  80% {
+    color: #000;
+  }
+  90% {
+    color: #575757;
+  }
+  100% {
+    color: #a0a0a0;
+  }
 }
 </style>
