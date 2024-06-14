@@ -7,7 +7,6 @@ import PreTest from '../views/PreTest.vue'
 import PostTest from '../views/PostTest.vue'
 import Survey from '../views/Survey.vue'
 import ThankYou from '../views/ThankYou.vue'
-import Chat from '../views/Chat.vue'
 import ChatLearningStyle from '../views/ChatLearningStyle.vue'
 
 
