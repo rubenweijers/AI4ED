@@ -1,11 +1,12 @@
 <template>
   <div class="content">
     <div class="welcome-image-container">
-      <img src="/oilpa.png" alt="Welcome Image" class="welcome-image">
+      <img src="/pasteloilpainting.png" alt="Welcome Image" class="welcome-image">
       <div class="welcome-text">
-        <h2>Welcome to our study!</h2>
-        <p>Join our research in exploring how personalized AI can enhance learning.</p>
-        <p>Take a questionnaire, interact with advanced AI based on your learning style, and see the results!</p>
+        <h2>AI for Education</h2>
+        <p>Reducing misconceptions in physics using state of the art AI models.</p>
+        <!-- <button @click="learnMore" class="learn-more-button">Learn More</button> -->
+        <router-link :to="{ name: 'Study'}" class="learn-more-button">Learn more</router-link>
       </div>
     </div>
   </div>
@@ -53,11 +54,40 @@ export default {
 
 .welcome-text {
   position: absolute;
-  top: 50%;
+  top: 35%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.7); /* Semi-transparent background for better readability */
-  padding: 20px;
-  border-radius: 5px;
+  color: #ffffff; /* White text for better visibility */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
 }
+
+.welcome-text h2 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+}
+
+.welcome-text p {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.learn-more-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #2c3e50;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.learn-more-button:hover {
+  background-color: #34495e;
+}
+
+
 </style>
