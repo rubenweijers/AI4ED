@@ -10,7 +10,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this according to your needs
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,7 +57,7 @@ def predict(message, history):
 
     print(data, count)
 
-gradio_app = gr.ChatInterface(predict)
+gradio_app = gr.Interface(predict, "textbox", "textbox")
 
 @app.get("/")
 def read_root():

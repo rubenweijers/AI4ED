@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>Chat with GPT-3.5</h1>
-    <gradio-interface />
+    <iframe id="gradio-frame" src="https://ai4ed.vercel.app/gradio" width="100%" height="600px"></iframe>
   </div>
 </template>
 
@@ -19,10 +19,11 @@ export default {
         console.error(error)
       })
   },
-  components: {
-    'gradio-interface': {
-      template: '<div id="gradio-interface"></div>'
-    }
-  }
 }
 </script>
+
+<style scoped>
+#gradio-frame {
+  border: none;
+}
+</style>
