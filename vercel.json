@@ -6,13 +6,6 @@
   
   "routes": [
     { "src": "/(.*)", "dest": "server.py" }
-  ],
-
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
   ]
-  }
+}
   

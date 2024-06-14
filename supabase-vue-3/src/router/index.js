@@ -3,12 +3,12 @@ import Home from '../views/Home.vue'
 import Study from '../views/Study.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
-import ChatLearningStyle from '../views/ChatLearningStyle.vue'
 import PreTest from '../views/PreTest.vue'
 import PostTest from '../views/PostTest.vue'
 import Survey from '../views/Survey.vue'
 import ThankYou from '../views/ThankYou.vue'
 import Chat from '../views/Chat.vue'
+import ChatLearningStyle from '../views/ChatLearningStyle.vue'
 
 
 const routes = [
