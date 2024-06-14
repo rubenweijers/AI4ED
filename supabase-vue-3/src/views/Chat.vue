@@ -8,7 +8,7 @@
 import ChatComponent from '@/components/ChatComponent.vue'
 
 export default {
-  name: 'Chat',
+  name: 'ChatComponent',
   components: {
     ChatComponent
   }
