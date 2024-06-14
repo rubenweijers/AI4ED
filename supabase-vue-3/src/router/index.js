@@ -3,11 +3,13 @@ import Home from '../views/Home.vue'
 import Study from '../views/Study.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
-import Chat from '../views/Chat.vue'
+import Chat from '../views/ChatLearningStyle.vue'
 import PreTest from '../views/PreTest.vue'
 import PostTest from '../views/PostTest.vue'
 import Survey from '../views/Survey.vue'
 import ThankYou from '../views/ThankYou.vue'
+import { supabase } from '../supabase'
+import Chat from '../views/ChatLearningStyle.vue'
 
 const routes = [
   {
@@ -44,6 +46,11 @@ const routes = [
     path: '/chat',
     name: 'Chat',
     component: Chat
+  },
+  {
+    path: '/chatlearningstyle',
+    name: 'ChatLearningStyle',
+    component: ChatLearningStyle
   },
   {
     path: '/survey',
