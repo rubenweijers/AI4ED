@@ -3,8 +3,7 @@
 <template>
   <div>
     <h1>Chat with GPT-3.5</h1>
-    <iframe v-if="gradioUrl" id="gradio-interface" width="100%" height="500px" :src="gradioUrl" frameborder="0"></iframe>
-    <p v-else>Loading Gradio interface...</p>
+    <iframe id="gradio-interface" width="100%" height="500px" :src="gradioUrl" frameborder="0"></iframe>
   </div>
 </template>
 
@@ -19,14 +18,13 @@ export default {
     }
   },
   mounted() {
-    axios.get('/gradio')
+    axios.get('https://ai4ed.vercel.app/gradio')
       .then(response => {
         console.log(response.data)
-        // Assuming the URL of the Gradio interface is returned by the /gradio endpoint
-        this.gradioUrl = 'https://ai4ed.vercel.app/gradio' // Adjust if needed
+        this.gradioUrl = 'https://ai4ed.vercel.app/gradio' // Update with the actual URL if needed
       })
       .catch(error => {
-        console.error('Error fetching Gradio URL:', error)
+        console.error(error)
       })
   }
 }
