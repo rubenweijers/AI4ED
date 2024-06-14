@@ -37,11 +37,11 @@ const fetchUserProfile = async (userId) => {
 
 const handleLogin = async () => {
   try {
-    loading.value = true
+    loading.value = true;
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.value,
       password: password.value,
-    })
+    });
 
     if (error) throw error;
 
@@ -58,11 +58,8 @@ const handleLogin = async () => {
     if (profileData) {
       // Save user and profile data to local storage or global state
       localStorage.setItem('user', JSON.stringify({ ...user, display_name: profileData.display_name }));
-      router.push('/study'); // Redirect to home page or any other page after successful login
-      // Use setTimeout to delay the refresh slightly after the push
-      setTimeout(() => {
-        window.location.replace('/study');
-      }, 100);
+      // Redirect to study page after successful login
+      router.push({ name: 'Study' });
     } else {
       throw new Error('Profile fetch failed.');
     }
@@ -72,7 +69,7 @@ const handleLogin = async () => {
   } finally {
     loading.value = false;
   }
-}
+};
 </script>
 
 
