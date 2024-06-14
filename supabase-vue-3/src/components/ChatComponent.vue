@@ -10,7 +10,6 @@
 
 <script>
 import axios from 'axios'
-import { supabase } from '../supabase.js' // Adjust the import path as needed
 
 export default {
   data() {
@@ -26,13 +25,17 @@ export default {
       const userMessage = { role: 'user', content: this.newMessage }
       this.chatHistory.push(userMessage)
 
-      const response = await axios.post('https://ai4ed.vercel.app', {
-        message: this.newMessage,
-        history: this.chatHistory
-      })
+      try {
+        const response = await axios.post('https://ai4ed.vercel.app', {
+          message: this.newMessage,
+          history: this.chatHistory
+        })
 
-      this.chatHistory.push({ role: 'assistant', content: response.data })
-      this.newMessage = ''
+        this.chatHistory.push({ role: 'assistant', content: response.data.response })
+        this.newMessage = ''
+      } catch (error) {
+        console.error('Error sending message:', error)
+      }
     }
   }
 }
