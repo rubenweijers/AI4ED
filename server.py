@@ -1,5 +1,3 @@
-# server.py
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
@@ -7,7 +5,6 @@ from supabase import create_client, Client
 from openai import OpenAI
 import gradio as gr
 import datetime
-import threading
 
 app = FastAPI()
 
@@ -62,16 +59,13 @@ def predict(message, history):
 
 gradio_app = gr.ChatInterface(predict)
 
-def run_gradio():
-    gradio_app.launch(share=True, inline=False)
-
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
 @app.get("/gradio")
-def run_gradio_interface():
-    threading.Thread(target=run_gradio).start()
+def run_gradio():
+    gradio_app.launch(share=True, inline=False)
     return {"status": "Gradio interface running"}
 
 if __name__ == "__main__":
