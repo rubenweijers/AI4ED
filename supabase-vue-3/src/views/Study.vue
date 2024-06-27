@@ -6,15 +6,71 @@
     <div class="study-container">
       <h2>Study Questionnaire</h2>
       <form @submit.prevent="confirmSubmission">
-        <div v-for="question in questions" :key="question.id" class="question">
-          <div class="option">
+        <div v-for="(question, index) in questions" :key="question.id" class="question">
+
+          <!-- Add images before the corresponding questions -->
+          <img v-if="question.question_number === 5" src="/fci_q5-6.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 6" src="/fci_q6.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 8" src="/fci_q8-11.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 12" src="/fci_q12.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 15" src="/fci_q15.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 17" src="/fci_q17.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 18" src="/fci_q18.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 19" src="/fci_q19.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 20" src="/fci_q20.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 21" src="/fci_q21-24.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 23" src="/fci_q23.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 28" src="/fci_q28.png" alt="Question related image" class="question-image">
+
+          <!-- Render question text with line breaks -->
+          <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)"></label>
+
+          <!-- Conditionally render image -->
+          <img v-if="question.image" :src="question.image" alt="Question related image" class="question-image">
+
+          <!-- Conditionally render additional text -->
+          <p v-if="question.additionalText" class="additional-text">{{ question.additionalText }}</p>
+
+          <div class="option" v-for="(option, index) in getOptions(question)" :key="index">
             <input type="checkbox"
-              :id="'question-' + question.question_number"
+              :id="'question-' + question.question_number + '-' + index"
               :name="'question-' + question.question_number"
+              :value="option"
               v-model="answers[question.id]"
             >
+            <label :for="'question-' + question.question_number + '-' + index">{{ option }}</label>
           </div>
-          <label :for="'question-' + question.question_number">{{ question.question_number }}. {{ question.question_text }}</label>
+
+          <!-- Add manual texts at specified positions -->
+          <div v-if="question.question_number === 4" class="manual-text">
+            <p>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (5 and 6). <br>
+              The accompanying figure shows a frictionless channel in the shape of a segment of a circle with a center at "O". The channel has been anchored to a frictionless horizontal table top. You are looking down at the table. Forces exerted by the air are negligible. A ball is shot at high speed into the channel at "p" and exits at "r."
+            </p>
+          </div>
+
+          <div v-if="question.question_number === 7" class="manual-text">
+            <p>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (8 through 11). <br>
+              The figure depicts a hockey puck sliding with constant speed v_o in a straight line from point "a" to point "b" on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point "b," it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point "b," then the kick would have set the puck in horizontal motion with a speed v_k in the direction of the kick.
+            </p>
+          </div>
+
+          <div v-if="question.question_number === 14" class="manual-text">
+            <p>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (15 and 16). <br>
+              A large truck breaks down out on the road and receives a push back into town by a small compact car as shown in the figure below.
+            </p>
+          </div>
+
+          <div v-if="question.question_number === 20" class="manual-text">
+            <p>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (21 through 24). <br>
+              A rocket drifts sideways in outer space from point "a" to point "b" as shown below. The rocket is subject to no outside forces. Starting at position "b", the rocket's engine is turned on and produces a constant thrust (force on the rocket) at right angles to the line "ab". The constant thrust is maintained until the rocket reaches a point "c" in space.
+            </p>
+          </div>
+
         </div>
         <button type="submit" class="submit-button">Submit Questionnaire</button>
       </form>
@@ -37,13 +93,6 @@ const questions = ref([]);
 const answers = ref({});
 const router = useRouter();
 
-const learningStyleQuestions = {
-  activist: [2, 4, 6, 10, 17, 23, 24, 32, 34, 38, 40, 43, 45, 48, 58, 64, 71, 72, 74, 79],
-  reflector: [7, 13, 15, 16, 25, 28, 29, 31, 33, 36, 39, 41, 46, 52, 55, 60, 62, 66, 67, 76],
-  theorist: [1, 3, 8, 12, 14, 18, 20, 22, 26, 30, 42, 47, 51, 57, 61, 63, 68, 75, 77, 78],
-  pragmatist: [5, 9, 11, 19, 21, 27, 35, 37, 44, 49, 50, 53, 54, 56, 59, 65, 69, 70, 73, 80]
-};
-
 const checkUser = async () => {
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   if (currentUser) {
@@ -61,18 +110,25 @@ const fetchQuestions = async () => {
     console.error('Error fetching questions:', error.message);
     return;
   }
-  console.log('Raw fetched data:', data);
-  if (data.length === 0) {
-    console.warn('No questions found in the database.');
-  } else {
-    console.log('Fetched questions:', data);
-  }
   questions.value = data;
 
   // Initialize answers with default "Unchecked"
   questions.value.forEach(question => {
-    answers.value[question.id] = false;
+    answers.value[question.id] = [];
   });
+};
+
+const getOptions = (question) => {
+  // Fetch options from the question object
+  return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
+};
+
+const formatQuestionText = (question) => {
+  const numberText = question.question_number + '. ';
+  // Explicitly replace \n with <br> and log the result for debugging
+  const formattedText = question.question_text.replace(/\\n/g, '<br>');
+  console.log('Formatted Text:', formattedText); // Debugging line
+  return numberText + formattedText;
 };
 
 const confirmSubmission = () => {
@@ -84,12 +140,11 @@ const confirmSubmission = () => {
 const submitAnswers = async () => {
   try {
     const userId = user.value.id;
-    console.log('User ID:', userId); // Log the user ID to ensure it's correct
 
     const answerEntries = questions.value.map(question => ({
       user_id: userId,
       question_id: question.id,
-      answer: answers.value[question.id] ? 'Checked' : 'Unchecked',
+      answer: answers.value[question.id].join(', '),
       question_number: question.question_number,
     }));
 
@@ -99,60 +154,8 @@ const submitAnswers = async () => {
       return;
     }
 
-    // Calculate learning style scores
-    const scores = {
-      activist: 0,
-      reflector: 0,
-      theorist: 0,
-      pragmatist: 0
-    };
-
-    questions.value.forEach(question => {
-      if (answers.value[question.id]) {
-        if (learningStyleQuestions.activist.includes(question.question_number)) {
-          scores.activist++;
-        }
-        if (learningStyleQuestions.reflector.includes(question.question_number)) {
-          scores.reflector++;
-        }
-        if (learningStyleQuestions.theorist.includes(question.question_number)) {
-          scores.theorist++;
-        }
-        if (learningStyleQuestions.pragmatist.includes(question.question_number)) {
-          scores.pragmatist++;
-        }
-      }
-    });
-
-    // Determine dominant learning style
-    const dominantLearningStyle = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-
-    console.log('Scores:', scores);
-    console.log('Dominant Learning Style:', dominantLearningStyle);
-
-    // Update user profile with scores and dominant learning style
-    const { data: profileData, error: profileError } = await supabase.from('profiles').update({
-      activist_score: scores.activist,
-      reflector_score: scores.reflector,
-      theorist_score: scores.theorist,
-      pragmatist_score: scores.pragmatist,
-      dominant_learning_style: dominantLearningStyle
-    }).eq('user_id', userId); // Ensure the column name is correct and matches user_id
-
-    if (profileError) {
-      console.error('Error updating profile:', profileError.message);
-      return;
-    }
-
-    console.log('Profile updated successfully:', profileData);
-
-    // Show success message with dominant learning style
-    alert(`
-    Form submission successful! 
-    Your learning style is "${dominantLearningStyle}"`);
-
-    // Proceed to the next step (e.g., chat interaction)
-    router.push('/pretest');
+    // Navigate to a summary or completion page
+    router.push('/summary'); // Assuming you have a summary or completion page
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
@@ -163,16 +166,16 @@ onMounted(() => {
 });
 </script>
 
-
 <style scoped>
 .study-container {
-  max-width: 1000px;
+  max-width: 800px;
   margin: 50px auto;
-  padding: 30px;
+  padding: 20px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
   text-align: left;
+  font-family: Arial, sans-serif;
 }
 
 .study-container h2 {
@@ -182,41 +185,56 @@ onMounted(() => {
 }
 
 .question {
-  display: flex;
-  align-items: center; /* Center the checkbox vertically with the question text */
-  margin-bottom: 100px; /* Increased distance between each question */
+  margin-bottom: 40px; /* Increase space between questions */
 }
 
 label {
-  margin-left: 10px;
-  font-weight: 600;
-  color: black;
-  text-transform: none; /* Make the question text not capitalized */
+  display: block;
+  color: black; /* Ensure text is black */
   font-size: 16px;
+  margin-bottom: 10px;
 }
 
 .option {
   display: flex;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 input[type="checkbox"] {
   margin-right: 10px;
-  transform: scale(1.3); /* Make the checkbox 30% bigger */
 }
 
 .submit-button {
+  display: block;
+  width: 100%;
   background-color: rgb(29, 29, 184);
   color: white;
   border: none;
   border-radius: 5px;
-  padding: 12px 30px;
+  padding: 12px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .submit-button:hover {
   background-color: rgb(23, 23, 250);
-  transform: translateY(-3px);
+}
+
+.question-image {
+  max-width: 100%;
+  margin: 20px 0;
+}
+
+.additional-text {
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+.manual-text {
+  margin: 20px 0;
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
 }
 </style>
