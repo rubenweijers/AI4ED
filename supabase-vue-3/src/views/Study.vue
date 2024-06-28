@@ -4,7 +4,7 @@
   </div>
   <div v-else-if="user">
     <div class="study-container">
-      <h2>Study Questionnaire</h2>
+      <h2>Force Concept Inventory</h2>
       <form @submit.prevent="confirmSubmission">
         <div v-for="(question, index) in questions" :key="question.id" class="question">
 
@@ -53,7 +53,7 @@
           <div v-if="question.question_number === 7" class="manual-text">
             <p>
               USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (8 through 11). <br>
-              The figure depicts a hockey puck sliding with constant speed v_o in a straight line from point "a" to point "b" on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point "b," it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point "b," then the kick would have set the puck in horizontal motion with a speed v_k in the direction of the kick.
+              The figure depicts a hockey puck sliding with constant speed <katex :expression="'v_o'" /> in a straight line from point "a" to point "b" on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point "b," it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point "b," then the kick would have set the puck in horizontal motion with a speed <katex :expression="'v_k'" /> in the direction of the kick.
             </p>
           </div>
 
@@ -83,9 +83,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { supabase } from '../supabase';
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { supabase } from '../supabase'
+import Katex from '../components/Katex.vue'
 
 const user = ref(null);
 const loading = ref(true);
