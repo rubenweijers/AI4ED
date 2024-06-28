@@ -16,7 +16,7 @@ export default {
     return {
       chatHistory: [],
       newMessage: '',
-      backendUrl: 'https://ai4ed.vercel.app/api/predict'
+      backendUrl: '/api/predict' // Assuming same domain
     };
   },
   methods: {
@@ -32,7 +32,7 @@ export default {
           history: this.chatHistory
         });
 
-        const assistantMessage = { role: 'assistant', content: response.data };
+        const assistantMessage = { role: 'assistant', content: response.data.response };
         this.chatHistory.push(assistantMessage);
       } catch (error) {
         console.error("Error sending message:", error);
