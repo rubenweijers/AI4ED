@@ -3,11 +3,14 @@
     <p>Loading...</p>
   </div>
   <div v-else-if="user">
-    <div class="study-container">
+    <div v-if="showStudyInfo" class="study-info-container">
+      <StudyInfo />
+      <button @click="proceedToStudy" class="next-button">Next</button>
+    </div>
+    <div v-else class="study-container">
       <h2>Force Concept Inventory</h2>
       <form @submit.prevent="confirmSubmission">
         <div v-for="(question, index) in questions" :key="question.id" class="question">
-
           <!-- Add images before the corresponding questions -->
           <img v-if="question.question_number === 5" src="/fci_q5-6.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 6" src="/fci_q6.png" alt="Question related image" class="question-image">
@@ -83,13 +86,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { supabase } from '../supabase'
-import Katex from '../components/Katex.vue'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { supabase } from '../supabase';
+import StudyInfo from '../components/StudyInfo1.vue';
 
 const user = ref(null);
 const loading = ref(true);
+const showStudyInfo = ref(true); // Add state to control display of StudyInfo
 const questions = ref([]);
 const answers = ref({});
 const router = useRouter();
@@ -162,12 +166,43 @@ const submitAnswers = async () => {
   }
 };
 
+// Function to proceed to the study
+const proceedToStudy = () => {
+  showStudyInfo.value = false;
+};
+
 onMounted(() => {
   checkUser();
 });
 </script>
 
 <style scoped>
+.study-info-container {
+  text-align: center;
+  margin: 50px auto;
+  padding: 20px;
+  max-width: 800px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.next-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: rgb(29, 29, 184);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.next-button:hover {
+  background-color: rgb(23, 23, 250);
+}
+
 .study-container {
   max-width: 800px;
   margin: 50px auto;
@@ -182,7 +217,7 @@ onMounted(() => {
 .study-container h2 {
   text-align: center;
   margin-bottom: 20px;
-  color: rgb(29, 29, 184); 
+  color: rgb(29, 29, 184);
 }
 
 .question {
