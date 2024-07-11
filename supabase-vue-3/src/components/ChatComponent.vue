@@ -1,10 +1,14 @@
 <template>
   <div class="chat-container">
-    <div class="chat-box" v-for="(message, index) in chatHistory" :key="index">
-      <div class="user-message" v-if="message.role === 'user'">{{ message.content }}</div>
-      <div class="assistant-message" v-else>{{ message.content }}</div>
+    <div class="messages">
+      <div v-for="(message, index) in messages" :key="index" :class="{'user-message': message.user, 'bot-message': !message.user}">
+        {{ message.text }}
+      </div>
     </div>
-    <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Type your message..." />
+    <div class="input-container">
+      <input v-model="userInput" @keyup.enter="sendMessage" placeholder="Type a message..."/>
+      <button @click="sendMessage">Send</button>
+    </div>
   </div>
 </template>
 
@@ -14,57 +18,72 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      chatHistory: [],
-      newMessage: '',
-      backendUrl: '/api/predict' // Assuming same domain
-    };
+      userInput: '',
+      messages: []
+    }
   },
   methods: {
     async sendMessage() {
-      if (this.newMessage.trim() === '') return;
-
-      const userMessage = { role: 'user', content: this.newMessage };
-      this.chatHistory.push(userMessage);
+      if (this.userInput.trim() === '') return;
+      
+      const userMessage = this.userInput;
+      this.messages.push({ text: userMessage, user: true });
+      this.userInput = '';
 
       try {
-        const response = await axios.post(this.backendUrl, {
-          message: this.newMessage,
-          history: this.chatHistory
+        const response = await axios.post('https://api.openai.com/v1/engines/davinci-codex/completions', {
+          prompt: userMessage,
+          max_tokens: 150
+        }, {
+          headers: {
+            'Authorization': `Bearer ${process.env.CHATGPT_API_KEY}`
+          }
         });
 
-        const assistantMessage = { role: 'assistant', content: response.data.response };
-        this.chatHistory.push(assistantMessage);
+        const botMessage = response.data.choices[0].text.trim();
+        this.messages.push({ text: botMessage, user: false });
       } catch (error) {
-        console.error("Error sending message:", error);
+        console.error("Error fetching response from OpenAI API", error);
+        this.messages.push({ text: "Error fetching response from OpenAI API", user: false });
       }
-
-      this.newMessage = '';
     }
   }
-};
+}
 </script>
 
 <style scoped>
 .chat-container {
+  max-width: 600px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  justify-content: flex-end;
+  height: 80vh;
 }
-.chat-box {
-  padding: 10px;
+
+.messages {
+  flex-grow: 1;
+  overflow-y: auto;
 }
+
 .user-message {
-  background-color: #dcf8c6;
-  align-self: flex-end;
+  text-align: right;
 }
-.assistant-message {
-  background-color: #ece5dd;
-  align-self: flex-start;
+
+.bot-message {
+  text-align: left;
 }
+
+.input-container {
+  display: flex;
+}
+
 input {
+  flex-grow: 1;
   padding: 10px;
-  border: 1px solid #ddd;
-  width: 100%;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 10px;
 }
 </style>
