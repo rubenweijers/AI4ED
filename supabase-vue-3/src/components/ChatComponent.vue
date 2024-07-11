@@ -1,86 +1,94 @@
 <template>
-  <div class="chat-container">
-    <div class="messages">
-      <div v-for="(message, index) in messages" :key="index" :class="{'user-message': message.user, 'bot-message': !message.user}">
-        {{ message.text }}
+    <div class="chat-container">
+      <div class="messages">
+        <div v-for="(message, index) in messages" :key="index" :class="message.role">
+          <p>{{ message.content }}</p>
+        </div>
+      </div>
+      <div class="input-area">
+        <input v-model="userMessage" @keyup.enter="sendMessage" placeholder="Type a message..." />
+        <button @click="sendMessage">Send</button>
       </div>
     </div>
-    <div class="input-container">
-      <input v-model="userInput" @keyup.enter="sendMessage" placeholder="Type a message..."/>
-      <button @click="sendMessage">Send</button>
-    </div>
-  </div>
 </template>
-
+  
 <script>
-import axios from 'axios';
-
-export default {
-  data() {
-    return {
-      userInput: '',
-      messages: []
-    }
-  },
-  methods: {
-    async sendMessage() {
-      if (this.userInput.trim() === '') return;
-      
-      const userMessage = this.userInput;
-      this.messages.push({ text: userMessage, user: true });
-      this.userInput = '';
-
-      try {
-        const response = await axios.post('/api/chat', {
-          message: userMessage
-        });
-
-        console.log('Response from backend:', response);
-        const botMessage = response.data.message;
-        this.messages.push({ text: botMessage, user: false });
-      } catch (error) {
-        console.error("Error fetching response from backend", error);
-        console.log('Error details:', error.response);
-        this.messages.push({ text: "Error fetching response from backend", user: false });
+  import axios from 'axios';
+  
+  export default {
+    name: 'ChatComponent',
+    data() {
+      return {
+        userMessage: '',
+        messages: []
+      };
+    },
+    methods: {
+      async sendMessage() {
+        if (this.userMessage.trim() === '') return;
+  
+        // Add the user's message to the messages array
+        this.messages.push({ role: 'user', content: this.userMessage });
+  
+        // Prepare the data for the API request
+        const apiData = {
+          model: "text-davinci-003",
+          prompt: this.userMessage,
+          max_tokens: 150,
+          temperature: 0.7
+        };
+  
+        // Clear the input field
+        this.userMessage = '';
+  
+        try {
+          // Make the API request to OpenAI
+          const response = await axios.post('https://api.openai.com/v1/completions', apiData, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer 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`
+            }
+          });
+  
+          // Add the API's response to the messages array
+          this.messages.push({ role: 'assistant', content: response.data.choices[0].text.trim() });
+        } catch (error) {
+          console.error('Error communicating with the OpenAI API', error);
+        }
       }
     }
-  }
-}
+  };
 </script>
-
+  
 <style scoped>
-.chat-container {
-  max-width: 600px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  height: 80vh;
-}
-
-.messages {
-  flex-grow: 1;
-  overflow-y: auto;
-}
-
-.user-message {
-  text-align: right;
-}
-
-.bot-message {
-  text-align: left;
-}
-
-.input-container {
-  display: flex;
-}
-
-input {
-  flex-grow: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
-}
-
-button {
-  padding: 10px;
-}
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .user {
+    text-align: right;
+    color: blue;
+  }
+  .assistant {
+    text-align: left;
+    color: green;
+  }
+  .input-area {
+    display: flex;
+    padding: 10px;
+  }
+  input {
+    flex: 1;
+    padding: 10px;
+    margin-right: 10px;
+  }
+  button {
+    padding: 10px;
+  }
 </style>
+  
