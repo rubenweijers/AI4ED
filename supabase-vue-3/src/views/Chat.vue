@@ -31,7 +31,7 @@ export default {
       this.userInput = '';
 
       try {
-        const response = await axios.post('http://localhost:5000/chat', {
+        const response = await axios.post('/api/chat', {
           message: userMessage
         });
 
