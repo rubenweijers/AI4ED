@@ -24,38 +24,41 @@
       };
     },
     methods: {
-      async sendMessage() {
-        if (this.userMessage.trim() === '') return;
-  
-        // Add the user's message to the messages array
-        this.messages.push({ role: 'user', content: this.userMessage });
-  
-        // Prepare the data for the API request
-        const apiData = {
-          model: "text-davinci-003",
-          prompt: this.userMessage,
-          max_tokens: 150,
-          temperature: 0.7
-        };
-  
-        // Clear the input field
-        this.userMessage = '';
-  
-        try {
-          // Make the API request to OpenAI
-          const response = await axios.post('https://api.openai.com/v1/completions', apiData, {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer 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`
+        async sendMessage() {
+            if (this.userMessage.trim() === '') return;
+
+            // Add the user's message to the messages array
+            this.messages.push({ role: 'user', content: this.userMessage });
+
+            // Prepare the data for the API request
+            const apiData = {
+                model: "gpt-3.5-turbo",
+                messages: [
+                { role: "system", content: "You are a helpful assistant." },
+                ...this.messages
+                ],
+                max_tokens: 150,
+                temperature: 0.7
+            };
+
+            // Clear the input field
+            this.userMessage = '';
+
+            try {
+                // Make the API request to OpenAI
+                const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer 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`
+                }
+                });
+
+                // Add the API's response to the messages array
+                this.messages.push({ role: 'assistant', content: response.data.choices[0].message.content.trim() });
+            } catch (error) {
+                console.error('Error communicating with the OpenAI API', error);
             }
-          });
-  
-          // Add the API's response to the messages array
-          this.messages.push({ role: 'assistant', content: response.data.choices[0].text.trim() });
-        } catch (error) {
-          console.error('Error communicating with the OpenAI API', error);
-        }
-      }
+            }
     }
   };
 </script>
