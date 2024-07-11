@@ -36,7 +36,7 @@ export default {
           max_tokens: 150
         }, {
           headers: {
-            'Authorization': `Bearer ${process.env.CHATGPT_API_KEY}`
+            'Authorization': `Bearer ${import.meta.env.CHATGPT_API_KEY}`
           }
         });
 
