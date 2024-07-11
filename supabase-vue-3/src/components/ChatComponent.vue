@@ -35,16 +35,17 @@ export default {
           message: userMessage
         });
 
+        console.log('Response from backend:', response);
         const botMessage = response.data.message;
         this.messages.push({ text: botMessage, user: false });
       } catch (error) {
         console.error("Error fetching response from backend", error);
+        console.log('Error details:', error.response);
         this.messages.push({ text: "Error fetching response from backend", user: false });
       }
     }
   }
 }
-
 </script>
 
 <style scoped>

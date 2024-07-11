@@ -31,7 +31,7 @@ export default {
       this.userInput = '';
 
       try {
-        const response = await axios.post('/api/chat', {
+        const response = await axios.post('https://ai4ed.vercel.app/api/chat', {
           message: userMessage
         });
 
