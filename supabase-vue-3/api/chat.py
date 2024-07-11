@@ -12,7 +12,7 @@ def handler(request):
             "body": json.dumps({'error': 'No message provided'})
         }
 
-    api_key = os.getenv('CHATGPT_API_KEY')
+    api_key = os.getenv('OPENAI_API_KEY')
     response = requests.post(
         'https://api.openai.com/v1/engines/davinci-codex/completions',
         headers={'Authorization': f'Bearer {api_key}'},

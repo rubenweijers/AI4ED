@@ -7,7 +7,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-CHATGPT_API_KEY = os.getenv('CHATGPT_API_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -18,7 +18,7 @@ def chat():
 
     response = requests.post(
         'https://api.openai.com/v1/engines/davinci-codex/completions',
-        headers={'Authorization': f'Bearer {CHATGPT_API_KEY}'},
+        headers={'Authorization': f'Bearer {OPENAI_API_KEY}'},
         json={
             'prompt': user_message,
             'max_tokens': 150
