@@ -9,11 +9,13 @@
     </div>
     <div v-else class="study-container">
       <h2>Force Concept Inventory</h2>
+      <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
       <form @submit.prevent="confirmSubmission">
         <div v-for="(question, index) in questions" :key="question.id" class="question">
           <!-- Add images before the corresponding questions -->
           <img v-if="question.question_number === 5" src="/fci_q5-6.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 6" src="/fci_q6.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 7" src="/fci_q7.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 8" src="/fci_q8-11.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 12" src="/fci_q12.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
@@ -36,10 +38,10 @@
           <p v-if="question.additionalText" class="additional-text">{{ question.additionalText }}</p>
 
           <div class="option" v-for="(option, index) in getOptions(question)" :key="index">
-            <input type="checkbox"
+            <input type="radio"
               :id="'question-' + question.question_number + '-' + index"
               :name="'question-' + question.question_number"
-              :value="option"
+              :value="index"
               v-model="answers[question.id]"
             >
             <label :for="'question-' + question.question_number + '-' + index">{{ option }}</label>
@@ -77,6 +79,9 @@
         </div>
         <button type="submit" class="submit-button">Submit Questionnaire</button>
       </form>
+      <div v-if="submissionSuccess" class="success-notification">
+        <p>Submission successful!</p>
+      </div>
     </div>
   </div>
   <div v-else>
@@ -90,6 +95,9 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
 import StudyInfo from '../components/StudyInfo1.vue';
+// import { defineAsyncComponent } from 'vue';
+
+// const Katex = defineAsyncComponent(() => import('vue-katex'));
 
 const user = ref(null);
 const loading = ref(true);
@@ -97,6 +105,7 @@ const showStudyInfo = ref(true); // Add state to control display of StudyInfo
 const questions = ref([]);
 const answers = ref({});
 const router = useRouter();
+const submissionSuccess = ref(false);
 
 const checkUser = async () => {
   const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -117,9 +126,9 @@ const fetchQuestions = async () => {
   }
   questions.value = data;
 
-  // Initialize answers with default "Unchecked"
+  // Initialize answers with empty string
   questions.value.forEach(question => {
-    answers.value[question.id] = [];
+    answers.value[question.id] = '';
   });
 };
 
@@ -136,6 +145,8 @@ const formatQuestionText = (question) => {
   return numberText + formattedText;
 };
 
+const optionMapping = ["A", "B", "C", "D", "E"];
+
 const confirmSubmission = () => {
   if (confirm("Are you sure you want to submit?")) {
     submitAnswers();
@@ -149,7 +160,7 @@ const submitAnswers = async () => {
     const answerEntries = questions.value.map(question => ({
       user_id: userId,
       question_id: question.id,
-      answer: answers.value[question.id].join(', '),
+      answer: optionMapping[answers.value[question.id]], // Map the selected option to A, B, C, D
       question_number: question.question_number,
     }));
 
@@ -158,12 +169,22 @@ const submitAnswers = async () => {
       console.error('Error submitting answers:', answerError.message);
       return;
     }
-
-    // Navigate to a summary or completion page
-    router.push('/summary'); // Assuming you have a summary or completion page
+    // Display submission success notification
+    submissionSuccess.value = true;
+    // Navigate to PostTest.vue after a delay
+    setTimeout(() => {
+      router.push('/PostTest');
+    }, 2000); // Delay for 2 seconds to show the success notification
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
+};
+
+// Function to select all answers as option 1
+const selectAllOption1 = () => {
+  questions.value.forEach(question => {
+    answers.value[question.id] = 0; // Index of option 1 is 0
+  });
 };
 
 // Function to proceed to the study
@@ -175,6 +196,7 @@ onMounted(() => {
   checkUser();
 });
 </script>
+
 
 <style scoped>
 .study-info-container {
@@ -203,6 +225,22 @@ onMounted(() => {
   background-color: rgb(23, 23, 250);
 }
 
+.select-all-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: rgb(29, 29, 184);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.select-all-button:hover {
+  background-color: rgb(23, 23, 250);
+}
+
 .study-container {
   max-width: 800px;
   margin: 50px auto;
@@ -221,7 +259,7 @@ onMounted(() => {
 }
 
 .question {
-  margin-bottom: 40px; /* Increase space between questions */
+  margin-bottom: 100px; /* Increase space between questions */
 }
 
 label {
@@ -237,7 +275,7 @@ label {
   margin-bottom: 10px;
 }
 
-input[type="checkbox"] {
+input[type="radio"] {
   margin-right: 10px;
 }
 
@@ -259,7 +297,7 @@ input[type="checkbox"] {
 
 .question-image {
   max-width: 100%;
-  margin: 20px 0;
+  margin: 0px 0;
 }
 
 .additional-text {
@@ -268,9 +306,19 @@ input[type="checkbox"] {
 }
 
 .manual-text {
-  margin: 20px 0;
+  margin: 40px ;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
+}
+
+.success-notification {
+  text-align: center;
+  margin: 20px auto;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 5px;
+  width: fit-content;
 }
 </style>
