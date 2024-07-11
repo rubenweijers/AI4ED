@@ -16,20 +16,21 @@ def chat():
     if not user_message:
         return jsonify({'error': 'No message provided'}), 400
 
-    response = requests.post(
-        'https://api.openai.com/v1/engines/davinci-codex/completions',
-        headers={'Authorization': f'Bearer {OPENAI_API_KEY}'},
-        json={
-            'prompt': user_message,
-            'max_tokens': 150
-        }
-    )
+    try:
+        response = requests.post(
+            'https://api.openai.com/v1/engines/davinci-codex/completions',
+            headers={'Authorization': f'Bearer {OPENAI_API_KEY}'},
+            json={
+                'prompt': user_message,
+                'max_tokens': 150
+            }
+        )
+        response.raise_for_status()  # Raise HTTPError for bad responses
 
-    if response.status_code != 200:
-        return jsonify({'error': 'Failed to fetch response from OpenAI API'}), response.status_code
-
-    bot_message = response.json().get('choices')[0].get('text').strip()
-    return jsonify({'message': bot_message})
+        bot_message = response.json().get('choices')[0].get('text').strip()
+        return jsonify({'message': bot_message})
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

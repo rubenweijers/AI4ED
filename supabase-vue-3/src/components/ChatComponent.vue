@@ -31,24 +31,20 @@ export default {
       this.userInput = '';
 
       try {
-        const response = await axios.post('https://api.openai.com/v1/engines/davinci-codex/completions', {
-          prompt: userMessage,
-          max_tokens: 150
-        }, {
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.CHATGPT_API_KEY}`
-          }
+        const response = await axios.post('/api/chat', {
+          message: userMessage
         });
 
-        const botMessage = response.data.choices[0].text.trim();
+        const botMessage = response.data.message;
         this.messages.push({ text: botMessage, user: false });
       } catch (error) {
-        console.error("Error fetching response from OpenAI API", error);
-        this.messages.push({ text: "Error fetching response from OpenAI API", user: false });
+        console.error("Error fetching response from backend", error);
+        this.messages.push({ text: "Error fetching response from backend", user: false });
       }
     }
   }
 }
+
 </script>
 
 <style scoped>
