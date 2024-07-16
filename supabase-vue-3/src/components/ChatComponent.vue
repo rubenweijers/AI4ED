@@ -4,11 +4,14 @@
             <div v-for="(message, index) in messages" :key="index" :class="['message', message.role]">
                 <div v-if="message.role === 'assistant'" class="assistant-message">
                     <img src="/openai.png" alt="OpenAI" class="openai-icon" />
-                    <p>{{ message.content }}</p>
+                    <p v-html="marked(message.content)"></p>
                 </div>
                 <div v-else class="user-message">
                     <p>{{ message.content }}</p>
                 </div>
+            </div>
+            <div v-if="loading" class="loading">
+                <img src="/loading_spinner.gif" alt="Loading" />
             </div>
         </div>
         <div class="input-area">
@@ -20,13 +23,15 @@
 
 <script>
     import axios from 'axios';
+    import { marked } from 'marked';
 
     export default {
         name: 'ChatComponent',
         data() {
             return {
                 userMessage: '',
-                messages: []
+                messages: [],
+                loading: false
             };
         },
         methods: {
@@ -50,6 +55,9 @@
                 // Clear the input field
                 this.userMessage = '';
 
+                // Set loading state to true
+                this.loading = true;
+
                 try {
                     // Make the API request to OpenAI
                     const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
@@ -61,9 +69,16 @@
 
                     // Add the API's response to the messages array
                     this.messages.push({ role: 'assistant', content: response.data.choices[0].message.content.trim() });
+
+                    // Set loading state to false
+                    this.loading = false;
                 } catch (error) {
                     console.error('Error communicating with the OpenAI API', error);
+                    this.loading = false;
                 }
+            },
+            marked(content) {
+                return marked(content);
             }
         }
     };
@@ -109,7 +124,7 @@
 
     .assistant-message {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
     }
 
     .openai-icon {
@@ -118,42 +133,43 @@
         margin-right: 10px;
     }
 
+    .assistant-message .openai-icon {
+    margin-right: 10px;
+    margin-top: 5px;
+}
+
     .assistant-message p {
-        background: none;
-        margin: 0;
-    }
+            background: none;
+            margin: 0;
+            text-align: left;
+        }
 
     .input-area {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    bottom: 40px;
-    width: 100%;
-    padding: 0 20px;
-    box-sizing: border-box;
-}
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-top: 1px solid #ccc;
+    }
 
-input {
-    width: 25%;
-    padding: 15px; /* Increased padding to make it taller */
-    border: 1px solid #ccc;
-    border-radius: 25px; /* Slightly increased to maintain proportion */
-    margin-right: 10px;
-    font-size: 16px;
-    background-color: rgb(241, 241, 241);
-    color: rgb(0, 0, 0);
-}
+    input {
+        width: 25%;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 25px;
+        margin-right: 10px;
+        font-size: 16px;
+        background-color: rgb(241, 241, 241);
+        color: rgb(0, 0, 0);
+    }
 
-button {
-    padding: 15px 25px; /* Increased padding to match input height */
-    background-color: #007bff;
-    border: none;
-    border-radius: 25px; /* Slightly increased to maintain proportion */
-    color: white;
-    cursor: pointer;
-    font-size: 16px;
-}
+    button {
+        padding: 15px 25px;
+        background-color: #007bff;
+        border: none;
+        border-radius: 25px;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+    }
 
     button:hover {
         background-color: #0056b3;
@@ -169,6 +185,28 @@ button {
         }
         50% {
             opacity: 0;
+        }
+    }
+
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .loading img {
+        width: 30px;
+        height: 30px;
+        /* animation: spin 1s linear infinite; */
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
         }
     }
 </style>

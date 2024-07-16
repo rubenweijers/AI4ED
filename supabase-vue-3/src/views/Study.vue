@@ -19,7 +19,7 @@
           <img v-if="question.question_number === 8" src="/fci_q8-11.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 12" src="/fci_q12.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 15" src="/fci_q15.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 15" src="/fci_q15-16.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 17" src="/fci_q17.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 18" src="/fci_q18.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 19" src="/fci_q19.png" alt="Question related image" class="question-image">
@@ -95,7 +95,9 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
 import StudyInfo from '../components/StudyInfo1.vue';
+// import { Katex } from 'vue-katex';
 // import { defineAsyncComponent } from 'vue';
+
 
 // const Katex = defineAsyncComponent(() => import('vue-katex'));
 
