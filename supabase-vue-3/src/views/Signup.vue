@@ -32,7 +32,6 @@ const handleSignUp = async () => {
 
     if (error) throw error;
 
-    // Access the user object correctly
     const user = data.user;
 
     if (!user) {
@@ -40,13 +39,45 @@ const handleSignUp = async () => {
     }
 
     console.log('User signed up:', user);
+    console.log('User ID:', user.id);
 
-    // Insert into profiles table
-    
+    // Fetch the current count of participants in both groups
+    const { data: treatmentCountData, error: treatmentCountError } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact' })
+      .eq('group', 'treatment');
+
+    const { data: controlCountData, error: controlCountError } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact' })
+      .eq('group', 'control');
+
+    if (treatmentCountError) throw treatmentCountError;
+    if (controlCountError) throw controlCountError;
+
+    const treatmentCount = treatmentCountData.length;
+    const controlCount = controlCountData.length;
+
+    let group = 'control';
+    if (treatmentCount < controlCount) {
+      group = 'treatment';
+    } else if (treatmentCount > controlCount) {
+      group = 'control';
+    } else {
+      group = Math.random() < 0.5 ? 'treatment' : 'control';
+    }
+
+    const now = new Date().toISOString();
+
+    // Insert into profiles table with group assignment
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .insert([
-        { user_id: user.id, display_name: displayName.value, age: age.value }
+        { user_id: user.id,
+          display_name: displayName.value,
+          age: age.value,
+          group: group,
+          created_at: now }
       ]);
 
     if (profileError) throw profileError;
@@ -61,7 +92,6 @@ const handleSignUp = async () => {
   }
 }
 </script>
-
 
 <style scoped>
 .auth {

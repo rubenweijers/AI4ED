@@ -11,6 +11,8 @@ import Chat from '../views/Chat.vue'
 import ChatLearningStyle from '../views/ChatLearningStyle.vue'
 import BeliefRating from '../views/BeliefRating.vue'
 import PreChat from '../views/PreChat.vue'
+import BeliefRating_PostChat from '../views/BeliefRating_PostChat.vue'
+import Study2 from '../views/Study2.vue'
 
 
 const routes = [
@@ -35,6 +37,11 @@ const routes = [
     component: Study
   },
   {
+    path: '/study2',
+    name: 'Study2',
+    component: Study2
+  },
+  {
     path: '/pretest',
     name: 'PreTest',
     component: PreTest
@@ -48,6 +55,11 @@ const routes = [
     path: '/beliefrating',
     name: 'BeliefRating',
     component: BeliefRating
+  },
+  {
+    path: '/beliefratingpostchat',
+    name: 'BeliefRatingPostChat',
+    component: BeliefRating_PostChat
   },
   {
     path: '/prechat',
