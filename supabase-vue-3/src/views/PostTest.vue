@@ -9,6 +9,7 @@
     </div>
     <div v-else-if="incorrectQuestion">
       <p><strong>We would like to hear your reasoning for answering the following question from the test:</strong></p>
+      <hr>
       <div class="question">
 
         <!-- Add reminder text for question numbers 26 and 27 -->
@@ -53,15 +54,13 @@
         <img v-if="incorrectQuestion.question_number === 23" src="/fci_q23.png" alt="Question related image" class="question-image">
         <img v-if="incorrectQuestion.question_number === 28" src="/fci_q28.png" alt="Question related image" class="question-image">
       
-
-      
-
         <label v-html="formatQuestionText(incorrectQuestion)"></label>
         <div v-for="(option, index) in getOptions(incorrectQuestion)" :key="index" class="option">
           <p :class="{'user-answer': userAnswer === option}">
             <strong v-if="!startsWithLabel(option)">{{ optionLabels[index] }}</strong> {{ option }}
           </p>
         </div>
+        <hr>
         <p><strong>Your answer was:</strong> {{ userAnswer }}</p>
         <!-- <p><strong>Correct Answer:</strong> {{ getCorrectAnswer() }}</p> -->
       </div>
@@ -81,6 +80,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
+import axios from 'axios';
 
 const user = ref(null);
 const loading = ref(true);
@@ -161,17 +161,44 @@ const confirmSubmission = () => {
 
 const submitExplanation = async () => {
   try {
+    // Delete existing row if it exists
+    const { error: deleteError } = await supabase
+      .from('answers_posttest')
+      .delete()
+      .eq('user_id', user.value.id)
+
+    if (deleteError) {
+      console.error('Error deleting existing row:', deleteError.message);
+      return;
+    }
+
+    // Insert new row
     const { data, error } = await supabase
       .from('answers_posttest')
-      .upsert({
+      .insert({
         user_id: user.value.id,
         question_id: incorrectQuestion.value.id,
         question_number: incorrectQuestion.value.question_number,
         explanation: explanation.value,
-      }, { onConflict: ['user_id', 'question_id'] });
+      });
 
     if (error) {
       console.error('Error submitting explanation:', error.message);
+      return;
+    }
+
+    // Call OpenAI API to summarize the explanation
+    const summary = await summarizeExplanation(explanation.value);
+
+    // Update the row with the summarized explanation
+    const { error: updateError } = await supabase
+      .from('answers_posttest')
+      .update({ llm_summary: summary })
+      .eq('user_id', user.value.id)
+      .eq('question_id', incorrectQuestion.value.id);
+
+    if (updateError) {
+      console.error('Error updating row with summary:', updateError.message);
       return;
     }
 
@@ -179,10 +206,36 @@ const submitExplanation = async () => {
     submissionSuccess.value = true;
     // Navigate to thank you page after a delay
     setTimeout(() => {
-      router.push('/chat');
+      router.push('/beliefrating');
     }, 2000); // Delay for 2 seconds to show the success notification
   } catch (error) {
     console.error('An unexpected error occurred:', error);
+  }
+};
+
+const summarizeExplanation = async (explanation) => {
+  const apiData = {
+    model: "gpt-4o",
+    // Prompt for summarizing the explanation
+    messages: [
+      { role: "system", content: "Summarize the following passage, which describes a misconception, in a single sentence. Do not mention that it is a misconception, or a belief, or provide any kind of normative judgment. Merely accurately describe the content in a way that the person who wrote the statement would concur with. Frame it as an assertion. If the statement is already short, no need to change it very much. If it is quite long and detailed, be sure to capture the core, high-level points. Do not focus on the evidence provided for the belief --merely focus on the basic assertion" },
+      { role: "user", content: explanation }
+    ],
+    max_tokens: 100,
+    temperature: 0.7
+  };
+
+  try {
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+      }
+    });
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Error communicating with the OpenAI API', error);
+    return '';
   }
 };
 

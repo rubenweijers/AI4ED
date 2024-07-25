@@ -9,6 +9,8 @@ import Survey from '../views/Survey.vue'
 import ThankYou from '../views/ThankYou.vue'
 import Chat from '../views/Chat.vue'
 import ChatLearningStyle from '../views/ChatLearningStyle.vue'
+import BeliefRating from '../views/BeliefRating.vue'
+import PreChat from '../views/PreChat.vue'
 
 
 const routes = [
@@ -41,6 +43,16 @@ const routes = [
     path: '/posttest',
     name: 'PostTest',
     component: PostTest
+  },
+  {
+    path: '/beliefrating',
+    name: 'BeliefRating',
+    component: BeliefRating
+  },
+  {
+    path: '/prechat',
+    name: 'PreChat',
+    component: PreChat
   },
   {
     path: '/chat',
