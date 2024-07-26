@@ -101,7 +101,7 @@
   
       const { data, error } = await supabase
         .from('answers_posttest')
-        .update({ '1_belief_rating': selectedRating.value })
+        .update({ 'belief_rating_1': selectedRating.value })
         .eq('user_id', user.id);
   
       if (error) {

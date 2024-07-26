@@ -13,7 +13,7 @@ import BeliefRating from '../views/BeliefRating.vue'
 import PreChat from '../views/PreChat.vue'
 import BeliefRating_PostChat from '../views/BeliefRating_PostChat.vue'
 import Study2 from '../views/Study2.vue'
-
+import WritingScreening from '../views/WritingScreening.vue'
 
 const routes = [
   {
@@ -30,6 +30,11 @@ const routes = [
     path: '/signup',
     name: 'Signup',
     component: Signup
+  },
+  {
+    path: '/writingscreening',
+    name: 'WritingScreening',
+    component: WritingScreening
   },
   {
     path: '/study',

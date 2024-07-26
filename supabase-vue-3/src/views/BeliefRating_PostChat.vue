@@ -101,7 +101,7 @@
   
       const { data, error } = await supabase
         .from('answers_posttest')
-        .update({ '2_belief_rating': selectedRating.value })
+        .update({ 'belief_rating_2': selectedRating.value })
         .eq('user_id', user.id);
   
       if (error) {
@@ -112,8 +112,8 @@
   
       submissionSuccess.value = true;
       setTimeout(() => {
-        router.push('/Home'); // Adjust the route as needed
-      }, 2000);
+        router.push('/study2'); // Adjust the route as needed
+      }, 1000);
     } catch (error) {
       console.error('An unexpected error occurred:', error);
       alert('An unexpected error occurred. Please try again.');

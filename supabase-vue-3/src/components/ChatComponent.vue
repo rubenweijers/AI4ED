@@ -1,6 +1,10 @@
 <template>
     <div class="chat-container">
         <div class="messages">
+            <div v-if="loading && messages.length === 0" class="loading">
+                <img src="/loading_spinner.gif" alt="Loading" />
+                <p>Generating initial message...</p>
+            </div>
             <div v-for="(message, index) in messages" :key="index" :class="['message', message.role]">
                 <div v-if="message.role === 'assistant'" class="assistant-message">
                     <img src="/openai.png" alt="OpenAI" class="openai-icon" />
@@ -10,203 +14,371 @@
                     <p>{{ message.content }}</p>
                 </div>
             </div>
-            <div v-if="loading" class="loading">
+            <div v-if="loading && messages.length > 0" class="loading">
                 <img src="/loading_spinner.gif" alt="Loading" />
             </div>
         </div>
         <div class="input-area">
-            <input v-model="userMessage" @keyup.enter="sendMessage" placeholder="Type a message..." />
-            <button @click="sendMessage">Send</button>
+            <div class="input-wrapper">
+                <div class="rounds-indicator" :class="roundsIndicatorClass">
+                    Inputs remaining: {{ remainingRounds }}
+                </div>
+                <input 
+                    v-model="userMessage" 
+                    @keyup.enter="sendMessage" 
+                    placeholder="Type a message..." 
+                    :disabled="isChatFinished()"
+                />
+                <button @click="sendMessage" :disabled="isChatFinished()">Send</button>
+            </div>
+            <button v-if="isChatFinished()" @click="confirmNextPage" class="next-button">Next</button>
         </div>
     </div>
 </template>
 
 <script>
-    import axios from 'axios';
-    import { marked } from 'marked';
+import axios from 'axios';
+import { marked } from 'marked';
+import { supabase } from '../supabase';
 
-    export default {
-        name: 'ChatComponent',
-        data() {
-            return {
-                userMessage: '',
-                messages: [],
-                loading: false
-            };
-        },
-        methods: {
-            async sendMessage() {
-                if (this.userMessage.trim() === '') return;
-
-                // Add the user's message to the messages array
-                this.messages.push({ role: 'user', content: this.userMessage });
-
-                // Prepare the data for the API request
-                const apiData = {
-                    model: "gpt-4o",
-                    messages: [
-                        { role: "system", content: "You are a helpful assistant." },
-                        ...this.messages
-                    ],
-                    max_tokens: 2000,
-                    temperature: 0.7
-                };
-
-                // Clear the input field
-                this.userMessage = '';
-
-                // Set loading state to true
-                this.loading = true;
-
-                try {
-                    // Make the API request to OpenAI
-                    const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-                        }
-                    });
-
-                    // Add the API's response to the messages array
-                    this.messages.push({ role: 'assistant', content: response.data.choices[0].message.content.trim() });
-
-                    // Set loading state to false
-                    this.loading = false;
-                } catch (error) {
-                    console.error('Error communicating with the OpenAI API', error);
-                    this.loading = false;
-                }
-            },
-            marked(content) {
-                return marked(content);
-            }
+export default {
+    name: 'ChatComponent',
+    data() {
+        return {
+            userMessage: '',
+            messages: [],
+            loading: false,
+            systemPrompt: '',
+            userBeliefLevel: null,
+            questionText: '',
+            explanation: '',
+            initialSystemMessage: '',
+            remainingRounds: 3
+        };
+    },
+    computed: {
+        roundsIndicatorClass() {
+            if (this.remainingRounds === 3) return 'green';
+            if (this.remainingRounds === 2) return 'yellow';
+            if (this.remainingRounds === 1) return 'red';
+            return 'finished';
         }
-    };
+    },
+    async mounted() {
+        await this.loadDataAndSetSystemPrompt();
+        this.$nextTick(() => {
+            this.scrollToBottom();
+        });
+    },
+    methods: {
+        async loadDataAndSetSystemPrompt() {
+        const storedData = localStorage.getItem('chatData');
+        if (storedData) {
+            const { userBeliefLevel, questionText, explanation, systemPrompt, initialSystemMessage, messages, remainingRounds } = JSON.parse(storedData);
+            this.userBeliefLevel = userBeliefLevel;
+            this.questionText = questionText;
+            this.explanation = explanation;
+            this.systemPrompt = systemPrompt;
+            this.initialSystemMessage = initialSystemMessage;
+            this.messages = messages || [{ role: 'assistant', content: this.initialSystemMessage }];
+            this.remainingRounds = remainingRounds !== undefined ? remainingRounds : 3; // Default to 3 if not set
+        } else {
+            await this.fetchDataAndSetSystemPrompt();
+        }
+    },
+    async fetchDataAndSetSystemPrompt() {
+        try {
+            const { data: userData, error: userError } = await supabase.auth.getUser();
+            if (userError || !userData?.user) {
+                console.log('User not authenticated');
+                this.$router.push('/login');
+                return;
+            }
+
+            const user = userData.user;
+
+            const { data: answerData, error: answerError } = await supabase
+                .from('answers_posttest')
+                .select('belief_rating_1, llm_summary, question_number')
+                .eq('user_id', user.id)
+                .single();
+
+            if (answerError) throw answerError;
+
+            this.userBeliefLevel = answerData.belief_rating_1;
+            this.explanation = answerData.llm_summary;
+
+            const { data: questionData, error: questionError } = await supabase
+                .from('questions')
+                .select('question_text')
+                .eq('question_number', answerData.question_number)
+                .single();
+
+            if (questionError) throw questionError;
+
+            this.questionText = questionData.question_text;
+
+            this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
+
+            await this.generateInitialAIMessage();
+
+            this.saveChatData();
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    },
+    async generateInitialAIMessage() {
+        this.loading = true;
+        const apiData = {
+            model: "gpt-4o",
+            messages: [
+                { role: "system", content: this.systemPrompt },
+                { role: "user", content: "Please start the conversation by addressing the user's misconception." }
+            ],
+            max_tokens: 2000,
+            temperature: 0.7
+        };
+
+        try {
+            const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+                }
+            });
+
+            const initialMessage = response.data.choices[0].message.content.trim();
+            this.initialSystemMessage = initialMessage;
+            this.messages.push({ role: 'assistant', content: initialMessage });
+        } catch (error) {
+            console.error('Error generating initial AI message:', error);
+            this.messages.push({ role: 'assistant', content: "I apologize, but I'm having trouble starting our conversation. Could you please share your thoughts on the physics question you answered?" });
+        } finally {
+            this.loading = false;
+        }
+    },
+    async sendMessage() {
+        if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
+
+        this.messages.push({ role: 'user', content: this.userMessage });
+        this.remainingRounds--;
+
+        const apiData = {
+            model: "gpt-4o",
+            messages: [
+                { role: "system", content: this.systemPrompt },
+                ...this.messages
+            ],
+            max_tokens: 2000,
+            temperature: 0.7
+        };
+
+        this.userMessage = '';
+        this.loading = true;
+
+        try {
+            const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+                }
+            });
+
+            this.messages.push({ role: 'assistant', content: response.data.choices[0].message.content.trim() });
+            this.$nextTick(() => {
+                this.scrollToBottom();
+            });
+        } catch (error) {
+            console.error('Error communicating with the OpenAI API', error);
+        } finally {
+            this.loading = false;
+        }
+
+        if (this.remainingRounds === 0) {
+            this.messages.push({ role: 'system', content: "Thank you for participating in this conversation. You have used all your available inputs." });
+        }
+
+        this.saveChatData();
+    },
+    marked(content) {
+        return marked(content);
+    },
+    scrollToBottom() {
+        const messagesContainer = this.$el.querySelector('.messages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    },
+    isChatFinished() {
+        return this.remainingRounds <= 0;
+    },
+    confirmNextPage() {
+      if (confirm('Are you sure you want to proceed to the next page?')) {
+        this.nextPage();
+      }
+    },
+    nextPage() {
+        this.saveChatData();
+        this.$router.push('/beliefratingpostchat');
+    },
+    saveChatData() {
+        localStorage.setItem('chatData', JSON.stringify({
+            userBeliefLevel: this.userBeliefLevel,
+            questionText: this.questionText,
+            explanation: this.explanation,
+            systemPrompt: this.systemPrompt,
+            initialSystemMessage: this.initialSystemMessage,
+            messages: this.messages,
+            remainingRounds: this.remainingRounds // Add this line
+        }));
+    }
+}
+};
 </script>
 
 <style scoped>
-    .chat-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        width: 100vw;
-        margin: auto;
-        font-family: Arial, sans-serif;
-        background-color: white;
-    }
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    margin: auto;
+    font-family: Arial, sans-serif;
+    background-color: white;
+}
 
-    .messages {
-        flex: 1;
-        padding: 20px;
-        overflow-y: auto;
-        background-color: #f9f9f9;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+.messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-    .message {
-        width: 50%;
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-    }
+.message {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
 
-    .user-message {
-        background-color: #efefef;
-        color: black;
-        padding: 10px;
-        border-radius: 20px;
-        margin-left: auto;
-        display: flex;
-        justify-content: flex-end;
-    }
+.user-message {
+    background-color: #efefef;
+    color: black;
+    padding: 10px;
+    border-radius: 20px;
+    margin-left: auto;
+    display: flex;
+    justify-content: flex-end;
+}
 
-    .assistant-message {
-        display: flex;
-        align-items: flex-start;
-    }
+.assistant-message {
+    display: flex;
+    align-items: flex-start;
+}
 
-    .openai-icon {
-        width: 30px;
-        height: 30px;
-        margin-right: 10px;
-    }
+.openai-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
 
-    .assistant-message .openai-icon {
+.assistant-message .openai-icon {
     margin-right: 10px;
     margin-top: 5px;
 }
 
-    .assistant-message p {
-            background: none;
-            margin: 0;
-            text-align: left;
-        }
+.assistant-message p {
+    background: none;
+    margin: 0;
+    text-align: left;
+}
 
-    .input-area {
-        padding: 20px;
-        background-color: #f9f9f9;
-        border-top: 1px solid #ccc;
-    }
+.input-area {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    input {
-        width: 25%;
-        padding: 15px;
-        border: 1px solid #ccc;
-        border-radius: 25px;
-        margin-right: 10px;
-        font-size: 16px;
-        background-color: rgb(241, 241, 241);
-        color: rgb(0, 0, 0);
-    }
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    width: 70%;
+    max-width: 800px;
+}
 
-    button {
-        padding: 15px 25px;
-        background-color: #007bff;
-        border: none;
-        border-radius: 25px;
-        color: white;
-        cursor: pointer;
-        font-size: 16px;
-    }
+.rounds-indicator {
+    white-space: nowrap;
+    margin-right: 15px;
+    font-size: 14px;
+}
 
-    button:hover {
-        background-color: #0056b3;
-    }
+.rounds-indicator.green { color: green; }
+.rounds-indicator.yellow { color: orange; }
+.rounds-indicator.red { color: red; }
+.rounds-indicator.finished { color: #999; }
 
-    .typing {
-        animation: blink 1s step-end infinite;
-    }
+input {
+    flex-grow: 1;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    margin-right: 10px;
+    font-size: 16px;
+    background-color: rgb(241, 241, 241);
+    color: rgb(0, 0, 0);
+}
 
-    @keyframes blink {
-        from, to {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0;
-        }
-    }
+button {
+    padding: 15px 25px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    white-space: nowrap;
+}
 
-    .loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 10px;
-    }
+button:hover {
+    background-color: #0056b3;
+}
 
-    .loading img {
-        width: 30px;
-        height: 30px;
-        /* animation: spin 1s linear infinite; */
-    }
+input:disabled, button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-    @keyframes spin {
-        from {
-            transform: rotate(0deg);
-        }
-        to {
-            transform: rotate(360deg);
-        }
-    }
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.loading img {
+    width: 30px;
+    height: 30px;
+}
+
+.next-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: #00008B; /* Dark Blue */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.next-button:hover {
+  background-color: #000066; /* Darker Blue */
+}
 </style>
