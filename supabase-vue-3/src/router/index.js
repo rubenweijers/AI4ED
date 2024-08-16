@@ -3,17 +3,15 @@ import Home from '../views/Home.vue'
 import Study from '../views/Study.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
-import PreTest from '../views/PreTest.vue'
 import PostTest from '../views/PostTest.vue'
 import Survey from '../views/Survey.vue'
 import ThankYou from '../views/ThankYou.vue'
 import Chat from '../views/Chat.vue'
-import ChatLearningStyle from '../views/ChatLearningStyle.vue'
 import BeliefRating from '../views/BeliefRating.vue'
 import PreChat from '../views/PreChat.vue'
 import BeliefRating_PostChat from '../views/BeliefRating_PostChat.vue'
 import Study2 from '../views/Study2.vue'
-import WritingScreening from '../views/WritingScreening.vue'
+// import WritingScreening from '../views/WritingScreening.vue'
 
 const routes = [
   {
@@ -32,11 +30,6 @@ const routes = [
     component: Signup
   },
   {
-    path: '/writingscreening',
-    name: 'WritingScreening',
-    component: WritingScreening
-  },
-  {
     path: '/study',
     name: 'Study',
     component: Study
@@ -45,11 +38,6 @@ const routes = [
     path: '/study2',
     name: 'Study2',
     component: Study2
-  },
-  {
-    path: '/pretest',
-    name: 'PreTest',
-    component: PreTest
   },
   {
     path: '/posttest',
@@ -75,11 +63,6 @@ const routes = [
     path: '/chat',
     name: 'Chat',
     component: Chat
-  },
-  {
-    path: '/chatlearningstyle',
-    name: 'ChatLearningStyle',
-    component: ChatLearningStyle
   },
   {
     path: '/survey',
