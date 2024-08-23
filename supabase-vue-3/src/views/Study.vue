@@ -3,11 +3,7 @@
     <p>Loading...</p>
   </div>
   <div v-else-if="user">
-    <div v-if="showStudyInfo" class="study-info-container">
-      <StudyInfo />
-      <button @click="proceedToStudy" class="next-button">Next</button>
-    </div>
-    <div v-else class="study-container">
+    <div class="study-container">
       <h2>Force Concept Inventory</h2>
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
       <form @submit.prevent="confirmSubmission">
@@ -16,15 +12,17 @@
           <img v-if="question.question_number === 5" src="/fci_q5-6.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 6" src="/fci_q6.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 7" src="/fci_q7.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 8" src="/fci_q8-11.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 8" src="/fci_q8-11.png" alt="Question related image" class="question-image-range">
+          <img v-if="question.question_number === 8" src="/fci_q8.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 12" src="/fci_q12.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 15" src="/fci_q15-16.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 15" src="/fci_q15-16.png" alt="Question related image" class="question-image-range">
           <img v-if="question.question_number === 17" src="/fci_q17.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 18" src="/fci_q18.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 19" src="/fci_q19.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 20" src="/fci_q20.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 21" src="/fci_q21-24.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 21" src="/fci_q21-24.png" alt="Question related image" class="question-image-range">
+          <img v-if="question.question_number === 21" src="/fci_q21.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 23" src="/fci_q23.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 28" src="/fci_q28.png" alt="Question related image" class="question-image">
 
@@ -44,21 +42,21 @@
               :value="index"
               v-model="answers[question.id]"
             >
-            <label :for="'question-' + question.question_number + '-' + index">{{ option }}</label>
+            <label :for="'question-' + question.question_number + '-' + index" v-html="formatOptionText(option)"></label>
           </div>
 
           <!-- Add manual texts at specified positions -->
           <div v-if="question.question_number === 4" class="manual-text">
             <p>
               USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (5 and 6). <br>
-              The accompanying figure shows a frictionless channel in the shape of a segment of a circle with a center at "O". The channel has been anchored to a frictionless horizontal table top. You are looking down at the table. Forces exerted by the air are negligible. A ball is shot at high speed into the channel at "p" and exits at "r."
+              The accompanying figure shows a frictionless channel in the shape of a segment of a circle with a center at <i>O</i>. The channel has been anchored to a frictionless horizontal table top. You are looking down at the table. Forces exerted by the air are negligible. A ball is shot at high speed into the channel at <i>p</i> and exits at <i>r</i>.
             </p>
           </div>
 
           <div v-if="question.question_number === 7" class="manual-text">
             <p>
               USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (8 through 11). <br>
-              The figure depicts a hockey puck sliding with constant speed <katex :expression="'v_o'" /> in a straight line from point "a" to point "b" on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point "b," it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point "b," then the kick would have set the puck in horizontal motion with a speed <katex :expression="'v_k'" /> in the direction of the kick.
+              The figure below depicts a hockey puck sliding with constant speed <i>v<span class="subscript">o</span></i> in a straight line from point <i>a</i> to point <i>b</i> on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point <i>b</i>, it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point <i>a</i>, then the kick would have set the puck in horizontal motion with a speed <i>v<span class="subscript">k</span></i> in the direction of the kick.
             </p>
           </div>
 
@@ -72,7 +70,7 @@
           <div v-if="question.question_number === 20" class="manual-text">
             <p>
               USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (21 through 24). <br>
-              A rocket drifts sideways in outer space from point "a" to point "b" as shown below. The rocket is subject to no outside forces. Starting at position "b", the rocket's engine is turned on and produces a constant thrust (force on the rocket) at right angles to the line "ab". The constant thrust is maintained until the rocket reaches a point "c" in space.
+              A rocket drifts sideways in outer space from point <i>a</i> to point <i>b</i> as shown below. The rocket is subject to no outside forces. Starting at position <i>b</i>, the rocket's engine is turned on and produces a constant thrust (force on the rocket) at right angles to the line <i>ab</i>. The constant thrust is maintained until the rocket reaches a point <i>c</i> in space.
             </p>
           </div>
 
@@ -91,19 +89,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
 import StudyInfo from '../components/StudyInfo1.vue';
-// import { Katex } from 'vue-katex';
-// import { defineAsyncComponent } from 'vue';
-
-
-// const Katex = defineAsyncComponent(() => import('vue-katex'));
 
 const user = ref(null);
 const loading = ref(true);
-const showStudyInfo = ref(true); // Add state to control display of StudyInfo
+const showStudyInfo = ref(true);
 const questions = ref([]);
 const answers = ref({});
 const router = useRouter();
@@ -115,7 +108,7 @@ const checkUser = async () => {
     user.value = currentUser;
     await fetchQuestions();
   } else {
-    router.push('/login'); // Redirect to login if no user is found
+    router.push('/login');
   }
   loading.value = false;
 };
@@ -132,19 +125,25 @@ const fetchQuestions = async () => {
   questions.value.forEach(question => {
     answers.value[question.id] = '';
   });
+
+  // Load saved answers from localStorage
+  loadSavedAnswers();
 };
 
 const getOptions = (question) => {
-  // Fetch options from the question object
   return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
 };
 
 const formatQuestionText = (question) => {
   const numberText = question.question_number + '. ';
-  // Explicitly replace \n with <br> and log the result for debugging
   const formattedText = question.question_text.replace(/\\n/g, '<br>');
-  console.log('Formatted Text:', formattedText); // Debugging line
+  console.log('Formatted Text:', formattedText);
   return numberText + formattedText;
+};
+
+const formatOptionText = (option) => {
+  const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
+  return formattedOption;
 };
 
 const optionMapping = ["A", "B", "C", "D", "E"];
@@ -162,7 +161,7 @@ const submitAnswers = async () => {
     const answerEntries = questions.value.map(question => ({
       user_id: userId,
       question_id: question.id,
-      answer: optionMapping[answers.value[question.id]], // Map the selected option to A, B, C, D
+      answer: optionMapping[answers.value[question.id]],
       question_number: question.question_number,
     }));
 
@@ -171,21 +170,18 @@ const submitAnswers = async () => {
       console.error('Error submitting answers:', answerError.message);
       return;
     }
-    // Display submission success notification
     submissionSuccess.value = true;
-    // Navigate to PostTest.vue after a delay
     setTimeout(() => {
       router.push('/PostTest');
-    }, 2000); // Delay for 2 seconds to show the success notification
+    }, 2000);
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
 };
 
-// Function to select all answers as option 1
 const selectAllOption1 = () => {
   questions.value.forEach(question => {
-    answers.value[question.id] = 0; // Index of option 1 is 0
+    answers.value[question.id] = 0;
   });
 };
 
@@ -194,13 +190,33 @@ const proceedToStudy = () => {
   showStudyInfo.value = false;
 };
 
+// Save answers to localStorage
+const saveAnswersToLocalStorage = () => {
+  localStorage.setItem('studyAnswers', JSON.stringify(answers.value));
+};
+
+// Load answers from localStorage
+const loadSavedAnswers = () => {
+  const savedAnswers = localStorage.getItem('studyAnswers');
+  if (savedAnswers) {
+    answers.value = JSON.parse(savedAnswers);
+  }
+};
+
+// Watch for changes in answers and save to localStorage
+watch(answers, saveAnswersToLocalStorage, { deep: true });
+
 onMounted(() => {
   checkUser();
 });
 </script>
 
-
 <style scoped>
+.subscript {
+  vertical-align: sub;
+  font-size: smaller;
+}
+
 .study-info-container {
   text-align: center;
   margin: 50px auto;
@@ -300,6 +316,18 @@ input[type="radio"] {
 .question-image {
   max-width: 100%;
   margin: 0px 0;
+}
+
+.question-image-range {
+  max-width: 100%;
+  margin: 0px 0;
+  margin-top: -80px;
+  margin-bottom: 100px; /* Increase margin to bottom */
+}
+
+.horizontal-line {
+  border-top: 1px solid #ccc; /* Add horizontal line */
+  margin: 20px 0;
 }
 
 .additional-text {

@@ -6,6 +6,14 @@
       <input v-model="displayName" type="text" placeholder="Display Name" required />
       <input v-model="password" type="password" placeholder="Password" required />
       <input v-model="age" type="number" placeholder="Age" required />
+      <select v-model="gender" required>
+        <option value="">Select Gender</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Non-binary</option>
+        <option value="prefer_not_to_say">Prefer not to say</option>
+      </select>
+      <input v-model="firstLanguage" type="text" placeholder="First Language" required />
       <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Sign Up' }}</button>
       <p>Already have an account? <router-link to="/login">Log in!</router-link></p>
     </form>
@@ -21,6 +29,8 @@ const email = ref('')
 const password = ref('')
 const displayName = ref('')
 const age = ref('')
+const gender = ref('')
+const firstLanguage = ref('')
 
 const handleSignUp = async () => {
   try {
@@ -69,15 +79,19 @@ const handleSignUp = async () => {
 
     const now = new Date().toISOString();
 
-    // Insert into profiles table with group assignment
+    // Insert into profiles table with group assignment, gender, and first language
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .insert([
-        { user_id: user.id,
+        { 
+          user_id: user.id,
           display_name: displayName.value,
           age: age.value,
           group: group,
-          created_at: now }
+          created_at: now,
+          gender: gender.value,
+          first_language: firstLanguage.value
+        }
       ]);
 
     if (profileError) throw profileError;

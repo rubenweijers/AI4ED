@@ -5,9 +5,7 @@
         <img src="/ai4edlogo-removebg.png" alt="Bookie Logo" />
       </div>
       <nav class="nav">
-        <a href="#examples">Examples</a>
-        <a href="#contact">Contact</a>
-        <router-link :to="{ name: 'Study' }">Get Started</router-link>
+        <router-link :to="{ name: 'Study' }">Take Study</router-link>
         <template v-if="user">
           <span class="user-name">
             <template v-for="(char, index) in user.display_name.split('')" :key="index">

@@ -24,7 +24,7 @@
 
         <div v-else-if="incorrectQuestion.question_number >= 8 && incorrectQuestion.question_number <= 11" class="additional-text">
           <p><i>Reminder: you used this statement to answer the question.</i> <br>
-          The figure depicts a hockey puck sliding with constant speed <Katex :expression="'v_o'" /> in a straight line from point "a" to point "b" on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point "b," it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point "b," then the kick would have set the puck in horizontal motion with a speed <Katex :expression="'v_k'" /> in the direction of the kick.</p>
+          The figure depicts a hockey puck sliding with constant speed <i>v<sub>o</sub></i> in a straight line from point "a" to point "b" on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point "b," it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point "b," then the kick would have set the puck in horizontal motion with a speed <i>v<sub>k</sub></i> in the direction of the kick.</p>
         </div>
 
         <div v-else-if="incorrectQuestion.question_number >= 15 && incorrectQuestion.question_number <= 16" class="additional-text">
