@@ -21,6 +21,9 @@ https://docs.google.com/document/d/10bm6JGiE-bj1kkajmkc8k1G9w5oNoWLyY2KNcvnkIEY/
 # Google Drive
 https://drive.google.com/drive/u/2/folders/1KI67dRqq1DN3ABTzCOBxrlxlrPSGBZqb
 
+# Book Time with Ruben
+https://calendly.com/rubenweijers
+
 ## Luke's questions
 1. implement Oauth/ Google sign-in, instead of traditional email sign up?
 2. why not use Google form for survey?
