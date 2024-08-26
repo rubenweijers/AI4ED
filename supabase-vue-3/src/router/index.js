@@ -5,7 +5,6 @@ import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
 import PostTest from '../views/PostTest.vue'
 import Survey from '../views/Survey.vue'
-import SurveyGoogle from '../views/SurveyGoogleFormEmbedded.vue'
 import ThankYou from '../views/ThankYou.vue'
 import Chat from '../views/Chat.vue'
 import BeliefRating from '../views/BeliefRating.vue'
@@ -75,11 +74,6 @@ const routes = [
     path: '/survey',
     name: 'Survey',
     component: Survey
-  },
-  {
-    path: '/survey-embedded',
-    name: 'SurveyGoogleFormEmbedded',
-    component: SurveyGoogle
   },
   { 
     path: '/:catchAll(.*)', // Catch-all route

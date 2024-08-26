@@ -6,7 +6,9 @@
     <div class="survey-container">
       <h2>Post-Study Survey</h2>
       <p>List of Imported Questions</p>
-      <form @submit.prevent="submitSurvey">
+      <!-- need to be removed before the final release -->
+      <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
+      <form @submit.prevent="confirmSubmission">
         <div class="survey-question" v-for="(question, index) in surveyQuestions" :key="index">
 
           <!-- copy pasted from study.vue -->
@@ -118,18 +120,20 @@ const optionMapping = ["A", "B", "C", "D", "E"];
 
 const confirmSubmission = () => {
   if (confirm("Are you sure you want to submit?")) {
-    submitAnswers();
+    submitSurvey();
   }
 };
 
 const submitSurvey = async () => {
   try {
+    console.log("answers",answers)
     const userId = user.value.id;
     const surveyEntries = surveyQuestions.value.map((question, index) => ({
       user_id: userId,
       question_id: question.id,
       question_number: index + 1,
-      answer: answers.value[index],
+      answer: optionMapping[answers.value[question.id]],
+      // answer: answers.value[index],
     }));
 
     // Ensure the table has a unique constraint on (user_id, question_id)
@@ -151,6 +155,14 @@ const submitSurvey = async () => {
     console.error('An unexpected error occurred:', error);
   }
 };
+
+// need to be removed before the final release
+const selectAllOption1 = () => {
+  questions.value.forEach(question => {
+    answers.value[question.id] = 0;
+  });
+};
+
 
 onMounted(async () => {
   await checkUser();
