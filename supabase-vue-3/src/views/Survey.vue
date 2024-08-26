@@ -8,6 +8,27 @@
       <p>List of Imported Questions</p>
       <form @submit.prevent="submitSurvey">
         <div class="survey-question" v-for="(question, index) in surveyQuestions" :key="index">
+
+          <!-- copy pasted from study.vue -->
+          <!-- Render question text with line breaks -->
+          <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)"></label>
+
+          <!-- Conditionally render image -->
+          <img v-if="question.image" :src="question.image" alt="Question related image" class="question-image">
+
+          <!-- Conditionally render additional text -->
+          <p v-if="question.additionalText" class="additional-text">{{ question.additionalText }}</p>
+
+          <div class="option" v-for="(option, index) in getOptions(question)" :key="index">
+            <input type="radio"
+              :id="'question-' + question.question_number + '-' + index"
+              :name="'question-' + question.question_number"
+              :value="index"
+              v-model="answers[question.id]"
+            >
+            <label :for="'question-' + question.question_number + '-' + index" v-html="formatOptionText(option)"></label>
+          </div>
+<!-- 
           <label :for="'question-' + index">{{ index + 1 }}. {{ question.question }}</label>
           <div class="likert-scale" v-if="question.question_type === 'likert'">
             <div v-for="option in likertOptions" :key="option.value" class="likert-option">
@@ -17,7 +38,9 @@
           </div>
           <div v-else-if="question.question_type === 'textarea'">
             <textarea :id="'question-' + index" v-model="answers[index]" rows="3"></textarea>
-          </div>
+          </div> -->
+
+
         </div>
         <button type="submit" class="submit-button">Submit Survey</button>
       </form>
@@ -59,7 +82,8 @@ const checkUser = async () => {
 };
 
 const fetchQuestions = async () => {
-  const { data, error } = await supabase.from('survey_questions').select('*').order('id', { ascending: true });
+  const { data, error } = await supabase.from('survey_questions').select('*').order('question_number', { ascending: true });
+  console.log("data",data)
   if (error) {
     console.error('Error fetching questions:', error.message);
     return;
@@ -71,6 +95,31 @@ const fetchQuestions = async () => {
     answers.value = surveyQuestions.value.map(() => ''); // Initialize answers array with empty strings
   }
   loading.value = false; // Set loading to false after fetching questions
+};
+
+
+const getOptions = (question) => {
+  return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
+};
+
+const formatQuestionText = (question) => {
+  const numberText = question.question_number + '. ';
+  const formattedText = question.question_text.replace(/\\n/g, '<br>');
+  console.log('Formatted Text:', formattedText);
+  return numberText + formattedText;
+};
+
+const formatOptionText = (option) => {
+  const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
+  return formattedOption;
+};
+
+const optionMapping = ["A", "B", "C", "D", "E"];
+
+const confirmSubmission = () => {
+  if (confirm("Are you sure you want to submit?")) {
+    submitAnswers();
+  }
 };
 
 const submitSurvey = async () => {
@@ -153,6 +202,13 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+ /* Copy Pasted from Study.vue */
+.option {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .likert-option label {

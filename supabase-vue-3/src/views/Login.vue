@@ -4,8 +4,15 @@
       <h1>Login</h1>
       <input v-model="email" type="email" placeholder="Email" required />
       <input v-model="password" type="password" placeholder="Password" required />
-      <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Log In' }}</button>
+      <!-- Button is disabled if loading or consent is not checked -->
+      <button type="submit" :disabled="loading ">{{ loading ? 'Loading...' : 'Log In' }}</button>
       <p>Don't have an account? <router-link to="/signup">Sign up!</router-link></p>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" v-model="consent" />
+          <a href="https://www.termsfeed.com/live/50a688ef-662a-4eb2-ace4-ded3baa4a903" target="_blank">I consent to the terms and conditions.</a>
+        </label>
+      </div>
     </form>
   </div>
 </template>
@@ -19,6 +26,7 @@ const router = useRouter()
 const loading = ref(false)
 const email = ref('')
 const password = ref('')
+const consent = ref(true)
 
 const fetchUserProfile = async (userId) => {
   const { data: profileData, error: profileError } = await supabase
@@ -36,6 +44,14 @@ const fetchUserProfile = async (userId) => {
 }
 
 const handleLogin = async () => {
+  console.log("consent",consent.value)
+
+  if (!consent.value) {
+    console.log("consent",consent.value)
+    alert('Please check the consent box before logging in.');
+    return; // Exit the function early if consent is not given
+  }
+
   try {
     loading.value = true;
     const { data, error } = await supabase.auth.signInWithPassword({
