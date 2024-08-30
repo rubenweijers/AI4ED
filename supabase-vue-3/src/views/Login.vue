@@ -4,9 +4,9 @@
       <h1>Login</h1>
       <input v-model="email" type="email" placeholder="Email" required />
       <input v-model="password" type="password" placeholder="Password" required />
-      <!-- Button is disabled if loading or consent is not checked -->
-      <button type="submit" :disabled="loading ">{{ loading ? 'Loading...' : 'Log In' }}</button>
+      <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Log In' }}</button>
       <p>Don't have an account? <router-link to="/signup">Sign up!</router-link></p>
+      <p><a href="#" @click.prevent="showResetPassword = true">Forgot Password?</a></p>
       <div class="form-group">
         <label>
           <input type="checkbox" v-model="consent" />
@@ -14,6 +14,18 @@
         </label>
       </div>
     </form>
+
+    <!-- Reset Password Modal -->
+    <div v-if="showResetPassword" class="reset-password-modal">
+      <form @submit.prevent="handleResetPassword">
+        <h2>Reset Password</h2>
+        <input v-model="resetEmail" type="email" placeholder="Enter your email" required />
+        <button type="submit" :disabled="resetLoading">
+          {{ resetLoading ? 'Sending...' : 'Send Reset Link' }}
+        </button>
+        <button @click="showResetPassword = false">Cancel</button>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -27,6 +39,11 @@ const loading = ref(false)
 const email = ref('')
 const password = ref('')
 const consent = ref(true)
+
+// New variables for reset password functionality
+const showResetPassword = ref(false)
+const resetEmail = ref('')
+const resetLoading = ref(false)
 
 const fetchUserProfile = async (userId) => {
   const { data: profileData, error: profileError } = await supabase
@@ -44,12 +61,12 @@ const fetchUserProfile = async (userId) => {
 }
 
 const handleLogin = async () => {
-  console.log("consent",consent.value)
+  console.log("consent", consent.value)
 
   if (!consent.value) {
-    console.log("consent",consent.value)
+    console.log("consent", consent.value)
     alert('Please check the consent box before logging in.');
-    return; // Exit the function early if consent is not given
+    return;
   }
 
   try {
@@ -72,9 +89,7 @@ const handleLogin = async () => {
     const profileData = await fetchUserProfile(user.id);
 
     if (profileData) {
-      // Save user and profile data to local storage or global state
       localStorage.setItem('user', JSON.stringify({ ...user, display_name: profileData.display_name }));
-      // Redirect to study page after successful login
       router.push({ name: 'Study' });
     } else {
       throw new Error('Profile fetch failed.');
@@ -86,10 +101,53 @@ const handleLogin = async () => {
     loading.value = false;
   }
 };
+
+// New function for handling password reset
+const handleResetPassword = async () => {
+  try {
+    resetLoading.value = true
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.value, {
+      redirectTo: `${window.location.origin}/resetpassword`,
+    })
+    if (error) throw error
+    alert('Password reset email sent. Check your inbox.')
+    showResetPassword.value = false
+  } catch (error) {
+    alert(error.message)
+  } finally {
+    resetLoading.value = false
+  }
+}
 </script>
 
-
 <style scoped>
+.reset-password-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reset-password-modal form {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reset-password-modal input,
+.reset-password-modal button {
+  padding: 10px;
+  margin: 5px 0;
+}
+
 .auth {
   display: flex;
   justify-content: center;

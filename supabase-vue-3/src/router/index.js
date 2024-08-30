@@ -12,6 +12,7 @@ import PreChat from '../views/PreChat.vue'
 import BeliefRating_PostChat from '../views/BeliefRating_PostChat.vue'
 import Study2 from '../views/Study2.vue'
 import StudyInfo from '../views/StudyInfo.vue'
+import ResetPassword from '../views/ResetPassword.vue'
 // import WritingScreening from '../views/WritingScreening.vue'
 
 const routes = [
@@ -29,6 +30,11 @@ const routes = [
     path: '/signup',
     name: 'Signup',
     component: Signup
+  },
+  {
+    path: '/resetpassword',
+    name: 'ResetPassword',
+    component: ResetPassword
   },
   {
     path: '/studyinfo',

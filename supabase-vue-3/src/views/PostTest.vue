@@ -65,7 +65,7 @@
         <!-- <p><strong>Correct Answer:</strong> {{ getCorrectAnswer() }}</p> -->
       </div>
       <div class="explanation">
-        <p>Please explain your reasoning for this answer:</p>
+        <p>Please explain your reasoning for this answer in at least 20 words:</p>
         <textarea v-model="explanation" rows="4" cols="50"></textarea>
       </div>
       <button @click="confirmSubmission" class="submit-button">Submit Explanation</button>
@@ -153,9 +153,40 @@ const formatQuestionText = (question) => {
   return numberText + formattedText;
 };
 
+const isExplanationValid = () => {
+  // Check if explanation is empty or only whitespace
+  if (!explanation.value || explanation.value.trim().length === 0) {
+    alert("Please provide an explanation before submitting.");
+    return false;
+  }
+
+  // Check if explanation is too short (e.g., less than 10 words)
+  const wordCount = explanation.value.trim().split(/\s+/).length;
+  if (wordCount < 20) {
+    alert("Your explanation is too short. Please provide a more detailed explanation containing at least 20 words.");
+    return false;
+  }
+
+  // Check for meaningful content (e.g., not just repeating the question or answer)
+  const lowercaseExplanation = explanation.value.toLowerCase();
+  const lowercaseQuestion = incorrectQuestion.value.question_text.toLowerCase();
+  const lowercaseAnswer = userAnswer.value.toLowerCase();
+
+  if (lowercaseExplanation.includes(lowercaseQuestion) || lowercaseExplanation.includes(lowercaseAnswer)) {
+    alert("Your explanation seems to just repeat the question or answer. Please provide your own reasoning.");
+    return false;
+  }
+
+  // If all checks pass, the explanation is valid
+  return true;
+};
+
+// Ensure the explanation is not empty
 const confirmSubmission = () => {
-  if (confirm("Are you sure you want to submit?")) {
-    submitExplanation();
+  if (isExplanationValid()) {
+    if (confirm("Are you sure you want to submit?")) {
+      submitExplanation();
+    }
   }
 };
 

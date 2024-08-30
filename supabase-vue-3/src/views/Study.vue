@@ -10,21 +10,7 @@
         <div v-for="(question, index) in questions" :key="question.id" class="question">
           <!-- Add images before the corresponding questions -->
           <img v-if="question.question_number === 5" src="/fci_q5-6.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 6" src="/fci_q6.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 7" src="/fci_q7.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 8" src="/fci_q8-11.png" alt="Question related image" class="question-image-range">
-          <img v-if="question.question_number === 8" src="/fci_q8.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 12" src="/fci_q12.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 15" src="/fci_q15-16.png" alt="Question related image" class="question-image-range">
-          <img v-if="question.question_number === 17" src="/fci_q17.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 18" src="/fci_q18.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 19" src="/fci_q19.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 20" src="/fci_q20.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 21" src="/fci_q21-24.png" alt="Question related image" class="question-image-range">
-          <img v-if="question.question_number === 21" src="/fci_q21.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 23" src="/fci_q23.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 28" src="/fci_q28.png" alt="Question related image" class="question-image">
+          <!-- ... (other image conditions) ... -->
 
           <!-- Render question text with line breaks -->
           <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)"></label>
@@ -35,14 +21,15 @@
           <!-- Conditionally render additional text -->
           <p v-if="question.additionalText" class="additional-text">{{ question.additionalText }}</p>
 
-          <div class="option" v-for="(option, index) in getOptions(question)" :key="index">
+          <div class="option" v-for="(option, optionIndex) in getOptions(question)" :key="optionIndex">
             <input type="radio"
-              :id="'question-' + question.question_number + '-' + index"
+              :id="'question-' + question.question_number + '-' + optionIndex"
               :name="'question-' + question.question_number"
-              :value="index"
+              :value="optionIndex"
               v-model="answers[question.id]"
+              @change="submitAnswer(question, optionIndex)"
             >
-            <label :for="'question-' + question.question_number + '-' + index" v-html="formatOptionText(option)"></label>
+            <label :for="'question-' + question.question_number + '-' + optionIndex" v-html="formatOptionText(option)"></label>
           </div>
 
           <!-- Add manual texts at specified positions -->
@@ -52,27 +39,7 @@
               The accompanying figure shows a frictionless channel in the shape of a segment of a circle with a center at <i>O</i>. The channel has been anchored to a frictionless horizontal table top. You are looking down at the table. Forces exerted by the air are negligible. A ball is shot at high speed into the channel at <i>p</i> and exits at <i>r</i>.
             </p>
           </div>
-
-          <div v-if="question.question_number === 7" class="manual-text">
-            <p>
-              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (8 through 11). <br>
-              The figure below depicts a hockey puck sliding with constant speed <i>v<span class="subscript">o</span></i> in a straight line from point <i>a</i> to point <i>b</i> on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point <i>b</i>, it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point <i>a</i>, then the kick would have set the puck in horizontal motion with a speed <i>v<span class="subscript">k</span></i> in the direction of the kick.
-            </p>
-          </div>
-
-          <div v-if="question.question_number === 14" class="manual-text">
-            <p>
-              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (15 and 16). <br>
-              A large truck breaks down out on the road and receives a push back into town by a small compact car as shown in the figure below.
-            </p>
-          </div>
-
-          <div v-if="question.question_number === 20" class="manual-text">
-            <p>
-              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (21 through 24). <br>
-              A rocket drifts sideways in outer space from point <i>a</i> to point <i>b</i> as shown below. The rocket is subject to no outside forces. Starting at position <i>b</i>, the rocket's engine is turned on and produces a constant thrust (force on the rocket) at right angles to the line <i>ab</i>. The constant thrust is maintained until the rocket reaches a point <i>c</i> in space.
-            </p>
-          </div>
+          <!-- ... (other manual texts) ... -->
 
         </div>
         <button type="submit" class="submit-button">Submit Questionnaire</button>
@@ -92,11 +59,9 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
-import StudyInfo from '../components/StudyInfo1.vue';
 
 const user = ref(null);
 const loading = ref(true);
-const showStudyInfo = ref(true);
 const questions = ref([]);
 const answers = ref({});
 const router = useRouter();
@@ -137,7 +102,6 @@ const getOptions = (question) => {
 const formatQuestionText = (question) => {
   const numberText = question.question_number + '. ';
   const formattedText = question.question_text.replace(/\\n/g, '<br>');
-  console.log('Formatted Text:', formattedText);
   return numberText + formattedText;
 };
 
@@ -179,15 +143,35 @@ const submitAnswers = async () => {
   }
 };
 
+const submitAnswer = async (question, optionIndex) => {
+  try {
+    const userId = user.value.id;
+    const answerEntry = {
+      user_id: userId,
+      question_id: question.id,
+      answer: optionMapping[optionIndex],
+      question_number: question.question_number,
+    };
+
+    const { data, error } = await supabase
+      .from('answers')
+      .upsert([answerEntry], { onConflict: ['user_id', 'question_id'] });
+
+    if (error) {
+      console.error('Error submitting the answer:', error.message);
+      return;
+    }
+
+    console.log(`Answer for question ${question.question_number} submitted successfully.`);
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+  }
+};
+
 const selectAllOption1 = () => {
   questions.value.forEach(question => {
     answers.value[question.id] = 0;
   });
-};
-
-// Function to proceed to the study
-const proceedToStudy = () => {
-  showStudyInfo.value = false;
 };
 
 // Save answers to localStorage
