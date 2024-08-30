@@ -158,48 +158,83 @@ export default {
         }
     },
     async sendMessage() {
-        if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
+    if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
 
-        this.messages.push({ role: 'user', content: this.userMessage });
-        this.remainingRounds--;
+    const startTime = new Date();
+    const userMessageContent = this.userMessage;
+    this.messages.push({ role: 'user', content: userMessageContent });
+    this.remainingRounds--;
 
-        const apiData = {
-            model: "gpt-4o",
-            messages: [
-                { role: "system", content: this.systemPrompt },
-                ...this.messages
-            ],
-            max_tokens: 2000,
-            temperature: 0.7
-        };
+    const apiData = {
+        model: "gpt-4o",
+        messages: [
+            { role: "system", content: this.systemPrompt },
+            ...this.messages
+        ],
+        max_tokens: 2000,
+        temperature: 0.7
+    };
 
-        this.userMessage = '';
-        this.loading = true;
+    this.userMessage = '';
+    this.loading = true;
 
-        try {
-            const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-                }
-            });
+    try {
+        const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+            }
+        });
 
-            this.messages.push({ role: 'assistant', content: response.data.choices[0].message.content.trim() });
-            this.$nextTick(() => {
-                this.scrollToBottom();
-            });
-        } catch (error) {
-            console.error('Error communicating with the OpenAI API', error);
-        } finally {
-            this.loading = false;
+        const modelReply = response.data.choices[0].message.content.trim();
+        this.messages.push({ role: 'assistant', content: modelReply });
+
+        const timeSpent = new Date() - startTime;
+        const timeSpentFormatted = new Date(timeSpent).toISOString().substr(11, 8); // Format as hh:mm:ss
+
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData?.user) {
+            console.log('User not authenticated');
+            return;
         }
 
-        if (this.remainingRounds === 0) {
-            this.messages.push({ role: 'system', content: "Thank you for participating in this conversation. You have used all your available inputs." });
-        }
+        const userId = userData.user.id;
+        const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('display_name, group')
+            .eq('user_id', userId)
+            .single();
 
-        this.saveChatData();
-    },
+        if (profileError) throw profileError;
+
+        const displayName = profileData.display_name;
+        const llmType = profileData.group;
+
+        await supabase.from('chat_history').insert({
+            user_id: userId,
+            round: Math.ceil(this.messages.length / 2), // Calculate the round
+            user_chat: userMessageContent,
+            model_reply: modelReply,
+            llm_type: llmType,
+            time_spent: timeSpentFormatted,
+            timestamp: new Date().toISOString(),
+            initial_message: this.initialSystemMessage
+        });
+
+        this.$nextTick(() => {
+            this.scrollToBottom();
+        });
+    } catch (error) {
+        console.error('Error communicating with the OpenAI API', error);
+    } finally {
+        this.loading = false;
+    }
+
+    if (this.remainingRounds === 0) {
+        this.messages.push({ role: 'system', content: "Thank you for participating in this conversation. You have used all your available inputs." });
+    }
+    this.saveChatData();
+},
     marked(content) {
         return marked(content);
     },
