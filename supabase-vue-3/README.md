@@ -4,13 +4,18 @@
 3. npm run build
 3. npm run dev
 
-
+# TODO
++ add post test survey, how did the AI do? 
++ add user name
 
 # Slack
 https://app.slack.com/client/TGFR1MJJH/D07JJ53B2C9
 
 # Website
 https://ai4ed.vercel.app/study
+
+# Database
+https://supabase.com/dashboard/project/namcuqgssvpdtxadfize
 
 # Github
 https://github.com/rubenweijers/AI4ED
