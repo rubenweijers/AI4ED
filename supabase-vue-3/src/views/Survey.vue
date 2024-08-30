@@ -6,17 +6,28 @@
     <div class="survey-container">
       <h2>Post-Study Survey</h2>
       <p>List of Imported Questions</p>
-      <form @submit.prevent="submitSurvey">
+      <!-- need to be removed before the final release -->
+      <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
+      <form @submit.prevent="confirmSubmission">
         <div class="survey-question" v-for="(question, index) in surveyQuestions" :key="index">
-          <label :for="'question-' + index">{{ index + 1 }}. {{ question.question }}</label>
-          <div class="likert-scale" v-if="question.question_type === 'likert'">
-            <div v-for="option in likertOptions" :key="option.value" class="likert-option">
-              <input type="radio" :id="'question-' + index + '-' + option.value" :name="'question-' + index" :value="option.value" v-model="answers[index]" />
-              <label :for="'question-' + index + '-' + option.value">{{ option.label }}</label>
-            </div>
-          </div>
-          <div v-else-if="question.question_type === 'textarea'">
-            <textarea :id="'question-' + index" v-model="answers[index]" rows="3"></textarea>
+          <!-- Render question text with line breaks -->
+          <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)"></label>
+
+          <!-- Conditionally render image -->
+          <img v-if="question.image" :src="question.image" alt="Question related image" class="question-image">
+
+          <!-- Conditionally render additional text -->
+          <p v-if="question.additionalText" class="additional-text">{{ question.additionalText }}</p>
+
+          <div class="option" v-for="(option, optionIndex) in getOptions(question)" :key="optionIndex">
+            <input type="radio"
+              :id="'question-' + question.question_number + '-' + optionIndex"
+              :name="'question-' + question.question_number"
+              :value="optionIndex"
+              v-model="answers[question.id]"
+              @change="submitAnswer(question, optionIndex)"  
+            >
+            <label :for="'question-' + question.question_number + '-' + optionIndex" v-html="formatOptionText(option)"></label>
           </div>
         </div>
         <button type="submit" class="submit-button">Submit Survey</button>
@@ -28,6 +39,7 @@
     <router-link to="/login">Log in</router-link>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -59,7 +71,7 @@ const checkUser = async () => {
 };
 
 const fetchQuestions = async () => {
-  const { data, error } = await supabase.from('survey_questions').select('*').order('id', { ascending: true });
+  const { data, error } = await supabase.from('survey_questions').select('*').order('question_number', { ascending: true });
   if (error) {
     console.error('Error fetching questions:', error.message);
     return;
@@ -73,6 +85,29 @@ const fetchQuestions = async () => {
   loading.value = false; // Set loading to false after fetching questions
 };
 
+const getOptions = (question) => {
+  return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
+};
+
+const formatQuestionText = (question) => {
+  const numberText = question.question_number + '. ';
+  const formattedText = question.question_text.replace(/\\n/g, '<br>');
+  return numberText + formattedText;
+};
+
+const formatOptionText = (option) => {
+  const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
+  return formattedOption;
+};
+
+const optionMapping = ["A", "B", "C", "D", "E"];
+
+const confirmSubmission = () => {
+  if (confirm("Are you sure you want to submit?")) {
+    submitSurvey();
+  }
+};
+
 const submitSurvey = async () => {
   try {
     const userId = user.value.id;
@@ -80,10 +115,9 @@ const submitSurvey = async () => {
       user_id: userId,
       question_id: question.id,
       question_number: index + 1,
-      answer: answers.value[index],
+      answer: optionMapping[answers.value[question.id]],
     }));
 
-    // Ensure the table has a unique constraint on (user_id, question_id)
     const { data, error } = await supabase
       .from('survey_answers')
       .upsert(surveyEntries, { onConflict: ['user_id', 'question_id'] });
@@ -93,14 +127,44 @@ const submitSurvey = async () => {
       return;
     }
 
-    // Show success message
     alert('Survey submission successful! Thank you for your feedback.');
-
-    // Redirect to a thank you or home page
     router.push('/ThankYou.vue');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
+};
+
+// Submit individual answer for a question
+const submitAnswer = async (question, optionIndex) => {
+  try {
+    const userId = user.value.id;
+    const surveyEntry = {
+      user_id: userId,
+      question_id: question.id,
+      question_number: question.question_number,
+      answer: optionMapping[optionIndex],
+    };
+
+    const { data, error } = await supabase
+      .from('survey_answers')
+      .upsert([surveyEntry], { onConflict: ['user_id', 'question_id'] });
+
+    if (error) {
+      console.error('Error submitting the answer:', error.message);
+      return;
+    }
+
+    console.log(`Answer for question ${question.question_number} submitted successfully.`);
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+  }
+};
+
+// need to be removed before the final release
+const selectAllOption1 = () => {
+  surveyQuestions.value.forEach(question => {
+    answers.value[question.id] = 0;
+  });
 };
 
 onMounted(async () => {
@@ -153,6 +217,13 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+ /* Copy Pasted from Study.vue */
+.option {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .likert-option label {
