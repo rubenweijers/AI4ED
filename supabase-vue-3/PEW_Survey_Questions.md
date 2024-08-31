@@ -31,7 +31,8 @@ This survey will be anonymized, your answers won't be shared with your instructo
 5. How often do you use Generative AI (such as ChatGPT or Gemini)?
     a. everyday
     b. weekly
-    c. 
-    d. never
+    c. monthly
+    d. once or twice
+    e. never
 
 

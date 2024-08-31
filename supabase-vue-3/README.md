@@ -7,6 +7,7 @@
 # TODO
 + add post test survey, how did the AI do? 
 + add user name
++ auto save logic error, won't save if no record was created
 
 # Slack
 https://app.slack.com/client/TGFR1MJJH/D07JJ53B2C9
