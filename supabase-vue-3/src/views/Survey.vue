@@ -4,7 +4,7 @@
   </div>
   <div v-else-if="user">
     <div class="survey-container">
-      <h2>Post-Study Survey</h2>
+      <h2>Pre-Study Survey</h2>
       <p>List of Imported Questions</p>
       <!-- need to be removed before the final release -->
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
@@ -128,7 +128,12 @@ const submitSurvey = async () => {
     }
 
     alert('Survey submission successful! Thank you for your feedback.');
-    router.push('/ThankYou.vue');
+    //TODO, add final survey
+    // router.push('/ThankYou.vue');
+    console.log('route to study')
+    setTimeout(() => {
+      router.push('/study');
+    }, 2000);
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
