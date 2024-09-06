@@ -65,7 +65,7 @@
         <!-- <p><strong>Correct Answer:</strong> {{ getCorrectAnswer() }}</p> -->
       </div>
       <div class="explanation">
-        <p>Please explain your reasoning for this answer in at least 20 words:</p>
+        <p>Please explain your reasoning for this answer in at least 10 words:</p>
         <textarea v-model="explanation" rows="4" cols="50"></textarea>
       </div>
       <button @click="confirmSubmission" class="submit-button">Submit Explanation</button>
@@ -162,7 +162,7 @@ const isExplanationValid = () => {
 
   // Check if explanation is too short (e.g., less than 10 words)
   const wordCount = explanation.value.trim().split(/\s+/).length;
-  if (wordCount < 20) {
+  if (wordCount < 10) {
     alert("Your explanation is too short. Please provide a more detailed explanation containing at least 20 words.");
     return false;
   }
