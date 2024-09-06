@@ -1,26 +1,69 @@
 <template>
+  <div v-if="loading">
+    <p>Loading...</p>
+  </div>
+  <div v-else-if="user">
     <div class="study-info-container">
       <h2>Study Information</h2>
-      
+      <StudyIntro />
       <StudyInfo1 />
       
-      <div class="info-block">
-        <p>Please review the information above carefully before proceeding to the study questions.</p>
-      </div>
-      
-      <button @click="proceedToStudy" class="next-button">Next</button>
+      <button @click="showToastNotification" class="next-button">I confirm to have read the above text.</button>
+    
+      <ToastNotification
+        :isVisible="showToast"
+        title="Proceed to Study"
+        message="Are you sure you want to proceed to the study? This action cannot be undone."
+        @confirm="proceedToStudy"
+        @cancel="cancelProceed"
+      />
     </div>
+  </div>
+  <div v-else>
+    <p>Please log in to view study information.</p>
+    <router-link to="/login">Log in</router-link>
+  </div>
 </template>
   
 <script setup>
-  import { useRouter } from 'vue-router';
-  import StudyInfo1 from '../components/StudyInfo1.vue';
-  
-  const router = useRouter();
-  
-  const proceedToStudy = () => {
-    router.push('/study'); // Assuming '/study' is the route for Study.vue
-  };
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { supabase } from '../supabase';
+import StudyInfo1 from '../components/StudyInfo1.vue';
+import StudyIntro from '../components/StudyIntro.vue';
+import ToastNotification from '../components/ToastNotification.vue';
+
+const router = useRouter();
+const loading = ref(true);
+const user = ref(null);
+const showToast = ref(false);
+
+const checkUser = async () => {
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+  if (currentUser) {
+    user.value = currentUser;
+  } else {
+    router.push('/login');
+  }
+  loading.value = false;
+};
+
+onMounted(() => {
+  checkUser();
+});
+
+const showToastNotification = () => {
+  showToast.value = true;
+};
+
+const proceedToStudy = () => {
+  showToast.value = false;
+  router.push('/survey');
+};
+
+const cancelProceed = () => {
+  showToast.value = false;
+};
 </script>
   
 <style scoped>

@@ -4,14 +4,16 @@
   </div>
   <div v-else-if="user">
     <div class="survey-container">
-      <h2>Post-Study Survey</h2>
+      <h2>5 Question Survey on your AI-related opinions.</h2>
       <p>List of Imported Questions</p>
       <!-- need to be removed before the final release -->
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
       <form @submit.prevent="confirmSubmission">
         <div class="survey-question" v-for="(question, index) in surveyQuestions" :key="index">
           <!-- Render question text with line breaks -->
-          <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)"></label>
+          <div class="question-text">
+            <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)"></label>
+          </div>
 
           <!-- Conditionally render image -->
           <img v-if="question.image" :src="question.image" alt="Question related image" class="question-image">
@@ -128,7 +130,7 @@ const submitSurvey = async () => {
     }
 
     alert('Survey submission successful! Thank you for your feedback.');
-    router.push('/ThankYou.vue');
+    router.push('/study');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
@@ -192,18 +194,24 @@ onMounted(async () => {
 }
 
 .survey-question {
-  margin-bottom: 30px; /* Increased margin between questions */
+  margin-bottom: 60px; /* Increased margin between questions */
 }
 
 .survey-question label {
   display: block;
-  margin-top: 50px;
-  margin-bottom: 10px;
+  margin-top: 0px;
+  margin-bottom: 0px;
   padding: 5px; /* Add padding for better readability */
   font-weight: 600;
   color: black;
   font-size: 18px; /* Increase font size */
   text-transform: none; /* Ensure text is not capitalized */
+}
+
+.question-text {
+  border-left: 4px solid rgb(29, 29, 184);
+  padding-left: 15px;
+  margin-bottom: 10px;
 }
 
 .likert-scale {

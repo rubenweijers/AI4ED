@@ -167,16 +167,6 @@ const isExplanationValid = () => {
     return false;
   }
 
-  // Check for meaningful content (e.g., not just repeating the question or answer)
-  const lowercaseExplanation = explanation.value.toLowerCase();
-  const lowercaseQuestion = incorrectQuestion.value.question_text.toLowerCase();
-  const lowercaseAnswer = userAnswer.value.toLowerCase();
-
-  if (lowercaseExplanation.includes(lowercaseQuestion) || lowercaseExplanation.includes(lowercaseAnswer)) {
-    alert("Your explanation seems to just repeat the question or answer. Please provide your own reasoning.");
-    return false;
-  }
-
   // If all checks pass, the explanation is valid
   return true;
 };

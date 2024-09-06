@@ -18,8 +18,8 @@ import ResetPassword from '../views/ResetPassword.vue'
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'StudyInfo',
+    component: StudyInfo
   },
   {
     path: '/login',
@@ -35,11 +35,6 @@ const routes = [
     path: '/resetpassword',
     name: 'ResetPassword',
     component: ResetPassword
-  },
-  {
-    path: '/studyinfo',
-    name: 'StudyInfo',
-    component: StudyInfo
   },
   {
     path: '/study',

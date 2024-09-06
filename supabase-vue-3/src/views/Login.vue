@@ -90,7 +90,7 @@ const handleLogin = async () => {
 
     if (profileData) {
       localStorage.setItem('user', JSON.stringify({ ...user, display_name: profileData.display_name }));
-      router.push({ name: 'Study' });
+      router.push({ name: 'StudyInfo' });
     } else {
       throw new Error('Profile fetch failed.');
     }
