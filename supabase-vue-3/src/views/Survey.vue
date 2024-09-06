@@ -130,7 +130,7 @@ const submitSurvey = async () => {
     }
 
     alert('Survey submission successful! Thank you for your feedback.');
-    router.push('/study');
+    router.push('/ThankYou.vue');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
