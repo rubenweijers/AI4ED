@@ -32,7 +32,17 @@
             <label :for="'question-' + question.question_number + '-' + optionIndex" v-html="formatOptionText(option)"></label>
           </div>
         </div>
-        <button type="submit" class="submit-button">Submit Survey</button>
+        <button type="submit" class="submit-button">Submit Survey and Take the FCI</button>
+
+        <button @click="showToastNotification" class="next-button">Submit Survey and Proceed to FCI.</button>
+    
+        <ToastNotification
+          :isVisible="showToast"
+          title="Proceed to Study"
+          message="Are you sure you want to proceed to the study? This action cannot be undone."
+          @confirm="proceedToStudy"
+          @cancel="cancelProceed"
+        />
       </form>
     </div>
   </div>
@@ -47,6 +57,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
+import ToastNotification from '../components/ToastNotification.vue';
 
 const user = ref(null);
 const loading = ref(true);
@@ -130,7 +141,7 @@ const submitSurvey = async () => {
     }
 
     alert('Survey submission successful! Thank you for your feedback.');
-    router.push('/ThankYou.vue');
+    router.push('/study');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
@@ -167,6 +178,19 @@ const selectAllOption1 = () => {
   surveyQuestions.value.forEach(question => {
     answers.value[question.id] = 0;
   });
+};
+
+const showToastNotification = () => {
+  showToast.value = true;
+};
+
+const proceedToStudy = () => {
+  showToast.value = false;
+  router.push('/study');
+};
+
+const cancelProceed = () => {
+  showToast.value = false;
 };
 
 onMounted(async () => {
@@ -248,20 +272,20 @@ textarea {
   font-size: 16px; /* Increase font size for better readability */
 }
 
-.submit-button {
-  display: block;
-  margin: 20px auto 0;
-  background-color: rgb(29, 29, 184);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 12px 30px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.submit-button:hover {
-  background-color: rgb(23, 23, 250);
-  transform: translateY(-3px);
-}
+.next-button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: rgb(29, 29, 184);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 18px;
+  }
+  
+  .next-button:hover {
+    background-color: rgb(23, 23, 250);
+  }
 </style>
