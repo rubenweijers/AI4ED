@@ -53,7 +53,9 @@ export default {
             questionText: '',
             explanation: '',
             initialSystemMessage: '',
-            remainingRounds: 3
+            remainingRounds: 3,
+            lastMessageTime: null,
+            firstMsgTime: null,
         };
     },
     computed: {
@@ -62,7 +64,7 @@ export default {
             if (this.remainingRounds === 2) return 'yellow';
             if (this.remainingRounds === 1) return 'red';
             return 'finished';
-        }
+        },
     },
     async mounted() {
         await this.loadDataAndSetSystemPrompt();
@@ -72,200 +74,225 @@ export default {
     },
     methods: {
         async loadDataAndSetSystemPrompt() {
-        const storedData = localStorage.getItem('chatData');
-        if (storedData) {
-            const { userBeliefLevel, questionText, explanation, systemPrompt, initialSystemMessage, messages, remainingRounds } = JSON.parse(storedData);
-            this.userBeliefLevel = userBeliefLevel;
-            this.questionText = questionText;
-            this.explanation = explanation;
-            this.systemPrompt = systemPrompt;
-            this.initialSystemMessage = initialSystemMessage;
-            this.messages = messages || [{ role: 'assistant', content: this.initialSystemMessage }];
-            this.remainingRounds = remainingRounds !== undefined ? remainingRounds : 3; // Default to 3 if not set
-        } else {
-            await this.fetchDataAndSetSystemPrompt();
-        }
-    },
-    async fetchDataAndSetSystemPrompt() {
-        try {
-            const { data: userData, error: userError } = await supabase.auth.getUser();
-            if (userError || !userData?.user) {
-                console.log('User not authenticated');
-                this.$router.push('/login');
-                return;
+            const storedData = localStorage.getItem('chatData');
+            if (storedData) {
+                const { userBeliefLevel, questionText, explanation, systemPrompt, initialSystemMessage, messages, remainingRounds } = JSON.parse(storedData);
+                this.userBeliefLevel = userBeliefLevel;
+                this.questionText = questionText;
+                this.explanation = explanation;
+                this.systemPrompt = systemPrompt;
+                this.initialSystemMessage = initialSystemMessage;
+                this.messages = messages || [{ role: 'assistant', content: this.initialSystemMessage }];
+                this.remainingRounds = remainingRounds !== undefined ? remainingRounds : 3; // Default to 3 if not set
+            } else {
+                await this.fetchDataAndSetSystemPrompt();
+            }
+        },
+        async fetchDataAndSetSystemPrompt() {
+            try {
+                const { data: userData, error: userError } = await supabase.auth.getUser();
+                if (userError || !userData?.user) {
+                    console.log('User not authenticated');
+                    this.$router.push('/login');
+                    return;
+                }
+
+                const user = userData.user;
+
+                const { data: answerData, error: answerError } = await supabase
+                    .from('answers_posttest')
+                    .select('belief_rating_1, llm_summary, question_number')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (answerError) throw answerError;
+
+                this.userBeliefLevel = answerData.belief_rating_1;
+                this.explanation = answerData.llm_summary;
+
+                const { data: questionData, error: questionError } = await supabase
+                    .from('questions')
+                    .select('question_text')
+                    .eq('question_number', answerData.question_number)
+                    .single();
+
+                if (questionError) throw questionError;
+
+                this.questionText = questionData.question_text;
+
+                this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
+
+                await this.generateInitialAIMessage();
+
+                this.saveChatData();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        },
+        async generateInitialAIMessage() {
+            this.loading = true;
+            const apiData = {
+                model: "gpt-4o",
+                messages: [
+                    { role: "system", content: this.systemPrompt },
+                    { role: "user", content: "Please start the conversation by addressing the user's misconception." },
+                ],
+                max_tokens: 2000,
+                temperature: 0.7,
+            };
+
+            try {
+                const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+                    },
+                });
+
+                const initialMessage = response.data.choices[0].message.content.trim();
+                this.initialSystemMessage = initialMessage;
+                this.messages.push({ role: 'assistant', content: initialMessage });
+                this.firstMsgTime = new Date();
+            } catch (error) {
+                console.error('Error generating initial AI message:', error);
+                this.messages.push({
+                    role: 'assistant',
+                    content: "I apologize, but I'm having trouble starting our conversation. Could you please share your thoughts on the physics question you answered?",
+                });
+            } finally {
+                this.loading = false;
+            }
+        },
+        async sendMessage() {
+            if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
+
+            const currentTime = new Date();
+            const userMessageContent = this.userMessage;
+
+            // Set lastMessageTime to firstMsgTime during the first message
+            if (this.remainingRounds === 3 && !this.lastMessageTime) {
+                this.lastMessageTime = this.firstMsgTime;
             }
 
-            const user = userData.user;
+            // Calculate time spent since the last message
+            let timeSpent = 0;
+            if (this.lastMessageTime) {
+                timeSpent = (currentTime - this.lastMessageTime) / 1000; // time spent in seconds
+            }
 
-            const { data: answerData, error: answerError } = await supabase
-                .from('answers_posttest')
-                .select('belief_rating_1, llm_summary, question_number')
-                .eq('user_id', user.id)
-                .single();
+            // Update lastMessageTime to the current time for next calculation
+            this.lastMessageTime = currentTime;
 
-            if (answerError) throw answerError;
+            this.messages.push({ role: 'user', content: userMessageContent });
+            this.remainingRounds--;
 
-            this.userBeliefLevel = answerData.belief_rating_1;
-            this.explanation = answerData.llm_summary;
+            const apiData = {
+                model: "gpt-4o",
+                messages: [
+                    { role: "system", content: this.systemPrompt },
+                    ...this.messages,
+                ],
+                max_tokens: 2000,
+                temperature: 0.7,
+            };
 
-            const { data: questionData, error: questionError } = await supabase
-                .from('questions')
-                .select('question_text')
-                .eq('question_number', answerData.question_number)
-                .single();
+            this.userMessage = '';
+            this.loading = true;
 
-            if (questionError) throw questionError;
+            try {
+                const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+                    },
+                });
 
-            this.questionText = questionData.question_text;
+                const modelReply = response.data.choices[0].message.content.trim();
+                this.messages.push({ role: 'assistant', content: modelReply });
 
-            this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
+                const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
 
-            await this.generateInitialAIMessage();
+                // Get user information from Supabase
+                const { data: userData, error: userError } = await supabase.auth.getUser();
+                if (userError || !userData?.user) {
+                    console.log('User not authenticated');
+                    return;
+                }
+
+                const userId = userData.user.id;
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('display_name, group')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (profileError) throw profileError;
+
+                const displayName = profileData.display_name;
+                const llmType = profileData.group;
+
+                await supabase.from('chat_history').insert({
+                    user_id: userId,
+                    system_message: this.messages,
+                    round: Math.ceil(this.messages.length / 2 - 1),
+                    user_chat: userMessageContent,
+                    model_reply: modelReply,
+                    llm_type: llmType,
+                    time_spent: timeSpentFormatted,
+                    timestamp: new Date().toISOString(),
+                    initial_message: this.initialSystemMessage,
+                });
+
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+            } catch (error) {
+                console.error('Error communicating with the OpenAI API', error);
+            } finally {
+                this.loading = false;
+            }
+
+            if (this.remainingRounds === 0) {
+                this.messages.push({
+                    role: 'system',
+                    content: "Thank you for participating in this conversation. You have used all your available inputs.",
+                });
+            }
 
             this.saveChatData();
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    },
-    async generateInitialAIMessage() {
-        this.loading = true;
-        const apiData = {
-            model: "gpt-4o",
-            messages: [
-                { role: "system", content: this.systemPrompt },
-                { role: "user", content: "Please start the conversation by addressing the user's misconception." }
-            ],
-            max_tokens: 2000,
-            temperature: 0.7
-        };
-
-        try {
-            const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-                }
-            });
-
-            const initialMessage = response.data.choices[0].message.content.trim();
-            this.initialSystemMessage = initialMessage;
-            this.messages.push({ role: 'assistant', content: initialMessage });
-        } catch (error) {
-            console.error('Error generating initial AI message:', error);
-            this.messages.push({ role: 'assistant', content: "I apologize, but I'm having trouble starting our conversation. Could you please share your thoughts on the physics question you answered?" });
-        } finally {
-            this.loading = false;
-        }
-    },
-    async sendMessage() {
-    if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
-
-    const startTime = new Date();
-    const userMessageContent = this.userMessage;
-    this.messages.push({ role: 'user', content: userMessageContent });
-    this.remainingRounds--;
-
-    const apiData = {
-        model: "gpt-4o",
-        messages: [
-            { role: "system", content: this.systemPrompt },
-            ...this.messages
-        ],
-        max_tokens: 2000,
-        temperature: 0.7
-    };
-
-    this.userMessage = '';
-    this.loading = true;
-
-    try {
-        const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+        },
+        marked(content) {
+            return marked(content);
+        },
+        scrollToBottom() {
+            const messagesContainer = this.$el.querySelector('.messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        },
+        isChatFinished() {
+            return this.remainingRounds <= 0;
+        },
+        confirmNextPage() {
+            if (confirm('Are you sure you want to proceed to the next page?')) {
+                this.nextPage();
             }
-        });
-
-        const modelReply = response.data.choices[0].message.content.trim();
-        this.messages.push({ role: 'assistant', content: modelReply });
-
-        const timeSpent = new Date() - startTime;
-        const timeSpentFormatted = new Date(timeSpent).toISOString().substr(11, 8); // Format as hh:mm:ss
-
-        const { data: userData, error: userError } = await supabase.auth.getUser();
-        if (userError || !userData?.user) {
-            console.log('User not authenticated');
-            return;
-        }
-
-        const userId = userData.user.id;
-        const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('display_name, group')
-            .eq('user_id', userId)
-            .single();
-
-        if (profileError) throw profileError;
-
-        const displayName = profileData.display_name;
-        const llmType = profileData.group;
-
-        await supabase.from('chat_history').insert({
-            user_id: userId,
-            round: Math.ceil(this.messages.length / 2), // Calculate the round
-            user_chat: userMessageContent,
-            model_reply: modelReply,
-            llm_type: llmType,
-            time_spent: timeSpentFormatted,
-            timestamp: new Date().toISOString(),
-            initial_message: this.initialSystemMessage
-        });
-
-        this.$nextTick(() => {
-            this.scrollToBottom();
-        });
-    } catch (error) {
-        console.error('Error communicating with the OpenAI API', error);
-    } finally {
-        this.loading = false;
-    }
-
-    if (this.remainingRounds === 0) {
-        this.messages.push({ role: 'system', content: "Thank you for participating in this conversation. You have used all your available inputs." });
-    }
-    this.saveChatData();
-},
-    marked(content) {
-        return marked(content);
+        },
+        nextPage() {
+            this.saveChatData();
+            this.$router.push('/beliefratingpostchat');
+        },
+        saveChatData() {
+            localStorage.setItem('chatData', JSON.stringify({
+                userBeliefLevel: this.userBeliefLevel,
+                questionText: this.questionText,
+                explanation: this.explanation,
+                systemPrompt: this.systemPrompt,
+                initialSystemMessage: this.initialSystemMessage,
+                messages: this.messages,
+                remainingRounds: this.remainingRounds, // Add this line
+                lastMessageTime: this.lastMessageTime, // Add this line for completeness
+            }));
+        },
     },
-    scrollToBottom() {
-        const messagesContainer = this.$el.querySelector('.messages');
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    },
-    isChatFinished() {
-        return this.remainingRounds <= 0;
-    },
-    confirmNextPage() {
-      if (confirm('Are you sure you want to proceed to the next page?')) {
-        this.nextPage();
-      }
-    },
-    nextPage() {
-        this.saveChatData();
-        this.$router.push('/beliefratingpostchat');
-    },
-    saveChatData() {
-        localStorage.setItem('chatData', JSON.stringify({
-            userBeliefLevel: this.userBeliefLevel,
-            questionText: this.questionText,
-            explanation: this.explanation,
-            systemPrompt: this.systemPrompt,
-            initialSystemMessage: this.initialSystemMessage,
-            messages: this.messages,
-            remainingRounds: this.remainingRounds // Add this line
-        }));
-    }
-}
 };
 </script>
 
