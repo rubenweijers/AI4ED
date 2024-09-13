@@ -163,7 +163,7 @@ const isExplanationValid = () => {
   // Check if explanation is too short (e.g., less than 10 words)
   const wordCount = explanation.value.trim().split(/\s+/).length;
   if (wordCount < 10) {
-    alert("Your explanation is too short. Please provide a more detailed explanation containing at least 20 words.");
+    alert("Your explanation is too short. Please provide a more detailed explanation containing at least 10 words.");
     return false;
   }
 
