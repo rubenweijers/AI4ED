@@ -7,7 +7,7 @@
       <h2>Force Concept Inventory</h2>
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
       <form @submit.prevent="confirmSubmission">
-        <div v-for="(question, index) in questions" :key="question.id" class="question">
+        <div v-for="(question, index) in questions" :key="question.id">
           <!-- Add images before the corresponding questions -->
           <img v-if="question.question_number === 5" src="/fci_q5-6.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 6" src="/fci_q6.png" alt="Question related image" class="question-image">
@@ -27,7 +27,7 @@
           <img v-if="question.question_number === 28" src="/fci_q28.png" alt="Question related image" class="question-image">
 
           <!-- Render question text with line breaks -->
-          <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)"></label>
+          <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)" class="studyquestion"></label>
 
           <!-- Conditionally render image -->
           <img v-if="question.image" :src="question.image" alt="Question related image" class="question-image">
@@ -36,14 +36,17 @@
           <p v-if="question.additionalText" class="additional-text">{{ question.additionalText }}</p>
 
           <div class="option" v-for="(option, optionIndex) in getOptions(question)" :key="optionIndex">
-            <input type="radio"
-              :id="'question-' + question.question_number + '-' + optionIndex"
-              :name="'question-' + question.question_number"
-              :value="optionIndex"
-              v-model="answers[question.id]"
-              @change="submitAnswer(question, optionIndex)"
-            >
-            <label :for="'question-' + question.question_number + '-' + optionIndex" v-html="formatOptionText(option)"></label>
+            <label class="radio-label" :for="'question-' + question.question_number + '-' + optionIndex">
+              <input type="radio"
+                :id="'question-' + question.question_number + '-' + optionIndex"
+                :name="'question-' + question.question_number"
+                :value="optionIndex"
+                v-model="answers[question.id]"
+                @change="submitAnswer(question, optionIndex)"
+              >
+              <span class="radio-custom"></span>
+              <span class="label-text" v-html="formatOptionText(option)"></span>
+            </label>
           </div>
 
           <!-- Add manual texts at specified positions -->
@@ -293,10 +296,6 @@ onMounted(() => {
   color: rgb(29, 29, 184);
 }
 
-.question {
-  margin-bottom: 100px; /* Increase space between questions */
-}
-
 label {
   display: block;
   color: black; /* Ensure text is black */
@@ -304,15 +303,30 @@ label {
   margin-bottom: 10px;
 }
 
-.option {
+/* Old radio */
+/* .option {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-  font-size: 15px;
+  font-size: 16px;
+  padding: 5px 0;
 }
+
+.option:hover {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+  }
 
 input[type="radio"] {
   margin-right: 10px;
+  margin-top: -10px;
+} */
+
+.studyquestion {
+  margin-top: 60px;
+  border-left: 4px solid rgb(29, 29, 184);
+  padding-left: 15px;
+  margin-bottom: 10px;
 }
 
 .submit-button {
@@ -334,6 +348,7 @@ input[type="radio"] {
 .question-image {
   max-width: 100%;
   margin: 0px 0;
+  margin-top: 20px;
 }
 
 .question-image-range {
@@ -358,6 +373,7 @@ input[type="radio"] {
   font-weight: bold;
   font-size: 16px;
   color: #333;
+  margin-bottom: 100px;
 }
 
 .success-notification {
@@ -369,4 +385,13 @@ input[type="radio"] {
   border-radius: 5px;
   width: fit-content;
 }
+
+/* .question {
+  margin-top: 80px;
+  border-left: 4px solid rgb(29, 29, 184);
+  padding-left: 10px;
+  height: 50px;
+  display: inline-block;
+} */
+
 </style>

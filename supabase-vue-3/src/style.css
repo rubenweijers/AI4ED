@@ -1,0 +1,79 @@
+.survey {
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+}
+
+.question {
+    margin-bottom: 100px; /* Increase space between questions */
+    font-family: 'Arial', sans-serif;
+    font-size: 18px;
+  }
+
+/* Radio Buttons */
+.option {
+    margin-bottom: 10px;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+  }
+  
+.radio-label {
+display: block;
+position: relative;
+padding: 10px 10px 10px 45px;
+cursor: pointer;
+font-size: 16px;
+user-select: none;
+border-radius: 5px;
+transition: background-color 0.3s;
+}
+
+.radio-label:hover {
+background-color: #f9f9f9;
+}
+
+.radio-label input {
+position: absolute;
+opacity: 0;
+cursor: pointer;
+}
+
+.radio-custom {
+position: absolute;
+top: 50%;
+left: 10px;
+transform: translateY(-50%);
+height: 20px;
+width: 20px;
+background-color: #fff;
+border: 2px solid #ccc;
+border-radius: 50%;
+}
+
+.radio-label input:checked ~ .radio-custom {
+background-color: rgb(29, 29, 184);
+border-color: rgb(29, 29, 184);
+}
+
+.radio-custom:after {
+content: "";
+position: absolute;
+display: none;
+}
+
+.radio-label input:checked ~ .radio-custom:after {
+display: block;
+}
+
+.radio-label .radio-custom:after {
+top: 5px;
+left: 5px;
+width: 10px;
+height: 10px;
+border-radius: 50%;
+background: white;
+}
+
+.label-text {
+display: inline-block;
+vertical-align: middle;
+}
