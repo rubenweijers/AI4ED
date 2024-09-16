@@ -8,7 +8,14 @@
       <StudyIntro />
       <StudyInfo1 />
       
-      <button @click="showToastNotification" class="next-button">I confirm to have read the above text.</button>
+      <div class="consent-checkbox" :class="{ 'flash-red': isFlashing }">
+        <input type="checkbox" id="consent" v-model="consentChecked">
+        <label for="consent">I agree to the terms and services</label>
+      </div>
+
+      <button @click="showToastNotification" class="submit-button">
+        I confirm to have read the above text.
+      </button>
     
       <ToastNotification
         :isVisible="showToast"
@@ -37,6 +44,7 @@ const router = useRouter();
 const loading = ref(true);
 const user = ref(null);
 const showToast = ref(false);
+const consentChecked = ref(false);
 
 const checkUser = async () => {
   const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -52,8 +60,17 @@ onMounted(() => {
   checkUser();
 });
 
+const isFlashing = ref(false);
+
 const showToastNotification = () => {
-  showToast.value = true;
+  if (consentChecked.value) {
+    showToast.value = true;
+  } else {
+    isFlashing.value = true;
+    setTimeout(() => {
+      isFlashing.value = false;
+    }, 1000); // Flash for 1 second
+  }
 };
 
 const proceedToStudy = () => {
@@ -94,23 +111,6 @@ const cancelProceed = () => {
     color: #333;
   }
   
-  .next-button {
-    display: block;
-    margin: 20px auto;
-    padding: 10px 20px;
-    background-color: rgb(29, 29, 184);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 18px;
-  }
-  
-  .next-button:hover {
-    background-color: rgb(23, 23, 250);
-  }
-  
   @media (max-width: 600px) {
     .study-info-container {
       margin: 20px;
@@ -125,4 +125,59 @@ const cancelProceed = () => {
       font-size: 16px;
     }
   }
+
+  .consent-checkbox {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.consent-checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #333;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.consent-checkbox input[type="checkbox"]:checked {
+  background-color: #333;
+  position: relative;
+}
+
+.consent-checkbox input[type="checkbox"]:checked::before {
+  content: '\2714';
+  font-size: 14px;
+  color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.consent-checkbox label {
+  font-size: 14px;
+}
+
+.consent-checkbox {
+  transition: background-color 0.3s ease;
+}
+
+/* Checkbox flashing red */
+.flash-red {
+  animation: flash-red 1s;
+}
+
+@keyframes flash-red {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: #ffcccc;
+  }
+}
 </style>

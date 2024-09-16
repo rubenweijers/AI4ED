@@ -19,11 +19,7 @@
         <p>This process is designed to <strong>explore your physics intuition</strong> in depth and provide you with a unique opportunity for learning.</p>
       </div>
       
-      <div>
-        <p>When you're ready to begin this AI-assisted conversation, please click the "Next" button below.</p>
-      </div>
-      
-      <button @click="proceedToChat" class="submit-button">Next</button>
+      <button @click="proceedToChat" class="submit-button">I have read and understood the above text.</button>
     </div>
 </template>
   

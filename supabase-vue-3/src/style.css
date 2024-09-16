@@ -9,6 +9,25 @@
     font-size: 18px;
   }
 
+/* Submit button */
+.submit-button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: rgb(29, 29, 184);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 18px;
+  }
+
+.submit-button:hover {
+background-color: rgb(23, 23, 250);
+}
+  
+
 /* Radio Buttons */
 .option {
     margin-bottom: 10px;

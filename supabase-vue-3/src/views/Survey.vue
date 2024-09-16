@@ -38,14 +38,15 @@
         <!-- Old button -->
         <!-- <button type="submit" class="submit-button">Submit Survey and Take the FCI</button> -->
 
-        <button @click="showToastNotification" class="next-button">Submit Survey and Proceed to FCI.</button>
+        <button @click="showToastNotification" class="submit-button">Submit Survey and Proceed to FCI.</button>
     
+
         <ToastNotification
           :isVisible="showToast"
-          title="Proceed to Study"
-          message="Are you sure you want to proceed to the study? This action cannot be undone."
-          @confirm="proceedToStudy"
-          @cancel="cancelProceed"
+          title="Submit Survey"
+          message="Are you sure you want to submit the survey? This action cannot be undone."
+          @confirm="confirmSubmit"
+          @cancel="cancelSubmit"
         />
       </form>
     </div>
@@ -67,16 +68,22 @@ const user = ref(null);
 const loading = ref(true);
 const surveyQuestions = ref([]);
 const answers = ref([]);
-
-const likertOptions = [
-  { value: '1', label: 'Strongly disagree' },
-  { value: '2', label: 'Disagree' },
-  { value: '3', label: 'Neither agree nor disagree' },
-  { value: '4', label: 'Agree' },
-  { value: '5', label: 'Strongly agree' }
-];
-
+const showToast = ref(false);
 const router = useRouter();
+
+// Toast notifications
+const showToastNotification = () => {
+  showToast.value = true;
+};
+
+const confirmSubmit = async () => {
+  showToast.value = false;
+  await submitAnswers();
+};
+
+const cancelSubmit = () => {
+  showToast.value = false;
+};
 
 const checkUser = async () => {
   const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -119,13 +126,13 @@ const formatOptionText = (option) => {
 
 const optionMapping = ["A", "B", "C", "D", "E"];
 
-const confirmSubmission = () => {
-  if (confirm("Are you sure you want to submit?")) {
-    submitSurvey();
-  }
-};
+// const confirmSubmission = () => {
+//   if (confirm("Are you sure you want to submit?")) {
+//     submitSurvey();
+//   }
+// };
 
-const submitSurvey = async () => {
+const submitAnswers = async () => {
   try {
     const userId = user.value.id;
     const surveyEntries = surveyQuestions.value.map((question, index) => ({
@@ -144,7 +151,7 @@ const submitSurvey = async () => {
       return;
     }
 
-    alert('Survey submission successful! Thank you for your feedback.');
+    // alert('Survey submission successful! Thank you for your feedback.');
     router.push('/study');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
@@ -184,19 +191,6 @@ const selectAllOption1 = () => {
   });
 };
 
-const showToastNotification = () => {
-  showToast.value = true;
-};
-
-const proceedToStudy = () => {
-  showToast.value = false;
-  router.push('/study');
-};
-
-const cancelProceed = () => {
-  showToast.value = false;
-};
-
 onMounted(async () => {
   await checkUser();
   await fetchQuestions();
@@ -230,21 +224,8 @@ onMounted(async () => {
   padding-left: 15px;
   margin-bottom: 10px;
 }
-
-.next-button {
-    display: block;
-    margin: 20px auto;
-    padding: 10px 20px;
-    background-color: rgb(29, 29, 184);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 18px;
-  }
   
-  .next-button:hover {
+  .submit-button:hover {
     background-color: rgb(23, 23, 250);
   }
 </style>

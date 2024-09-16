@@ -13,6 +13,7 @@ import BeliefRating_PostChat from '../views/BeliefRating_PostChat.vue'
 import Study2 from '../views/Study2.vue'
 import StudyInfo from '../views/StudyInfo.vue'
 import ResetPassword from '../views/ResetPassword.vue'
+import FCI_Answers from '../views/FCI_Answers.vue'
 // import WritingScreening from '../views/WritingScreening.vue'
 
 const routes = [
@@ -60,6 +61,12 @@ const routes = [
     path: '/beliefratingpostchat',
     name: 'BeliefRatingPostChat',
     component: BeliefRating_PostChat
+  },
+  {
+    path: '/fcianswers',
+    name: 'FCIAnswers',
+    component: FCI_Answers
+    
   },
   {
     path: '/prechat',

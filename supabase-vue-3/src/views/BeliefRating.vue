@@ -19,10 +19,14 @@
             {{ label.text }}
           </label>
         </div>
-        <button class="submit-button" @click="submitRating">Submit</button>
-        <div v-if="submissionSuccess" class="success-notification">
-          Your rating has been submitted successfully!
-        </div>
+        <button @click="showToastNotification" class="submit-button">Submit</button>
+        <ToastNotification
+          :isVisible="showToast"
+          title="Submit Survey"
+          message="Are you sure you want to confirm your belief rating in the statement? This action cannot be undone."
+          @confirm="confirmSubmit"
+          @cancel="cancelSubmit"
+        />
       </template>
     </div>
 </template>
@@ -31,12 +35,28 @@
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import { supabase } from '../supabase';
+  import ToastNotification from '../components/ToastNotification.vue';
   
   const sentence = ref('');
   const selectedRating = ref(null);
   const submissionSuccess = ref(false);
   const loading = ref(true);
   const router = useRouter();
+  const showToast = ref(false);
+
+// Toast notifications
+const showToastNotification = () => {
+  showToast.value = true;
+};
+
+const confirmSubmit = async () => {
+  showToast.value = false;
+  await submitAnswers();
+};
+
+const cancelSubmit = () => {
+  showToast.value = false;
+};
   
   const ratingLabels = [
     { value: 0, text: 'Definitely False' },
@@ -83,7 +103,7 @@
     }
   };
   
-  const submitRating = async () => {
+  const submitAnswers = async () => {
     if (selectedRating.value === null) {
       alert('Please select a rating before submitting.');
       return;
@@ -111,9 +131,7 @@
       }
   
       submissionSuccess.value = true;
-      setTimeout(() => {
         router.push('/prechat'); // Adjust the route as needed
-      }, 2000);
     } catch (error) {
       console.error('An unexpected error occurred:', error);
       alert('An unexpected error occurred. Please try again.');
@@ -167,22 +185,6 @@ label {
 
 input[type="radio"] {
   margin-right: 10px;
-}
-
-.submit-button {
-  display: block;
-  width: 100%;
-  background-color: rgb(29, 29, 184);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.submit-button:hover {
-  background-color: rgb(23, 23, 250);
 }
 
 .success-notification {
