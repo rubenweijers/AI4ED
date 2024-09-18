@@ -221,7 +221,7 @@ export default {
 
                 const userId = userData.user.id;
                 const { data: profileData, error: profileError } = await supabase
-                    .from('profiles')
+                    .from('profiles_duplicate')
                     .select('display_name, group')
                     .eq('user_id', userId)
                     .single();
