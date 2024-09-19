@@ -38,7 +38,7 @@
         <!-- Old button -->
         <!-- <button type="submit" class="submit-button">Submit Survey and Take the FCI</button> -->
 
-        <button @click="showToastNotification" class="submit-button">Submit Survey and Proceed to FCI.</button>
+        <button @click="showToastNotification" class="submit-button" :disabled="formSubmitted">Submit Survey and Proceed to FCI.</button>
     
 
         <ToastNotification
@@ -69,6 +69,8 @@ const surveyQuestions = ref([]);
 const answers = ref([]);
 const showToast = ref(false);
 const router = useRouter();
+const formSubmitted = ref(false);  // New state to track form submission
+
 
 // Toast notifications
 const showToastNotification = () => {
