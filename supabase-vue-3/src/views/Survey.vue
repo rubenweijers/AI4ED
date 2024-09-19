@@ -5,11 +5,10 @@
   <div v-else-if="user">
     <div class="survey-container">
       <h2>5 Question Survey on your AI-related opinions.</h2>
-      <p>List of Imported Questions</p>
       <!-- need to be removed before the final release -->
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
       <form @submit.prevent="confirmSubmission">
-        <div class="survey-question" v-for="(question, index) in surveyQuestions" :key="index">
+        <div class="question" v-for="(question, index) in surveyQuestions" :key="index">
           <!-- Render question text with line breaks -->
           <div class="question-text">
             <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)"></label>
@@ -22,26 +21,32 @@
           <p v-if="question.additionalText" class="additional-text">{{ question.additionalText }}</p>
 
           <div class="option" v-for="(option, optionIndex) in getOptions(question)" :key="optionIndex">
-            <input type="radio"
-              :id="'question-' + question.question_number + '-' + optionIndex"
-              :name="'question-' + question.question_number"
-              :value="optionIndex"
-              v-model="answers[question.id]"
-              @change="submitAnswer(question, optionIndex)"
-            >
-            <label :for="'question-' + question.question_number + '-' + optionIndex" v-html="formatOptionText(option)"></label>
+            <label class="radio-label" :for="'question-' + question.question_number + '-' + optionIndex">
+              <input type="radio"
+                :id="'question-' + question.question_number + '-' + optionIndex"
+                :name="'question-' + question.question_number"
+                :value="optionIndex"
+                v-model="answers[question.id]"
+                @change="submitAnswer(question, optionIndex)"
+              >
+              <span class="radio-custom"></span>
+              <span class="label-text" v-html="formatOptionText(option)"></span>
+            </label>
           </div>
         </div>
-        <button type="submit" class="submit-button" :disabled="formSubmitted">Submit Survey and Take the FCI</button>
 
-        <button @click="showToastNotification" class="next-button" :disabled="formSubmitted">Submit Survey and Proceed to FCI.</button>
+        <!-- Old button -->
+        <!-- <button type="submit" class="submit-button">Submit Survey and Take the FCI</button> -->
+
+        <button @click="showToastNotification" class="submit-button">Submit Survey and Proceed to FCI.</button>
     
+
         <ToastNotification
           :isVisible="showToast"
-          title="Proceed to Study"
-          message="Are you sure you want to proceed to the study? This action cannot be undone."
-          @confirm="proceedToStudy"
-          @cancel="cancelProceed"
+          title="Submit Survey"
+          message="Are you sure you want to submit the survey? This action cannot be undone."
+          @confirm="confirmSubmit"
+          @cancel="cancelSubmit"
         />
       </form>
     </div>
@@ -62,18 +67,22 @@ const user = ref(null);
 const loading = ref(true);
 const surveyQuestions = ref([]);
 const answers = ref([]);
-const formSubmitted = ref(false);  // New state to track form submission
 const showToast = ref(false);
-
-const likertOptions = [
-  { value: '1', label: 'Strongly disagree' },
-  { value: '2', label: 'Disagree' },
-  { value: '3', label: 'Neither agree nor disagree' },
-  { value: '4', label: 'Agree' },
-  { value: '5', label: 'Strongly agree' }
-];
-
 const router = useRouter();
+
+// Toast notifications
+const showToastNotification = () => {
+  showToast.value = true;
+};
+
+const confirmSubmit = async () => {
+  showToast.value = false;
+  await submitAnswers();
+};
+
+const cancelSubmit = () => {
+  showToast.value = false;
+};
 
 const checkUser = async () => {
   const userData = localStorage.getItem('user');
@@ -149,13 +158,13 @@ const formatOptionText = (option) => {
 
 const optionMapping = ["A", "B", "C", "D", "E"];
 
-const confirmSubmission = () => {
-  if (confirm("Are you sure you want to submit?")) {
-    submitSurvey();
-  }
-};
+// const confirmSubmission = () => {
+//   if (confirm("Are you sure you want to submit?")) {
+//     submitSurvey();
+//   }
+// };
 
-const submitSurvey = async () => {
+const submitAnswers = async () => {
   try {
     formSubmitted.value = true;  // Mark the form as submitted
     const surveyEntries = surveyQuestions.value.map((question, index) => ({
@@ -188,7 +197,7 @@ const submitSurvey = async () => {
       return;
     }
 
-    alert('Survey submission successful! Thank you for your feedback.');
+    // alert('Survey submission successful! Thank you for your feedback.');
     router.push('/study');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
@@ -228,19 +237,6 @@ const selectAllOption1 = () => {
   });
 };
 
-const showToastNotification = () => {
-  showToast.value = true;
-};
-
-const proceedToStudy = () => {
-  showToast.value = false;
-  router.push('/study');
-};
-
-const cancelProceed = () => {
-  showToast.value = false;
-};
-
 onMounted(async () => {
   await checkUser();
   await fetchQuestions();
@@ -266,18 +262,7 @@ onMounted(async () => {
 }
 
 .survey-question {
-  margin-bottom: 60px; /* Increased margin between questions */
-}
-
-.survey-question label {
-  display: block;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  padding: 5px; /* Add padding for better readability */
-  font-weight: 600;
-  color: black;
-  font-size: 18px; /* Increase font size */
-  text-transform: none; /* Ensure text is not capitalized */
+  margin-bottom: 60px;
 }
 
 .question-text {
@@ -285,55 +270,8 @@ onMounted(async () => {
   padding-left: 15px;
   margin-bottom: 10px;
 }
-
-.likert-scale {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-  padding: 10px 0; /* Add padding to the likert scale for better spacing */
-}
-
-.likert-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
- /* Copy Pasted from Study.vue */
-.option {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.likert-option label {
-  margin-top: 5px;
-  font-size: 16px; /* Increase font size for better readability */
-  color: rgb(88, 88, 88);
-}
-
-textarea {
-  width: 100%;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 16px; /* Increase font size for better readability */
-}
-
-.next-button {
-    display: block;
-    margin: 20px auto;
-    padding: 10px 20px;
-    background-color: rgb(29, 29, 184);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 18px;
-  }
   
-  .next-button:hover {
+  .submit-button:hover {
     background-color: rgb(23, 23, 250);
   }
 </style>

@@ -3,7 +3,7 @@
     <p>Loading...</p>
   </div>
   <div v-else class="post-test-container">
-    <h2>Post-Test Review</h2>
+    <h2>Question Review</h2>
     <div v-if="submissionSuccess" class="success-notification">
       <p>Submission successful! Redirecting...</p>
     </div>
@@ -68,7 +68,15 @@
         <p>Please explain your reasoning for this answer in at least 10 words:</p>
         <textarea v-model="explanation" rows="4" cols="50"></textarea>
       </div>
-      <button @click="confirmSubmission" class="submit-button">Submit Explanation</button>
+      <button @click="showToastNotification" class="submit-button">Submit</button>
+
+        <ToastNotification
+          :isVisible="showToast"
+          title="Submit FCI"
+          message="Are you sure you want to submit your results? This action cannot be undone."
+          @confirm="confirmSubmit"
+          @cancel="cancelSubmit"
+        />
     </div>
     <div v-else>
       <p>No incorrect answers found.</p>
@@ -81,6 +89,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
 import axios from 'axios';
+import ToastNotification from '../components/ToastNotification.vue';
 
 const user = ref(null);
 const loading = ref(true);
@@ -89,8 +98,20 @@ const userAnswer = ref('');
 const explanation = ref('');
 const submissionSuccess = ref(false);
 const router = useRouter();
-
+const showToast = ref(false);
 const optionLabels = ["A", "B", "C", "D", "E"];
+
+// Toast notifications
+const showToastNotification = () => {
+  showToast.value = true;
+};
+const confirmSubmit = async () => {
+  showToast.value = false;
+  await checkValid();
+};
+const cancelSubmit = () => {
+  showToast.value = false;
+};
 
 const checkUser = async () => {
   const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -163,7 +184,7 @@ const isExplanationValid = () => {
   // Check if explanation is too short (e.g., less than 10 words)
   const wordCount = explanation.value.trim().split(/\s+/).length;
   if (wordCount < 10) {
-    alert("Your explanation is too short. Please provide a more detailed explanation containing at least 20 words.");
+    alert("Your explanation is too short. Please provide a more detailed explanation containing at least 10 words.");
     return false;
   }
 
@@ -172,66 +193,62 @@ const isExplanationValid = () => {
 };
 
 // Ensure the explanation is not empty
-const confirmSubmission = () => {
+const checkValid = () => {
   if (isExplanationValid()) {
-    if (confirm("Are you sure you want to submit?")) {
       submitExplanation();
     }
-  }
 };
 
 const submitExplanation = async () => {
-  try {
-    // Delete existing row if it exists
-    const { error: deleteError } = await supabase
-      .from('answers_posttest')
-      .delete()
-      .eq('user_id', user.value.id)
+    try {
+      // Delete existing row if it exists
+      const { error: deleteError } = await supabase
+        .from('answers_posttest')
+        .delete()
+        .eq('user_id', user.value.id)
 
-    if (deleteError) {
-      console.error('Error deleting existing row:', deleteError.message);
-      return;
+      if (deleteError) {
+        console.error('Error deleting existing row:', deleteError.message);
+        return;
+      }
+
+      // Insert new row
+      const { data, error } = await supabase
+        .from('answers_posttest')
+        .insert({
+          user_id: user.value.id,
+          question_id: incorrectQuestion.value.id,
+          question_number: incorrectQuestion.value.question_number,
+          explanation: explanation.value,
+        });
+
+      if (error) {
+        console.error('Error submitting explanation:', error.message);
+        return;
+      }
+
+      // Call OpenAI API to summarize the explanation
+      const summary = await summarizeExplanation(explanation.value);
+
+      // Update the row with the summarized explanation
+      const { error: updateError } = await supabase
+        .from('answers_posttest')
+        .update({ llm_summary: summary })
+        .eq('user_id', user.value.id)
+        .eq('question_id', incorrectQuestion.value.id);
+
+      if (updateError) {
+        console.error('Error updating row with summary:', updateError.message);
+        return;
+      }
+
+      // Display submission success notification
+      submissionSuccess.value = true;
+      // Navigate to thank you page after a delay
+        router.push('/beliefrating');
+    } catch (error) {
+      console.error('An unexpected error occurred:', error);
     }
-
-    // Insert new row
-    const { data, error } = await supabase
-      .from('answers_posttest')
-      .insert({
-        user_id: user.value.id,
-        question_id: incorrectQuestion.value.id,
-        question_number: incorrectQuestion.value.question_number,
-        explanation: explanation.value,
-      });
-
-    if (error) {
-      console.error('Error submitting explanation:', error.message);
-      return;
-    }
-
-    // Call OpenAI API to summarize the explanation
-    const summary = await summarizeExplanation(explanation.value);
-
-    // Update the row with the summarized explanation
-    const { error: updateError } = await supabase
-      .from('answers_posttest')
-      .update({ llm_summary: summary })
-      .eq('user_id', user.value.id)
-      .eq('question_id', incorrectQuestion.value.id);
-
-    if (updateError) {
-      console.error('Error updating row with summary:', updateError.message);
-      return;
-    }
-
-    // Display submission success notification
-    submissionSuccess.value = true;
-    // Navigate to thank you page after a delay
-    setTimeout(() => {
-      router.push('/beliefrating');
-    }, 2000); // Delay for 2 seconds to show the success notification
-  } catch (error) {
-    console.error('An unexpected error occurred:', error);
-  }
 };
 
 const summarizeExplanation = async (explanation) => {

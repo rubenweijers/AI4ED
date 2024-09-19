@@ -1,13 +1,19 @@
 <template>
-  <div v-if="loading">
-    <p>Loading...</p>
-  </div>
-  <div v-else-if="user">
-    <div class="study-container">
-      <h2>Force Concept Inventory</h2>
-      <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
-      <form @submit.prevent="confirmSubmission">
-        <div v-for="(question, index) in questions" :key="question.id">
+    <div v-if="loading">
+      <p>Loading...</p>
+    </div>
+    <div v-else-if="user">
+      <div class="study-container">
+        <h2>Force Concept Inventory - Results</h2>
+        <h>
+            <span style="color: green;">Green</span> = Correct FCI Answer
+            <br><br>
+            <span style="color: red;">Red</span> = Wrong User Answer
+            <br><br>
+            <span style="color: green; border: 2px solid blue; padding: 2px;">Green + Blue</span> border = Correct User Answer
+        </h>
+
+        <div v-for="(question, index) in questions" :key="question.id" class="question-container">
           <!-- Add images before the corresponding questions -->
           <img v-if="question.question_number === 5" src="/fci_q5-6.png" alt="Question related image" class="question-image">
           <img v-if="question.question_number === 6" src="/fci_q6.png" alt="Question related image" class="question-image">
@@ -28,28 +34,13 @@
 
           <!-- Render question text with line breaks -->
           <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)" class="studyquestion"></label>
-
-          <!-- Conditionally render image -->
-          <img v-if="question.image" :src="question.image" alt="Question related image" class="question-image">
-
-          <!-- Conditionally render additional text -->
-          <p v-if="question.additionalText" class="additional-text">{{ question.additionalText }}</p>
-
-          <div class="option" v-for="(option, optionIndex) in getOptions(question)" :key="optionIndex">
-            <label class="radio-label" :for="'question-' + question.question_number + '-' + optionIndex">
-              <input type="radio"
-                :id="'question-' + question.question_number + '-' + optionIndex"
-                :name="'question-' + question.question_number"
-                :value="optionIndex"
-                v-model="answers[question.id]"
-                @change="submitAnswer(question, optionIndex)"
-              >
-              <span class="radio-custom"></span>
-              <span class="label-text" v-html="formatOptionText(option)"></span>
-            </label>
+  
+          <!-- Render options with correct and user-selected answer highlights -->
+          <div class="option" v-for="(option, optionIndex) in getOptions(question)" :key="optionIndex" :class="getOptionClass(question, optionIndex)">
+            <span class="label-text" v-html="formatOptionText(option)"></span>
           </div>
-
-          <!-- Add manual texts at specified positions -->
+  
+          <!-- Add any manual text (unchanged from the original) -->
           <div v-if="question.question_number === 4" class="manual-text">
             <p>
               USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (5 and 6). <br>
@@ -76,182 +67,113 @@
               A rocket drifts sideways in outer space from point <i>a</i> to point <i>b</i> as shown below. The rocket is subject to no outside forces. Starting at position <i>b</i>, the rocket's engine is turned on and produces a constant thrust (force on the rocket) at right angles to the line <i>ab</i>. The constant thrust is maintained until the rocket reaches a point <i>c</i> in space.
             </p>
           </div>
-
         </div>
-        <!-- Old button -->
-        <!-- <button type="submit" class="submit-button">Submit Questionnaire</button> -->
-        
-        <button @click="showToastNotification" class="next-button">Submit Survey and Proceed to FCI.</button>
-
-        <ToastNotification
-          :isVisible="showToast"
-          title="Submit FCI"
-          message="Are you sure you want to submit your results? This action cannot be undone."
-          @confirm="confirmSubmit"
-          @cancel="cancelSubmit"
-        />
-      </form>
-      <div v-if="submissionSuccess" class="success-notification">
-        <p>Submission successful!</p>
+  
+        <button @click="goToPostTest" class="next-button">Go to Post-Test</button>
       </div>
     </div>
-  </div>
-  <div v-else>
-    <p>Please log in to start the study.</p>
-    <router-link to="/login">Log in</router-link>
-  </div>
+    <div v-else>
+      <p>Please log in to see your results.</p>
+      <router-link to="/login">Log in</router-link>
+    </div>
 </template>
 
-<script setup>
-import { ref, onMounted, watch } from 'vue';
+  <script setup>
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
-import ToastNotification from '../components/ToastNotification.vue';
 
 const user = ref(null);
 const loading = ref(true);
 const questions = ref([]);
-const answers = ref({});
+const userAnswers = ref({});
+const correctAnswers = ref({});
 const router = useRouter();
-const submissionSuccess = ref(false);
-const showToast = ref(false);
 
-// Toast notifications
-const showToastNotification = () => {
-  showToast.value = true;
-};
-const confirmSubmit = async () => {
-  showToast.value = false;
-  await submitAnswers();
-};
-const cancelSubmit = () => {
-  showToast.value = false;
-};
+// Fetch the user and questions data on mount
+onMounted(() => {
+  checkUser();
+});
 
 const checkUser = async () => {
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   if (currentUser) {
     user.value = currentUser;
-    await fetchQuestions();
+    await fetchQuestionsAndAnswers();
   } else {
     router.push('/login');
   }
   loading.value = false;
 };
 
-const fetchQuestions = async () => {
-  const { data, error } = await supabase.from('questions').select('*').order('question_number', { ascending: true });
-  if (error) {
-    console.error('Error fetching questions:', error.message);
-    return;
+// Fetch the questions and the user's answers
+const fetchQuestionsAndAnswers = async () => {
+  try {
+    // Fetch all questions
+    const { data: questionsData, error: questionsError } = await supabase.from('questions').select('*').order('question_number', { ascending: true });
+    if (questionsError) throw new Error(questionsError.message);
+
+    questions.value = questionsData;
+
+    // Fetch user answers
+    const { data: userAnswersData, error: userAnswersError } = await supabase.from('answers').select('question_id, answer').eq('user_id', user.value.id);
+    if (userAnswersError) throw new Error(userAnswersError.message);
+
+    // Store user answers in a dictionary format
+    userAnswersData.forEach(answer => {
+      userAnswers.value[answer.question_id] = answer.answer;
+    });
+
+    // Fetch correct answers from the "questions" table
+    questions.value.forEach(question => {
+      correctAnswers.value[question.id] = question.correct_answer;
+    });
+  } catch (error) {
+    console.error('Error fetching questions or answers:', error.message);
   }
-  questions.value = data;
-
-  // Initialize answers with empty string
-  questions.value.forEach(question => {
-    answers.value[question.id] = '';
-  });
-
-  // Load saved answers from localStorage
-  loadSavedAnswers();
 };
 
+// Get options for each question
 const getOptions = (question) => {
   return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
 };
 
+// Format the question text (same as before)
 const formatQuestionText = (question) => {
   const numberText = question.question_number + '. ';
   const formattedText = question.question_text.replace(/\\n/g, '<br>');
   return numberText + formattedText;
 };
 
+// Format the option text (same as before)
 const formatOptionText = (option) => {
   const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
   return formattedOption;
 };
 
+// Determine the CSS class for each option based on the correct and user answers
+const getOptionClass = (question, optionIndex) => {
+  const correctIndex = optionMapping.indexOf(correctAnswers.value[question.id]);
+  const userIndex = optionMapping.indexOf(userAnswers.value[question.id]);
+
+  if (optionIndex === correctIndex && optionIndex === userIndex) {
+    return 'correct-user-answer';  // Both correct and user answer
+  } else if (optionIndex === correctIndex) {
+    return 'correct-answer';  // Correct answer
+  } else if (optionIndex === userIndex) {
+    return 'user-answer';  // User's answer
+  } else {
+    return '';  // Neutral
+  }
+};
+
+// Map options A, B, C, D, E
 const optionMapping = ["A", "B", "C", "D", "E"];
 
-// const confirmSubmission = () => {
-//   if (confirm("Are you sure you want to submit?")) {
-//     submitAnswers();
-//   }
-// };
-
-const submitAnswers = async () => {
-  try {
-    const userId = user.value.id;
-
-    const answerEntries = questions.value.map(question => ({
-      user_id: userId,
-      question_id: question.id,
-      answer: optionMapping[answers.value[question.id]],
-      question_number: question.question_number,
-    }));
-
-    const { data: answerData, error: answerError } = await supabase.from('answers').upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
-    if (answerError) {
-      console.error('Error submitting answers:', answerError.message);
-      return;
-    }
-    submissionSuccess.value = true;
-    router.push('/PostTest');
-  } catch (error) {
-    console.error('An unexpected error occurred:', error);
-  }
+// Navigation to post-test page
+const goToPostTest = () => {
+  router.push('/PostTest');
 };
-
-const submitAnswer = async (question, optionIndex) => {
-  try {
-    const userId = user.value.id;
-    const answerEntry = {
-      user_id: userId,
-      question_id: question.id,
-      answer: optionMapping[optionIndex],
-      question_number: question.question_number,
-    };
-
-    const { data, error } = await supabase
-      .from('answers')
-      .upsert([answerEntry], { onConflict: ['user_id', 'question_id'] });
-
-    if (error) {
-      console.error('Error submitting the answer:', error.message);
-      return;
-    }
-
-    console.log(`Answer for question ${question.question_number} submitted successfully.`);
-  } catch (error) {
-    console.error('An unexpected error occurred:', error);
-  }
-};
-
-const selectAllOption1 = () => {
-  questions.value.forEach(question => {
-    answers.value[question.id] = 0;
-  });
-};
-
-// Save answers to localStorage
-const saveAnswersToLocalStorage = () => {
-  localStorage.setItem('studyAnswers', JSON.stringify(answers.value));
-};
-
-// Load answers from localStorage
-const loadSavedAnswers = () => {
-  const savedAnswers = localStorage.getItem('studyAnswers');
-  if (savedAnswers) {
-    answers.value = JSON.parse(savedAnswers);
-  }
-};
-
-// Watch for changes in answers and save to localStorage
-watch(answers, saveAnswersToLocalStorage, { deep: true });
-
-onMounted(() => {
-  checkUser();
-});
 </script>
 
 <style scoped>
@@ -326,25 +248,6 @@ label {
   margin-bottom: 10px;
 }
 
-/* Old radio */
-/* .option {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 16px;
-  padding: 5px 0;
-}
-
-.option:hover {
-    background-color: #f9f9f9;
-    border-radius: 10px;
-  }
-
-input[type="radio"] {
-  margin-right: 10px;
-  margin-top: -10px;
-} */
-
 .studyquestion {
   margin-top: 60px;
   border-left: 4px solid rgb(29, 29, 184);
@@ -389,6 +292,19 @@ input[type="radio"] {
 .additional-text {
   font-style: italic;
   margin-bottom: 20px;
+}
+
+.correct-answer {
+  background-color: lightgreen; /* Highlight correct answers */
+}
+
+.user-answer {
+  background-color: rgb(239, 116, 116); /* Highlight user's selected answer */
+}
+
+.correct-user-answer {
+  background-color: lightgreen; /* Both correct and user answer */
+  border: 2px solid blue; /* Add a border to differentiate the user selection */
 }
 
 .manual-text {

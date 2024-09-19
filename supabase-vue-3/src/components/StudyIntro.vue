@@ -4,15 +4,19 @@
       <p>
         In this study, you will be taking the <i>Force Concept Inventory (FCI)</i> test to evaluate your understanding of fundamental Newtonian mechanics concepts.
         <br><br>
-        - After completing the test, you will interact with an AI tutor to help you understand the concepts better.<br>
-        - After completing the test, you will interact with an AI tutor to reduce your misconceptions.<br>
-        - After completing the test, you will interact with an AI tutor to discuss a question you got wrong.<br>
+        After completing the test, you will interact with an AI tutor to help you understand the concepts better.<br>
         <br><br>
         Then, you will be asked to complete a different version of the FCI to evaluate your learning experience.
         <br><br> 
         Aditionally, we will ask some additional questions about your experience throughout the experiment. 
         <br>
         We ask you to answer these questions honestly and to the best of your ability.
+        <br>
+        Your responses are anonmyous and will <strong>not</strong> be shared with anyone outside this research.
+        <br>
+        This is an <strong>ungraded</strong>ungraded test and your responses will not affect your grade in any way.
+        <br>
+        Bonus points will be awarded for participation?
       </p>
       <img src="/studypipeline.svg" alt="Welcome Image" class="welcome-image">
 
