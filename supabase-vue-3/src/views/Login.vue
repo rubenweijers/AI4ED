@@ -2,11 +2,11 @@
   <div class="auth">
     <form class="auth-form" @submit.prevent="handleLogin">
       <h1>Login</h1>
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Log In' }}</button>
-      <p>Don't have an account? <router-link to="/signup">Sign up!</router-link></p>
-      <p><a href="#" @click.prevent="showResetPassword = true">Forgot Password?</a></p>
+      <!-- <input v-model="email" type="email" placeholder="Email"  /> -->
+      <!-- <input v-model="password" type="password" placeholder="Password"  /> -->
+      <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Anonymous Log In' }}</button>
+      <!-- <p>Don't have an account? <router-link to="/signup">Sign up!</router-link></p> -->
+      <!-- <p><a href="#" @click.prevent="showResetPassword = true">Forgot Password?</a></p> -->
       <div class="form-group">
         <label>
           <input type="checkbox" v-model="consent" />
@@ -60,6 +60,66 @@ const fetchUserProfile = async (userId) => {
   return profileData;
 }
 
+const handleSignUp = async (data) => {
+  try {
+    const user = data.user;
+
+    if (!user) {
+      throw new Error('No user object returned.');
+    }
+
+    console.log('User signed up:', user);
+    console.log('User ID:', user.id);
+
+    // Fetch the current count of participants in both groups
+    const { data: treatmentCountData, error: treatmentCountError } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact' })
+      .eq('group', 'treatment');
+
+    const { data: controlCountData, error: controlCountError } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact' })
+      .eq('group', 'control');
+
+    if (treatmentCountError) throw treatmentCountError;
+    if (controlCountError) throw controlCountError;
+
+    const treatmentCount = treatmentCountData.length;
+    const controlCount = controlCountData.length;
+
+    let group = 'control';
+    if (treatmentCount < controlCount) {
+      group = 'treatment';
+    } else if (treatmentCount > controlCount) {
+      group = 'control';
+    } else {
+      group = Math.random() < 0.5 ? 'treatment' : 'control';
+    }
+
+    const now = new Date().toISOString();
+
+    // Insert into profiles table with group assignment, gender, and first language
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .insert([
+        { 
+          user_id: user.id,
+          created_at: now,
+        }
+      ]);
+
+    if (profileError) throw profileError;
+    console.log('Profile created:', profile);
+    return profile
+  } catch (error) {
+    console.error('Error during signup:', error.message);
+    alert(error.message);
+  } finally {
+    loading.value = false;
+  }
+}
+
 const handleLogin = async () => {
   console.log("consent", consent.value)
 
@@ -71,13 +131,18 @@ const handleLogin = async () => {
 
   try {
     loading.value = true;
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.value,
-      password: password.value,
-    });
+    // const { data, error } = await supabase.auth.signInWithPassword({
+    //   email: email.value,
+    //   password: password.value,
+    // });
+
+    const { data, error } = await supabase.auth.signInAnonymously()
 
     if (error) throw error;
 
+    const profile = await handleSignUp(data);
+    console.log("profile",profile)
+    // compare profile with profileData; fetchUserProfile is like a double check
     const user = data.user;
 
     if (!user) {
@@ -87,6 +152,7 @@ const handleLogin = async () => {
     console.log('User logged in:', user);
 
     const profileData = await fetchUserProfile(user.id);
+    console.log("profileData",profileData)
 
     if (profileData) {
       localStorage.setItem('user', JSON.stringify({ ...user, display_name: profileData.display_name }));
