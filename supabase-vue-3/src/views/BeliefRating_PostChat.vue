@@ -48,17 +48,29 @@
   
   const fetchSummary = async () => {
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError || !userData?.user) {
-        console.log('User not authenticated');
-        router.push('/login');
-        return;
-      }
+      // const { data: userData, error: userError } = await supabase.auth.getUser();
+      // if (userError || !userData?.user) {
+      //   console.log('User not authenticated');
+      //   router.push('/login');
+      //   return;
+      // }
+
+      const userData = localStorage.getItem('user');
+                if (userData) {
+                    // const user = JSON.parse(userData);
+                    // user.value = JSON.parse(userData);
+                    // console.log("user.value",user.value)
+                } else {
+                    console.log('User not authenticated');
+                    this.$router.push('/login');
+                    return
+                }
   
-      const user = userData.user;
-  
+      // const user = userData.user;
+      const user = JSON.parse(userData);
+      // const userId = user.id;
       const { data, error } = await supabase
-        .from('answers_posttest')
+        .from('answers_posttest_duplicate')
         .select('llm_summary')
         .eq('user_id', user.id)
         .single();
@@ -90,17 +102,29 @@
     }
   
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError || !userData?.user) {
-        console.log('User not authenticated');
-        router.push('/login');
-        return;
-      }
+      // const { data: userData, error: userError } = await supabase.auth.getUser();
+      // if (userError || !userData?.user) {
+      //   console.log('User not authenticated');
+      //   router.push('/login');
+      //   return;
+      // }
   
-      const user = userData.user;
+      const userData = localStorage.getItem('user');
+                if (userData) {
+                    // const user = JSON.parse(userData);
+                    // user.value = JSON.parse(userData);
+                    // console.log("user.value",user.value)
+                } else {
+                    console.log('User not authenticated');
+                    this.$router.push('/login');
+                    return
+                }
+                
+      // const user = userData.user;
+      const user = JSON.parse(userData);
   
       const { data, error } = await supabase
-        .from('answers_posttest')
+        .from('answers_posttest_duplicate')
         .update({ 'belief_rating_2': selectedRating.value })
         .eq('user_id', user.id);
   

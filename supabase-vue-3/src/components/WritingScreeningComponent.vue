@@ -57,9 +57,10 @@
       loading.value = true
   
       // Get the current user
-      const { data: { user } } = await supabase.auth.getUser()
-  
-      if (!user) {
+      // const { data: { user } } = await supabase.auth.getUser()
+      const userData = localStorage.getItem('user');
+
+      if (!userData) {
         throw new Error('No user is currently logged in.')
       }
   

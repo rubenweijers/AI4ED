@@ -88,19 +88,25 @@ export default {
                 await this.fetchDataAndSetSystemPrompt();
             }
         },
+
+
         async fetchDataAndSetSystemPrompt() {
             try {
-                const { data: userData, error: userError } = await supabase.auth.getUser();
-                if (userError || !userData?.user) {
+                //TODO this change needs double check
+                const userData = localStorage.getItem('user');
+                if (userData) {
+                    user.value = JSON.parse(userData);
+                    console.log("user.value",user.value)
+                } else {
                     console.log('User not authenticated');
                     this.$router.push('/login');
-                    return;
+                    return
                 }
 
                 const user = userData.user;
 
                 const { data: answerData, error: answerError } = await supabase
-                    .from('answers_posttest')
+                    .from('answers_posttest_duplicate')
                     .select('belief_rating_1, llm_summary, question_number')
                     .eq('user_id', user.id)
                     .single();
@@ -213,13 +219,19 @@ export default {
                 const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
 
                 // Get user information from Supabase
-                const { data: userData, error: userError } = await supabase.auth.getUser();
-                if (userError || !userData?.user) {
+                // TODO TODO ! need error handling
+                const userData = localStorage.getItem('user');
+                if (userData) {
+                    // const user = JSON.parse(userData);
+                    // user.value = JSON.parse(userData);
+                    // console.log("user.value",user.value)
+                } else {
                     console.log('User not authenticated');
-                    return;
+                    this.$router.push('/login');
+                    return
                 }
-
-                const userId = userData.user.id;
+                const user = JSON.parse(userData);
+                const userId = user.id;
                 const { data: profileData, error: profileError } = await supabase
                     .from('profiles_duplicate')
                     .select('display_name, group')
@@ -231,7 +243,7 @@ export default {
                 const displayName = profileData.display_name;
                 const llmType = profileData.group;
 
-                await supabase.from('chat_history').insert({
+                await supabase.from('chat_history_duplicate').insert({
                     user_id: userId,
                     system_message: this.messages,
                     round: Math.ceil(this.messages.length / 2 - 1),

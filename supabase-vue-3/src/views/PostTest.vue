@@ -114,9 +114,10 @@ const cancelSubmit = () => {
 };
 
 const checkUser = async () => {
-  const { data: { user: currentUser } } = await supabase.auth.getUser();
-  if (currentUser) {
-    user.value = currentUser;
+  const userData = localStorage.getItem('user');
+  if (userData) {
+    user.value = JSON.parse(userData);
+    console.log("user.value",user.value)
     await fetchIncorrectQuestion();
   } else {
     router.push('/login'); // Redirect to login if no user is found
@@ -127,7 +128,7 @@ const checkUser = async () => {
 const fetchIncorrectQuestion = async () => {
   try {
     const { data: incorrectAnswers, error: incorrectAnswersError } = await supabase
-      .from('answers')
+      .from('answers_duplicate')
       .select('*')
       .eq('user_id', user.value.id);
 
@@ -203,7 +204,7 @@ const submitExplanation = async () => {
     try {
       // Delete existing row if it exists
       const { error: deleteError } = await supabase
-        .from('answers_posttest')
+        .from('answers_posttest_duplicate')
         .delete()
         .eq('user_id', user.value.id)
 
@@ -214,7 +215,7 @@ const submitExplanation = async () => {
 
       // Insert new row
       const { data, error } = await supabase
-        .from('answers_posttest')
+        .from('answers_posttest_duplicate')
         .insert({
           user_id: user.value.id,
           question_id: incorrectQuestion.value.id,
@@ -232,7 +233,7 @@ const submitExplanation = async () => {
 
       // Update the row with the summarized explanation
       const { error: updateError } = await supabase
-        .from('answers_posttest')
+        .from('answers_posttest_duplicate')
         .update({ llm_summary: summary })
         .eq('user_id', user.value.id)
         .eq('question_id', incorrectQuestion.value.id);

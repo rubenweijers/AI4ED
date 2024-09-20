@@ -164,7 +164,7 @@ const autoSignUp = async () => {
   loading.value = true;
   const userDetails = [];
   // i controls # of users to generate
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 10; i++) {
     const newUser = generateRandomUser();
     userDetails.push(newUser);
     await handleSignUp(newUser);
