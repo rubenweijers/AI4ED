@@ -2,21 +2,23 @@
   <div class="auth">
     <form class="auth-form" @submit.prevent="handleSignUp">
       <h1>Sign Up</h1>
-      <input v-model="username" type="text" placeholder="Username" required />
-      <input v-model="displayName" type="text" placeholder="Display Name" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      <input v-model="age" type="number" placeholder="Age" required />
-      <select v-model="gender" required >
+      <input v-model="username" type="text" placeholder="Username" />
+      <input v-model="displayName" type="text" placeholder="Display Name" />
+      <input v-model="password" type="password" placeholder="Password" />
+      <input v-model="age" type="number" placeholder="Age" />
+      <select v-model="gender" >
         <option value="">Select Gender</option>
         <option value="male">Male</option>
         <option value="female">Female</option>
         <option value="other">Non-binary</option>
         <option value="prefer_not_to_say">Prefer not to say</option>
       </select>
-      <input v-model="firstLanguage" type="text" placeholder="First Language" required />
+      <input v-model="firstLanguage" type="text" placeholder="First Language" />
       <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Sign Up' }}</button>
       <p>Already have an account? <router-link to="/login">Log in!</router-link></p>
-      <button @click="autoSignUp" :disabled="loading">{{ loading ? 'Loading...' : 'Auto Sign Up 5 Users' }}</button>
+      <br>
+      <input v-model="numberOfUsersToGenerate" type="number" placeholder="number of users to generate" />
+      <button @click="autoSignUp" :disabled="loading">{{ loading ? 'Loading...' : 'Auto Sign Up Users' }}</button>
     </form>
   </div>
 </template>
@@ -35,21 +37,13 @@ const displayName = ref('')
 const age = ref('')
 const gender = ref('')
 const firstLanguage = ref('')
+const numberOfUsersToGenerate = ref('')
 
 const hashPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   return hashedPassword;
 }
-
-// const generateRandomString = (length) => {
-//   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-//   let result = '';
-//   for (let i = 0; i < length; i++) {
-//     result += characters.charAt(Math.floor(Math.random() * characters.length));
-//   }
-//   return result;
-// }
 
 const generateRandomUser = () => {
   const generatedUsername = uuidv4();
@@ -83,7 +77,7 @@ const createAndDownloadTxtFile = (userDetails) => {
 const handleSignUp = async (user) => {
   try {
     loading.value = true;
-
+    // user.password was generating during the method generateRandomUser
     // Hash the user's password
     const hashedPassword = await hashPassword(user.password);
 
@@ -150,8 +144,14 @@ const handleSignUp = async (user) => {
     if (profileError) throw profileError;
 
     console.log('Profile created:', profile);
-
-    alert('User registered successfully!');
+    console.log('numberOfUsersToGenerate',)
+    // only alert if we are using individual sign-up
+    // - If the input is a valid number (e.g., "5"), `usersToGenerate` will be `5`.
+    //- If the input is invalid (e.g., "abc", "", or even an input that leads to `NaN`), `usersToGenerate` will default to `0`.
+    const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
+    if (usersToGenerate < 1){
+      alert('User registered successfully!');
+    }
   } catch (error) {
     console.error('Error during signup:', error.message);
     alert(error.message);
@@ -164,7 +164,8 @@ const autoSignUp = async () => {
   loading.value = true;
   const userDetails = [];
   // i controls # of users to generate
-  for (let i = 0; i < 10; i++) {
+  const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
+  for (let i = 0; i < usersToGenerate; i++) {
     const newUser = generateRandomUser();
     userDetails.push(newUser);
     await handleSignUp(newUser);
