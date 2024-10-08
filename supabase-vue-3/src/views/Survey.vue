@@ -27,7 +27,6 @@
                 :name="'question-' + question.question_number"
                 :value="optionIndex"
                 v-model="answers[question.id]"
-                @change="submitAnswer(question, optionIndex)"
               >
               <span class="radio-custom"></span>
               <span class="label-text" v-html="formatOptionText(option)"></span>
@@ -38,8 +37,7 @@
         <!-- Old button -->
         <!-- <button type="submit" class="submit-button">Submit Survey and Take the FCI</button> -->
 
-        <button @click="showToastNotification" class="submit-button" :disabled="formSubmitted">Submit Survey and Proceed to FCI.</button>
-    
+        <button @click="handleFormSubmission" class="submit-button" :disabled="formSubmitted.value">Submit Survey and Proceed to FCI.</button>
 
         <ToastNotification
           :isVisible="showToast"
@@ -58,6 +56,8 @@
 </template>
 
 <script setup>
+
+
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
@@ -70,7 +70,6 @@ const answers = ref([]);
 const showToast = ref(false);
 const router = useRouter();
 const formSubmitted = ref(false);  // New state to track form submission
-
 
 // Toast notifications
 const showToastNotification = () => {
@@ -90,7 +89,7 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value",user.value)
+    console.log("user.value", user.value);
     await checkSubmissionStatus();
   } else {
     router.push('/login'); // Redirect to login if no user is found
@@ -103,8 +102,6 @@ const checkSubmissionStatus = async () => {
       .from('profiles_duplicate')
       .select('has_submitted_survey')
       .eq('user_id', user.value.username)
-      //.eq('user_id', user.value.username)
-
       .single();
 
     if (error) {
@@ -115,6 +112,16 @@ const checkSubmissionStatus = async () => {
     formSubmitted.value = data.has_submitted_survey;
   } catch (error) {
     console.error('Error checking submission status:', error);
+  }
+};
+
+const handleFormSubmission = () => {
+  if (formSubmitted.value) {
+    console.log('Form has already been submitted.');
+    alert('The form has already been submitted.');
+    router.push('/study');
+  } else {
+    confirmSubmit();
   }
 };
 
@@ -160,12 +167,6 @@ const formatOptionText = (option) => {
 
 const optionMapping = ["A", "B", "C", "D", "E"];
 
-// const confirmSubmission = () => {
-//   if (confirm("Are you sure you want to submit?")) {
-//     submitSurvey();
-//   }
-// };
-
 const submitAnswers = async () => {
   try {
     formSubmitted.value = true;  // Mark the form as submitted
@@ -185,9 +186,7 @@ const submitAnswers = async () => {
       formSubmitted.value = false;  // Re-enable the form if there is an error
       return;
     }
-    // console.log("userId: ",userId)
-    console.log("181", user._value.username)
-    console.log("182", user.value.username)
+
     // Update user's submission status on the server
     const { error: updateError } = await supabase
       .from('profiles_duplicate')
@@ -199,36 +198,10 @@ const submitAnswers = async () => {
       return;
     }
 
-    // alert('Survey submission successful! Thank you for your feedback.');
     router.push('/study');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
     formSubmitted.value = false;  // Re-enable the form if there is an error
-  }
-};
-
-// Submit individual answer for a question
-const submitAnswer = async (question, optionIndex) => {
-  try {
-    const surveyEntry = {
-      user_id: user.value.username,
-      question_id: question.id,
-      question_number: question.question_number,
-      answer: optionMapping[optionIndex],
-    };
-
-    const { data, error } = await supabase
-      .from('survey_answers_duplicate')
-      .upsert([surveyEntry], { onConflict: ['user_id', 'question_id'] });
-
-    if (error) {
-      console.error('Error submitting the answer:', error.message);
-      return;
-    }
-
-    console.log(`Answer for question ${question.question_number} submitted successfully.`);
-  } catch (error) {
-    console.error('An unexpected error occurred:', error);
   }
 };
 
@@ -243,6 +216,7 @@ onMounted(async () => {
   await checkUser();
   await fetchQuestions();
 });
+
 </script>
 
 
