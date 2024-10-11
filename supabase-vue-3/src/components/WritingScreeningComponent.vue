@@ -57,15 +57,16 @@
       loading.value = true
   
       // Get the current user
-      const { data: { user } } = await supabase.auth.getUser()
-  
-      if (!user) {
+      // const { data: { user } } = await supabase.auth.getUser()
+      const userData = localStorage.getItem('user');
+
+      if (!userData) {
         throw new Error('No user is currently logged in.')
       }
   
       // Upsert the writing screening response
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles_duplicate')
         .upsert(
           { 
             user_id: user.id,
@@ -85,7 +86,7 @@
   
       // Update the profile with the coherence rating
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from('profiles_duplicate')
         .update({ coherence_rating: coherenceRating })
         .eq('user_id', user.id)
   

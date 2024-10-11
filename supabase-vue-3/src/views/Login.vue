@@ -2,7 +2,7 @@
   <div class="auth">
     <form class="auth-form" @submit.prevent="handleLogin">
       <h1>Login</h1>
-      <input v-model="email" type="email" placeholder="Email" required />
+      <input v-model="username" type="text" placeholder="UserName" required />
       <input v-model="password" type="password" placeholder="Password" required />
       <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Log In' }}</button>
       <p>Don't have an account? <router-link to="/signup">Sign up!</router-link></p>
@@ -30,70 +30,59 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { supabase } from '../supabase'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue';
+import { supabase } from '../supabase';
+import { useRouter } from 'vue-router';
+import bcrypt from 'bcryptjs';
 
-const router = useRouter()
-const loading = ref(false)
-const email = ref('')
-const password = ref('')
-const consent = ref(true)
+const router = useRouter();
+const loading = ref(false);
+const username = ref('');
+const password = ref('');
+const consent = ref(true);
 
 // New variables for reset password functionality
-const showResetPassword = ref(false)
-const resetEmail = ref('')
-const resetLoading = ref(false)
-
-const fetchUserProfile = async (userId) => {
-  const { data: profileData, error: profileError } = await supabase
-    .from('profiles')
-    .select('display_name')
-    .eq('user_id', userId)
-    .single();
-
-  if (profileError) {
-    console.error('Error fetching profile:', profileError);
-    return null;
-  }
-
-  return profileData;
-}
+const showResetPassword = ref(false);
+const resetEmail = ref('');
+const resetLoading = ref(false);
 
 const handleLogin = async () => {
-  console.log("consent", consent.value)
+  console.log("consent", consent.value);
 
   if (!consent.value) {
-    console.log("consent", consent.value)
     alert('Please check the consent box before logging in.');
     return;
   }
 
   try {
     loading.value = true;
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.value,
-      password: password.value,
-    });
 
-    if (error) throw error;
+    // Fetch the hashed password from the database based on the username
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles_duplicate')
+      .select('id, password, display_name')
+      .eq('username', username.value)
+      .single();
 
-    const user = data.user;
-
-    if (!user) {
-      throw new Error('Login failed: no user object returned.');
+    if (profileError || !profile) {
+      throw new Error('Login failed: Username not found.');
     }
 
+    const validPassword = await bcrypt.compare(password.value, profile.password);
+
+    if (!validPassword) {
+      throw new Error('Login failed: Incorrect password.');
+    }
+
+    // On successful authentication
+    const user = { id: profile.id, username: username.value, display_name: profile.display_name };
     console.log('User logged in:', user);
 
-    const profileData = await fetchUserProfile(user.id);
+    // Store user information in local storage
+    localStorage.setItem('user', JSON.stringify(user));
 
-    if (profileData) {
-      localStorage.setItem('user', JSON.stringify({ ...user, display_name: profileData.display_name }));
-      router.push({ name: 'StudyInfo' });
-    } else {
-      throw new Error('Profile fetch failed.');
-    }
+    // Redirect to StudyInfo page
+    router.push({ name: 'StudyInfo' });
   } catch (error) {
     console.error('Error during login:', error.message);
     alert(error.message);
@@ -101,23 +90,6 @@ const handleLogin = async () => {
     loading.value = false;
   }
 };
-
-// New function for handling password reset
-const handleResetPassword = async () => {
-  try {
-    resetLoading.value = true
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.value, {
-      redirectTo: `${window.location.origin}/resetpassword`,
-    })
-    if (error) throw error
-    alert('Password reset email sent. Check your inbox.')
-    showResetPassword.value = false
-  } catch (error) {
-    alert(error.message)
-  } finally {
-    resetLoading.value = false
-  }
-}
 </script>
 
 <style scoped>

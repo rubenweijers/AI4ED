@@ -49,7 +49,8 @@ watch(route, () => {
 })
 
 const handleLogout = async () => {
-  await supabase.auth.signOut()
+  // await supabase.auth.signOut()
+  // TODO
   user.value = null
   localStorage.removeItem('user')
   router.push('/login')

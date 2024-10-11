@@ -96,14 +96,14 @@ onMounted(() => {
 });
 
 const checkUser = async () => {
-  const { data: { user: currentUser } } = await supabase.auth.getUser();
-  if (currentUser) {
-    user.value = currentUser;
+  const userData = localStorage.getItem('user');
+  if (userData) {
+    user.value = JSON.parse(userData);
+    console.log("user.value",user.value)
     await fetchQuestionsAndAnswers();
   } else {
-    router.push('/login');
+    router.push('/login'); // Redirect to login if no user is found
   }
-  loading.value = false;
 };
 
 // Fetch the questions and the user's answers

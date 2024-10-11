@@ -110,14 +110,15 @@
   const submissionSuccess = ref(false);
   
   const checkUser = async () => {
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (currentUser) {
-      user.value = currentUser;
-      await fetchQuestions();
-    } else {
-      router.push('/login'); // Redirect to login if no user is found
-    }
-    loading.value = false;
+  const userData = localStorage.getItem('user');
+  if (userData) {
+    user.value = JSON.parse(userData);
+    console.log("user.value",user.value)
+    await fetchQuestions();
+  } else {
+    router.push('/login'); // Redirect to login if no user is found
+  }
+  loading.value = false;
   };
   
   const fetchQuestions = async () => {
@@ -158,7 +159,7 @@
   const submitAnswers = async () => {
     try {
       const userId = user.value.id;
-  
+      console.log("userId", userId)
       const answerEntries = questions.value.map(question => ({
         user_id: userId,
         question_id: question.id,
@@ -166,7 +167,7 @@
         question_number: question.question_number,
       }));
   
-      const { data: answerData, error: answerError } = await supabase.from('answers').upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
+      const { data: answerData, error: answerError } = await supabase.from('answers_duplicate').upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
       if (answerError) {
         console.error('Error submitting answers:', answerError.message);
         return;

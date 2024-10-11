@@ -2,63 +2,107 @@
   <div class="auth">
     <form class="auth-form" @submit.prevent="handleSignUp">
       <h1>Sign Up</h1>
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="displayName" type="text" placeholder="Display Name" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      <input v-model="age" type="number" placeholder="Age" required />
-      <select v-model="gender" required>
+      <input v-model="username" type="text" placeholder="Username" />
+      <input v-model="displayName" type="text" placeholder="Display Name" />
+      <input v-model="password" type="password" placeholder="Password" />
+      <input v-model="age" type="number" placeholder="Age" />
+      <select v-model="gender" >
         <option value="">Select Gender</option>
         <option value="male">Male</option>
         <option value="female">Female</option>
         <option value="other">Non-binary</option>
         <option value="prefer_not_to_say">Prefer not to say</option>
       </select>
-      <input v-model="firstLanguage" type="text" placeholder="First Language" required />
+      <input v-model="firstLanguage" type="text" placeholder="First Language" />
       <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Sign Up' }}</button>
       <p>Already have an account? <router-link to="/login">Log in!</router-link></p>
+      <br>
+      <input v-model="numberOfUsersToGenerate" type="number" placeholder="number of users to generate" />
+      <button @click="autoSignUp" :disabled="loading">{{ loading ? 'Loading...' : 'Auto Sign Up Users' }}</button>
     </form>
   </div>
 </template>
 
+
 <script setup>
 import { ref } from 'vue'
 import { supabase } from '../supabase'
+import bcrypt from 'bcryptjs' // Ensure correct import as per the module documentation
+import { v4 as uuidv4 } from 'uuid' // Import the uuid library
 
 const loading = ref(false)
-const email = ref('')
+const username = ref('')
 const password = ref('')
 const displayName = ref('')
 const age = ref('')
 const gender = ref('')
 const firstLanguage = ref('')
+const numberOfUsersToGenerate = ref('')
 
-const handleSignUp = async () => {
+const hashPassword = async (password) => {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  return hashedPassword;
+}
+
+const generateRandomUser = () => {
+  const generatedUsername = uuidv4();
+  return {
+    username: generatedUsername,
+    password: uuidv4(),
+    displayName: generatedUsername,
+    // age: Math.floor(Math.random() * 70) + 18, // Random age between 18 and 87
+    // gender: ['male', 'female', 'other', 'prefer_not_to_say'][Math.floor(Math.random() * 4)],
+    // firstLanguage: ['English', 'Spanish', 'French', 'German', 'Chinese'][Math.floor(Math.random() * 5)]
+  }
+}
+
+const createAndDownloadTxtFile = (userDetails) => {
+  let fileContent = 'Generated Users:\n\n';
+  userDetails.forEach(detail => {
+    fileContent += `Username: ${detail.username}, Password: ${detail.password}\n`;
+  });
+
+  const blob = new Blob([fileContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'generated_users.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+const handleSignUp = async (user) => {
   try {
-    loading.value = true
-    const { data, error } = await supabase.auth.signUp({
-      email: email.value,
-      password: password.value,
-    })
+    loading.value = true;
+    // user.password was generating during the method generateRandomUser
+    // Hash the user's password
+    const hashedPassword = await hashPassword(user.password);
 
-    if (error) throw error;
+    // Check if username already exists
+    const { data: existingUser, error: existingUserError } = await supabase
+      .from('profiles_duplicate')
+      .select('username')
+      .eq('username', user.username)
+      .single();
 
-    const user = data.user;
-
-    if (!user) {
-      throw new Error('User sign-up failed: no user object returned.');
+    if (existingUser) {
+      throw new Error('Username already exists');
     }
-
-    console.log('User signed up:', user);
-    console.log('User ID:', user.id);
+    if (existingUserError && existingUserError.code !== 'PGRST116') {
+      throw existingUserError;
+    }
 
     // Fetch the current count of participants in both groups
     const { data: treatmentCountData, error: treatmentCountError } = await supabase
-      .from('profiles')
+      .from('profiles_duplicate')
       .select('id', { count: 'exact' })
       .eq('group', 'treatment');
 
     const { data: controlCountData, error: controlCountError } = await supabase
-      .from('profiles')
+      .from('profiles_duplicate')
       .select('id', { count: 'exact' })
       .eq('group', 'control');
 
@@ -78,32 +122,56 @@ const handleSignUp = async () => {
     }
 
     const now = new Date().toISOString();
+    // const userId = uuidv4();
 
-    // Insert into profiles table with group assignment, gender, and first language
+    // Insert into profiles_duplicate table with the assigned group, hashed password, and other details
     const { data: profile, error: profileError } = await supabase
-      .from('profiles')
+      .from('profiles_duplicate')
       .insert([
         { 
-          user_id: user.id,
-          display_name: displayName.value,
-          age: age.value,
+          user_id: user.displayName,
+          username: user.username, // do we need this? why don't we make user_id, username and display name the same?
+          display_name: user.displayName,
+          password: hashedPassword,
+          age: user.age,
           group: group,
           created_at: now,
-          gender: gender.value,
-          first_language: firstLanguage.value
+          gender: user.gender,
+          first_language: user.firstLanguage
         }
       ]);
 
     if (profileError) throw profileError;
-    console.log('Profile created:', profile);
 
-    alert('Check your email for the confirmation link!');
+    console.log('Profile created:', profile);
+    console.log('numberOfUsersToGenerate',)
+    // only alert if we are using individual sign-up
+    // - If the input is a valid number (e.g., "5"), `usersToGenerate` will be `5`.
+    //- If the input is invalid (e.g., "abc", "", or even an input that leads to `NaN`), `usersToGenerate` will default to `0`.
+    const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
+    if (usersToGenerate < 1){
+      alert('User registered successfully!');
+    }
   } catch (error) {
     console.error('Error during signup:', error.message);
     alert(error.message);
   } finally {
     loading.value = false;
   }
+}
+
+const autoSignUp = async () => {
+  loading.value = true;
+  const userDetails = [];
+  // i controls # of users to generate
+  const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
+  for (let i = 0; i < usersToGenerate; i++) {
+    const newUser = generateRandomUser();
+    userDetails.push(newUser);
+    await handleSignUp(newUser);
+  }
+  createAndDownloadTxtFile(userDetails);
+  loading.value = false;
 }
 </script>
 
