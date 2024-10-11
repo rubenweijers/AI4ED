@@ -81,7 +81,7 @@
         <!-- Old button -->
         <!-- <button type="submit" class="submit-button">Submit Questionnaire</button> -->
         
-        <button @click="showToastNotification" class="next-button">Submit Survey and Proceed to FCI.</button>
+        <button @click="showToastNotification" class="next-button">Submit Survey.</button>
 
         <ToastNotification
           :isVisible="showToast"
