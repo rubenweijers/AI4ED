@@ -52,7 +52,7 @@
           <!-- Add manual texts at specified positions -->
           <div v-if="question.question_number === 4" class="manual-text">
             <p>
-              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (5 and 6). <br>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (5 and 6).<br>
               The accompanying figure shows a frictionless channel in the shape of a segment of a circle with a center at <i>O</i>. The channel has been anchored to a frictionless horizontal table top. You are looking down at the table. Forces exerted by the air are negligible. A ball is shot at high speed into the channel at <i>p</i> and exits at <i>r</i>.
             </p>
           </div>
@@ -78,7 +78,7 @@
           </div>
 
         </div>
-        <!-- Old button -->
+        <!-- Old button! --> 
         <!-- <button type="submit" class="submit-button">Submit Questionnaire</button> -->
         
         <button @click="showToastNotification" class="next-button">Submit Survey.</button>
