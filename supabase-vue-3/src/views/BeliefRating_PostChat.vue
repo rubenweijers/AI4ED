@@ -62,7 +62,7 @@ const fetchSummary = async () => {
     const { data: profileData, error: profileError } = await supabase
       .from('profiles_duplicate')
       .select('*')
-      .eq('user_id', user.value.id)
+      .eq('user_id', user.value.username)
       .single();
 
     if (profileError) {
@@ -72,7 +72,7 @@ const fetchSummary = async () => {
     }
 
     const questionQueue = profileData.question_queue;
-    const currentQuestionIndex = (profileData.current_question_index || 0) - 1;
+    const currentQuestionIndex = profileData.current_question_index || 0; // Adjusted here
 
     const questionNumber = questionQueue[currentQuestionIndex];
 
@@ -80,12 +80,12 @@ const fetchSummary = async () => {
     const { data, error } = await supabase
       .from('answers_posttest_duplicate')
       .select('llm_summary')
-      .eq('user_id', user.value.id)
+      .eq('user_id', user.value.username)
       .eq('question_number', questionNumber)
-      .single();
+      .maybeSingle(); // Use maybeSingle
 
     if (error) {
-      console.error('Error fetching summary:', error);
+      console.error('Error fetching summary:', error.message);
       alert('An error occurred while fetching the summary. Please try again.');
       return;
     }
@@ -124,7 +124,7 @@ const submitRating = async () => {
     const { data: profileData, error: profileError } = await supabase
       .from('profiles_duplicate')
       .select('*')
-      .eq('user_id', user.value.id)
+      .eq('user_id', user.value.username)
       .single();
 
     if (profileError) {
@@ -134,7 +134,7 @@ const submitRating = async () => {
     }
 
     const questionQueue = profileData.question_queue;
-    const currentQuestionIndex = (profileData.current_question_index || 0) - 1;
+    const currentQuestionIndex = profileData.current_question_index || 0; // Adjusted here
 
     const questionNumber = questionQueue[currentQuestionIndex];
 
@@ -142,7 +142,7 @@ const submitRating = async () => {
     const { error } = await supabase
       .from('answers_posttest_duplicate')
       .update({ belief_rating_2: selectedRating.value })
-      .eq('user_id', user.value.id)
+      .eq('user_id', user.value.username)
       .eq('question_number', questionNumber);
 
     if (error) {
@@ -154,14 +154,13 @@ const submitRating = async () => {
     submissionSuccess.value = true;
 
     // Increment current_question_index
-    const newIndex = profileData.current_question_index || 0;
-    const updatedIndex = newIndex + 1;
+    const updatedIndex = (profileData.current_question_index || 0) + 1; // Adjusted here
 
     // Update current_question_index in profiles_duplicate
     const { error: updateError } = await supabase
       .from('profiles_duplicate')
       .update({ current_question_index: updatedIndex })
-      .eq('user_id', user.value.id);
+      .eq('user_id', user.value.username); // Use .username
 
     if (updateError) {
       console.error('Error updating current_question_index:', updateError.message);

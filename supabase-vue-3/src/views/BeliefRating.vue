@@ -22,7 +22,7 @@
         <button @click="showToastNotification" class="submit-button">Submit</button>
         <ToastNotification
           :isVisible="showToast"
-          title="Submit Survey"
+          title="Submit Belief Rating"
           message="Are you sure you want to confirm your belief rating in the statement? This action cannot be undone."
           @confirm="confirmSubmit"
           @cancel="cancelSubmit"
@@ -81,7 +81,7 @@ const fetchSummary = async () => {
     const { data: profileData, error: profileError } = await supabase
       .from('profiles_duplicate')
       .select('*')
-      .eq('user_id', user.value.id)
+      .eq('user_id', user.value.username)
       .single();
 
     if (profileError) {
@@ -91,16 +91,18 @@ const fetchSummary = async () => {
     }
 
     const questionQueue = profileData.question_queue;
-    const currentQuestionIndex = (profileData.current_question_index || 0) - 1;
+    const currentQuestionIndex = (profileData.current_question_index || 0);
 
     const questionNumber = questionQueue[currentQuestionIndex];
 
-    // Now fetch the llm_summary from 'answers_posttest_duplicate' for this question
+    // Fetch the newest row based on created_at for this user and question
     const { data, error } = await supabase
       .from('answers_posttest_duplicate')
-      .select('llm_summary')
-      .eq('user_id', user.value.id)
+      .select('llm_summary, created_at')
+      .eq('user_id', user.value.username)
       .eq('question_number', questionNumber)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single();
 
     if (error) {
@@ -111,6 +113,7 @@ const fetchSummary = async () => {
 
     if (data && data.llm_summary) {
       sentence.value = data.llm_summary;
+      console.log('Summary fetched, created at:', data.created_at);
     } else {
       console.error('No summary found for the user');
       alert('No summary found. Please try again.');
@@ -122,6 +125,7 @@ const fetchSummary = async () => {
     loading.value = false;
   }
 };
+
 
 const submitAnswers = async () => {
   if (selectedRating.value === null) {
@@ -142,7 +146,7 @@ const submitAnswers = async () => {
     const { data: profileData, error: profileError } = await supabase
       .from('profiles_duplicate')
       .select('*')
-      .eq('user_id', user.value.id)
+      .eq('user_id', user.value.username)
       .single();
 
     if (profileError) {
@@ -152,14 +156,14 @@ const submitAnswers = async () => {
     }
 
     const questionQueue = profileData.question_queue;
-    const currentQuestionIndex = (profileData.current_question_index || 0) - 1;
+    const currentQuestionIndex = (profileData.current_question_index || 0);
 
     const questionNumber = questionQueue[currentQuestionIndex];
 
     const { data, error } = await supabase
       .from('answers_posttest_duplicate')
       .update({ 'belief_rating_1': selectedRating.value })
-      .eq('user_id', user.value.id)
+      .eq('user_id', user.value.username)
       .eq('question_number', questionNumber);
 
     if (error) {
@@ -167,6 +171,9 @@ const submitAnswers = async () => {
       alert('An error occurred while submitting your rating. Please try again.');
       return;
     }
+
+    // // Remove chat data from localStorage
+    // localStorage.removeItem('chatData');
 
     submissionSuccess.value = true;
     router.push('/prechat'); // Adjust the route as needed

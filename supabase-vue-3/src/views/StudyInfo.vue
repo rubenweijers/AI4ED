@@ -76,6 +76,8 @@ const showToastNotification = () => {
 
 const proceedToStudy = () => {
   showToast.value = false;
+  const startTime = Date.now();
+  localStorage.setItem('studyStartTime', startTime);
   router.push('/survey');
 };
 

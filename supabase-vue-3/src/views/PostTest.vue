@@ -72,8 +72,8 @@
 
         <ToastNotification
           :isVisible="showToast"
-          title="Submit FCI"
-          message="Are you sure you want to submit your results? This action cannot be undone."
+          title="Submit Explanation"
+          message="Are you sure you want to submit your explanation? This action cannot be undone."
           @confirm="confirmSubmit"
           @cancel="cancelSubmit"
         />
@@ -131,10 +131,13 @@ const fetchUserProfile = async () => {
     .from('profiles_duplicate')
     .select('*')
     .eq('user_id', user.value.username)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching user profile:', error.message);
+  } else if (data === null) {
+    console.error('No profile found for user');
+    // Handle case where no profile is found
   } else {
     profile.value = data;
   }
@@ -208,46 +211,49 @@ const formatQuestionText = (question) => {
 };
 
 const isExplanationValid = () => {
-  // Check if explanation is empty or only whitespace
   if (!explanation.value || explanation.value.trim().length === 0) {
     alert("Please provide an explanation before submitting.");
     return false;
   }
 
-  // Check if explanation is too short (e.g., less than 10 words)
   const wordCount = explanation.value.trim().split(/\s+/).length;
   if (wordCount < 10) {
     alert("Your explanation is too short. Please provide a more detailed explanation containing at least 10 words.");
     return false;
   }
 
-  // If all checks pass, the explanation is valid
   return true;
 };
 
-// Ensure the explanation is not empty
 const checkValid = () => {
   if (isExplanationValid()) {
-      submitExplanation();
-    }
+    submitExplanation();
+  }
 };
 
 const submitExplanation = async () => {
     try {
-      // Insert new row
+      // Prepare the data to upsert
+      const upsertData = {
+        user_id: user.value.username,
+        question_number: incorrectQuestion.value.question_number,
+        explanation: explanation.value,
+      };
+
+      // Perform the upsert operation
       const { data, error } = await supabase
         .from('answers_posttest_duplicate')
-        .insert({
-          user_id: user.value.username,
-          question_id: incorrectQuestion.value.id,
-          question_number: incorrectQuestion.value.question_number,
-          explanation: explanation.value,
+        .upsert(upsertData, { 
+          onConflict: 'user_id,question_number',
+          returning: 'minimal' 
         });
 
       if (error) {
         console.error('Error submitting explanation:', error.message);
         return;
       }
+
+      // const insertedRow = data[0]; // Get the inserted or updated row
 
       // Call OpenAI API to summarize the explanation
       const summary = await summarizeExplanation(explanation.value);
@@ -257,41 +263,46 @@ const submitExplanation = async () => {
         .from('answers_posttest_duplicate')
         .update({ llm_summary: summary })
         .eq('user_id', user.value.username)
-        .eq('question_id', incorrectQuestion.value.id);
+        .eq('question_number', incorrectQuestion.value.question_number);
 
       if (updateError) {
         console.error('Error updating row with summary:', updateError.message);
         return;
       }
 
-      // Update current_question_index
-      const newIndex = (profile.value.current_question_index || 0) + 1;
+    // Update current_question_index
+    const newIndex = profile.value.current_question_index;
 
-      const { data: updateData, error: profileUpdateError } = await supabase
-        .from('profiles_duplicate')
-        .update({
-          current_question_index: newIndex,
-        })
-        .eq('user_id', user.value.username);
+    const { data: updateData, error: profileUpdateError } = await supabase
+      .from('profiles_duplicate')
+      .update({
+        current_question_index: newIndex,
+      })
+      .eq('user_id', user.value.username);
 
-      if (profileUpdateError) {
-        console.error('Error updating current_question_index:', profileUpdateError.message);
-      } else {
-        profile.value.current_question_index = newIndex;
-      }
-
-      // Display submission success notification
-      submissionSuccess.value = true;
-      // Navigate to belief rating page
-      router.push('/beliefrating');
-    } catch (error) {
-      console.error('An unexpected error occurred:', error);
+    if (profileUpdateError) {
+      console.error('Error updating current_question_index:', profileUpdateError.message);
+    } else {
+      profile.value.current_question_index = newIndex;
     }
+
+    // Display submission success notification
+    submissionSuccess.value = true;
+    
+    // Log user data and profile data before navigation
+    console.log('User data:', user.value);
+    console.log('Profile data:', profile.value);
+
+    // Navigate to belief rating page
+    await router.push('/beliefrating');
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+  }
 };
 
 const summarizeExplanation = async (explanation) => {
   const apiData = {
-    model: "gpt-4",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",

@@ -67,6 +67,20 @@ export default {
         });
     },
     methods: {
+        clearChatData() {
+            localStorage.removeItem('chatData');
+            this.userMessage = '';
+            this.messages = [];
+            this.loading = false;
+            this.systemPrompt = '';
+            this.userBeliefLevel = null;
+            this.questionText = '';
+            this.explanation = '';
+            this.initialSystemMessage = '';
+            this.remainingRounds = 3;
+            this.lastMessageTime = null;
+            this.firstMsgTime = null;
+            },
         async loadDataAndSetSystemPrompt() {
             const storedData = localStorage.getItem('chatData');
             if (storedData) {
@@ -92,67 +106,127 @@ export default {
         },
 
         async fetchDataAndSetSystemPrompt() {
-            try {
-                const userData = localStorage.getItem('user');
-                if (userData) {
-                    this.user = JSON.parse(userData);
-                } else {
-                    console.log('User not authenticated');
-                    this.$router.push('/login');
-                    return;
-                }
+  try {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      this.user = JSON.parse(userData);
+    } else {
+      console.log('User not authenticated');
+      this.$router.push('/login');
+      return;
+    }
 
-                // Fetch profile data to get question queue and current index
-                const { data: profileData, error: profileError } = await supabase
-                    .from('profiles_duplicate')
-                    .select('*')
-                    .eq('user_id', this.user.id)
-                    .single();
+    // Fetch profile data to get question queue and current index
+    console.log('Fetching profile data for user:', this.user.username);
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles_duplicate')
+      .select('*')
+      .eq('user_id', this.user.username)
+      .maybeSingle();
 
-                if (profileError) throw profileError;
+    if (profileError) {
+      console.error('Error fetching profile data:', profileError.message);
+      alert('No profile data found. Please complete the previous steps first.');
+      this.$router.push('/study'); // Redirect to the appropriate page
+      return;
+    }
 
-                this.profileData = profileData; // Store profileData for later use
+    if (!profileData) {
+      console.error('No profile data found for user:', this.user.username);
+      alert('No profile data found. Please complete the previous steps first.');
+      this.$router.push('/study');
+      return;
+    }
 
-                const questionQueue = profileData.question_queue;
-                const currentQuestionIndex = profileData.current_question_index || 0;
+    this.profileData = profileData;
 
-                const questionNumber = questionQueue[currentQuestionIndex];
+    const questionQueue = this.profileData.question_queue;
+    const currentQuestionIndex = this.profileData.current_question_index || 0;
 
-                const { data: answerData, error: answerError } = await supabase
-                    .from('answers_posttest_duplicate')
-                    .select('belief_rating_1, llm_summary')
-                    .eq('user_id', this.user.id)
-                    .eq('question_number', questionNumber)
-                    .single();
+    // Check if questionQueue is valid and has the next question
+    if (!questionQueue || questionQueue.length === 0) {
+      console.error('Question queue is empty.');
+      alert('No questions to display. Please complete the previous steps.');
+      this.$router.push('/study');
+      return;
+    }
 
-                if (answerError) throw answerError;
+    if (currentQuestionIndex >= questionQueue.length) {
+      console.error('No more questions left.');
+      alert('You have completed all the questions. Thank you!');
+      this.$router.push('/completion'); // Redirect to a completion page
+      return;
+    }
 
-                this.userBeliefLevel = answerData.belief_rating_1;
-                this.explanation = answerData.llm_summary;
+    const questionNumber = questionQueue[currentQuestionIndex];
 
-                const { data: questionData, error: questionError } = await supabase
-                    .from('questions_denton')
-                    .select('question_text')
-                    .eq('question_number', questionNumber)
-                    .single();
+    // Ensure questionNumber is defined
+    if (questionNumber === undefined) {
+      console.error('Question number is undefined.');
+      alert('An error occurred. Please try again later.');
+      return;
+    }
 
-                if (questionError) throw questionError;
+    // Fetch answer data
+    console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
+    const { data: answerData, error: answerError } = await supabase
+      .from('answers_posttest_duplicate')
+      .select('belief_rating_1, llm_summary')
+      .eq('user_id', this.user.username)
+      .eq('question_number', questionNumber)
+      .maybeSingle();
 
-                this.questionText = questionData.question_text;
+    if (answerError) {
+      console.error('Error fetching answer data:', answerError.message);
+      alert('An error occurred while fetching answer data.');
+      return;
+    }
 
-                this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
+    if (!answerData) {
+      console.error('No answer data found for this user and question number.');
+      alert('No answer data found. Please complete the previous steps first.');
+      return;
+    }
 
-                await this.generateInitialAIMessage();
+    this.userBeliefLevel = answerData.belief_rating_1;
+    this.explanation = answerData.llm_summary;
 
-                this.saveChatData();
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        },
+    // Fetch question data
+    console.log('Fetching question data for question number:', questionNumber);
+    const { data: questionData, error: questionError } = await supabase
+      .from('questions_denton')
+      .select('question_text')
+      .eq('question_number', questionNumber)
+      .maybeSingle();
+
+    if (questionError) {
+      console.error('Error fetching question data:', questionError.message);
+      alert('An error occurred while fetching question data.');
+      return;
+    }
+
+    if (!questionData) {
+      console.error('No question data found for question number:', questionNumber);
+      alert('No question data found. Please contact support.');
+      return;
+    }
+
+    this.questionText = questionData.question_text;
+
+    // Set the system prompt
+    this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
+
+    await this.generateInitialAIMessage();
+
+    this.saveChatData();
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+},
         async generateInitialAIMessage() {
             this.loading = true;
             const apiData = {
-                model: "gpt-4",
+                model: "gpt-4o",
                 messages: [
                     { role: "system", content: this.systemPrompt },
                     { role: "user", content: "Please start the conversation by addressing the user's misconception." },
@@ -207,7 +281,7 @@ export default {
             this.remainingRounds--;
 
             const apiData = {
-                model: "gpt-4",
+                model: "gpt-4o",
                 messages: [
                     { role: "system", content: this.systemPrompt },
                     ...this.messages,
@@ -233,7 +307,7 @@ export default {
                 const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
 
                 // Get user information from Supabase
-                const userId = this.user.id;
+                const userId = this.user.username;
                 const { data: profileData, error: profileError } = await supabase
                     .from('profiles_duplicate')
                     .select('display_name, group')
@@ -294,9 +368,9 @@ export default {
             }
         },
         async nextPage() {
-            this.saveChatData();
-            // Redirect to the post-chat belief rating page
-            this.$router.push('/beliefratingpostchat');
+        this.clearChatData(); // Clear chat data before moving to the next page
+        // Redirect to the post-chat belief rating page
+        this.$router.push('/beliefratingpostchat');
         },
         saveChatData() {
             localStorage.setItem('chatData', JSON.stringify({

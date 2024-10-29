@@ -5,72 +5,116 @@
         <img src="/ai4edlogo-removebg.png" alt="Bookie Logo" />
       </div>
       <nav class="nav">
-        <router-link :to="{ name: 'Survey' }">Begin Study</router-link>
-        <template v-if="user">
-          <span class="user-name">
-            <template v-for="(char, index) in user.display_name.split('')" :key="index">
-              <span>{{ char }}</span>
-            </template>
-          </span>
-          <button @click="handleLogout" class="logout-btn">Log out</button>
-        </template>
-        <template v-else>
-          <router-link :to="{ name: 'Login' }">Log in</router-link>
-          <router-link :to="{ name: 'Signup' }">Sign up</router-link>
-        </template>
+        <!-- Other nav items can go here -->
       </nav>
+      <div class="timer" v-if="remainingTime !== null">
+        Time left: {{ formattedTime }}
+      </div>
     </header>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { supabase } from '../supabase'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { supabase } from '../supabase';
 
-const router = useRouter()
-const route = useRoute()
-const user = ref(null)
+const router = useRouter();
+const route = useRoute();
+const user = ref(null);
+const remainingTime = ref(null); // Remaining time in seconds
+let timerInterval = null; // Reference to the interval timer
 
 const checkUser = () => {
-  const storedUser = localStorage.getItem('user')
+  const storedUser = localStorage.getItem('user');
   if (storedUser) {
-    user.value = JSON.parse(storedUser)
+    user.value = JSON.parse(storedUser);
   }
-}
+};
+
+const updateRemainingTime = () => {
+  const startTime = localStorage.getItem('studyStartTime');
+  if (startTime) {
+    const now = Date.now();
+    const elapsed = Math.floor((now - startTime) / 1000); // Elapsed time in seconds
+    const totalDuration = 45 * 60; // Total duration in seconds (45 minutes)
+    const timeLeft = totalDuration - elapsed;
+    if (timeLeft > 0) {
+      remainingTime.value = timeLeft;
+    } else {
+      remainingTime.value = 0;
+      clearInterval(timerInterval);
+      // Handle timer expiration (e.g., log out the user or display a message)
+      alert('Your study time has ended.');
+      handleLogout();
+    }
+  } else {
+    remainingTime.value = null;
+  }
+};
 
 onMounted(() => {
-  checkUser()
-})
+  checkUser();
+  updateRemainingTime();
+  timerInterval = setInterval(updateRemainingTime, 1000); // Update every second
+});
+
+// Clear the interval timer when the component is unmounted
+onUnmounted(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+});
 
 // Watch for route changes to re-check user
 watch(route, () => {
-  checkUser()
-})
+  checkUser();
+});
 
 const handleLogout = async () => {
-  // await supabase.auth.signOut()
-  // TODO
-  user.value = null
-  localStorage.removeItem('user')
-  router.push('/login')
-}
+  // TODO: Implement logout logic, if any
+  user.value = null;
+  localStorage.removeItem('user');
+  localStorage.removeItem('studyStartTime'); // Clear the start time when logging out
+  router.push('/login');
+};
 
 const redirect = () => {
-  router.push('/')
-}
+  router.push('/');
+};
+
+// Computed property to format the remaining time as MM:SS
+const formattedTime = computed(() => {
+  if (remainingTime.value !== null) {
+    const minutes = Math.floor(remainingTime.value / 60);
+    const seconds = remainingTime.value % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  } else {
+    return '';
+  }
+});
 </script>
 
 <style scoped>
 .header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  padding: 5px 0;
-  background-color: transparent;
+  padding: 10px 20px;
+  background-color: transparent; /* Fully transparent */
   color: black;
-  position: relative;
-  top: 0.2cm;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  border: none;
+  box-shadow: none;
+}
+
+.timer {
+  font-size: 1em; /* Adjust font size as needed */
+  color: #000; /* Adjust color as needed */
 }
 
 .logo-container {

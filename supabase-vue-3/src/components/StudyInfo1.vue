@@ -23,7 +23,7 @@
         </ul>
       </p>
       <p>
-        Plan to finish this questionnaire in 30 minutes. <br>
+        Pressing the button below will set a 45 minute timer for you to finish the survey and the FCI test <br>
       </p>
     </div>
 </template>
