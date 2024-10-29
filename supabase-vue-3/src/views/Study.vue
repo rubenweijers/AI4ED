@@ -109,21 +109,24 @@ import { supabase } from '../supabase';
 import ToastNotification from '../components/ToastNotification.vue';
 
 const user = ref(null);
+const profile = ref(null);
 const loading = ref(true);
 const questions = ref([]);
 const answers = ref({});
 const router = useRouter();
 const submissionSuccess = ref(false);
 const showToast = ref(false);
+const formSubmitted = ref(false);
 
-// Toast notifications
 const showToastNotification = () => {
   showToast.value = true;
 };
+
 const confirmSubmit = async () => {
   showToast.value = false;
   await submitAnswers();
 };
+
 const cancelSubmit = () => {
   showToast.value = false;
 };
@@ -132,12 +135,47 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value",user.value)
+    console.log("user.value", user.value);
+    await fetchUserProfile();
+    await checkSubmissionStatus();
     await fetchQuestions();
   } else {
-    router.push('/login'); // Redirect to login if no user is found
+    router.push('/login');
   }
   loading.value = false;
+};
+
+const fetchUserProfile = async () => {
+  const { data, error } = await supabase
+    .from('profiles_duplicate')
+    .select('*')
+    .eq('user_id', user.value.username)
+    .single();
+
+  if (error) {
+    console.error('Error fetching user profile:', error.message);
+  } else {
+    profile.value = data;
+  }
+};
+
+const checkSubmissionStatus = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles_duplicate')
+      .select('has_submitted_survey')
+      .eq('user_id', user.value.username)
+      .single();
+
+    if (error) {
+      console.error('Error checking submission status:', error.message);
+      return;
+    }
+
+    formSubmitted.value = data?.has_submitted_survey || false;
+  } catch (error) {
+    console.error('Error checking submission status:', error);
+  }
 };
 
 const fetchQuestions = async () => {
@@ -148,12 +186,10 @@ const fetchQuestions = async () => {
   }
   questions.value = data;
 
-  // Initialize answers with empty string
   questions.value.forEach(question => {
     answers.value[question.id] = '';
   });
 
-  // Load saved answers from localStorage
   loadSavedAnswers();
 };
 
@@ -174,40 +210,60 @@ const formatOptionText = (option) => {
 
 const optionMapping = ["A", "B", "C", "D", "E"];
 
-// const confirmSubmission = () => {
-//   if (confirm("Are you sure you want to submit?")) {
-//     submitAnswers();
-//   }
-// };
+const handleFormSubmission = () => {
+  if (formSubmitted.value) {
+    console.log('Form has already been submitted.');
+    alert('The form has already been submitted.');
+    router.push('/PostTest');
+  } else {
+    confirmSubmit();
+  }
+};
 
 const submitAnswers = async () => {
   try {
-    const userId = user.value.id;
-    console.log("userId",userId)
+    formSubmitted.value = true;
     const answerEntries = questions.value.map(question => ({
-      user_id: userId,
+      user_id: user.value.username,
       question_id: question.id,
       answer: optionMapping[answers.value[question.id]],
       question_number: question.question_number,
     }));
 
-    const { data: answerData, error: answerError } = await supabase.from('answers_duplicate').upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
+    const { data: answerData, error: answerError } = await supabase
+      .from('answers_duplicate')
+      .upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
+    
     if (answerError) {
       console.error('Error submitting answers:', answerError.message);
+      formSubmitted.value = false;
       return;
     }
+
+    await generateQuestionQueue();
+
+    const { error: updateError } = await supabase
+      .from('profiles_duplicate')
+      .update({ has_submitted_survey: true })
+      .eq('user_id', user.value.username);
+
+    if (updateError) {
+      console.error('Error updating submission status:', updateError.message);
+      return;
+    }
+
     submissionSuccess.value = true;
     router.push('/PostTest');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
+    formSubmitted.value = false;
   }
 };
 
 const submitAnswer = async (question, optionIndex) => {
   try {
-    const userId = user.value.id;
     const answerEntry = {
-      user_id: userId,
+      user_id: user.value.username,
       question_id: question.id,
       answer: optionMapping[optionIndex],
       question_number: question.question_number,
@@ -234,12 +290,10 @@ const selectAllOption1 = () => {
   });
 };
 
-// Save answers to localStorage
 const saveAnswersToLocalStorage = () => {
   localStorage.setItem('studyAnswers', JSON.stringify(answers.value));
 };
 
-// Load answers from localStorage
 const loadSavedAnswers = () => {
   const savedAnswers = localStorage.getItem('studyAnswers');
   if (savedAnswers) {
@@ -247,9 +301,143 @@ const loadSavedAnswers = () => {
   }
 };
 
-// Watch for changes in answers and save to localStorage
 watch(answers, saveAnswersToLocalStorage, { deep: true });
 
+const generateQuestionQueue = async () => {
+  try {
+    console.log('Starting queue generation');
+    
+    // Fetch all user's answers
+    const { data: userAnswers, error: userAnswersError } = await supabase
+      .from('answers_duplicate')
+      .select('question_number, answer')
+      .eq('user_id', user.value.username);
+
+    if (userAnswersError) {
+      console.error('Error fetching user answers:', userAnswersError.message);
+      return;
+    }
+
+    console.log('User answers:', userAnswers);
+
+    if (!userAnswers || userAnswers.length === 0) {
+      console.log('No user answers found');
+      return;
+    }
+
+    // Fetch correct answers for those questions from 'questions_denton'
+    const questionNumbers = userAnswers.map(a => a.question_number);
+    const { data: questionsData, error: questionsError } = await supabase
+      .from('questions_denton')
+      .select('*')
+      .in('question_number', questionNumbers);
+
+    if (questionsError) {
+      console.error('Error fetching questions:', questionsError.message);
+      return;
+    }
+
+    console.log('Questions data:', questionsData);
+
+    if (!questionsData || questionsData.length === 0) {
+      console.log('No questions data found');
+      return;
+    }
+
+    // Determine incorrect answers by comparing user's answer with correct answer
+    const incorrectQuestionNumbers = [];
+
+    for (const userAnswer of userAnswers) {
+      const question = questionsData.find(q => q.question_number === userAnswer.question_number);
+      if (question && question.correct_answer !== userAnswer.answer) {
+        incorrectQuestionNumbers.push(userAnswer.question_number);
+      }
+    }
+
+    console.log('Incorrect question numbers:', incorrectQuestionNumbers);
+
+    if (incorrectQuestionNumbers.length === 0) {
+      console.log('User got all answers correct, no question queue to generate.');
+      return;
+    }
+
+    const { data: incorrectQuestions, error: incorrectQuestionsError } = await supabase
+      .from('questions_denton')
+      .select('*')
+      .in('question_number', incorrectQuestionNumbers);
+
+    if (incorrectQuestionsError) {
+      console.error('Error fetching incorrect questions:', incorrectQuestionsError.message);
+      return;
+    }
+
+    const questionsByNumberInCategory = {};
+
+    for (const question of incorrectQuestions) {
+      const n = question.question_number_in_category;
+      if (!questionsByNumberInCategory[n]) {
+        questionsByNumberInCategory[n] = [];
+      }
+      questionsByNumberInCategory[n].push(question);
+    }
+
+    const questionQueue = [];
+
+    const nValues = Object.keys(questionsByNumberInCategory).map(Number).sort((a, b) => a - b);
+
+    for (const n of nValues) {
+      const questionsAtN = questionsByNumberInCategory[n];
+      questionsAtN.sort(() => Math.random() - 0.5);
+
+      for (const question of questionsAtN) {
+        questionQueue.push(question.question_number);
+      }
+    }
+
+    console.log('Generated question queue:', questionQueue);
+
+    // Before update
+    console.log('Attempting to update profile with queue:', questionQueue);
+
+    const { data: updateData, error: updateError } = await supabase
+      .from('profiles_duplicate')
+      .update({
+        question_queue: questionQueue,
+        current_question_index: 0,
+      })
+      .eq('user_id', user.value.username);
+
+    if (updateError) {
+      console.error('Error updating user profile:', updateError.message);
+      return;
+    }
+
+    console.log('Update response:', updateData);
+
+    // Update profile.value
+    if (profile.value) {
+      profile.value.question_queue = questionQueue;
+      profile.value.current_question_index = 0;
+    }
+
+    // Add delay and retry fetch
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay
+    const { data: updatedProfile, error: checkError } = await supabase
+      .from('profiles_duplicate')
+      .select('question_queue')
+      .eq('user_id', user.value.username)
+      .single();
+
+    if (checkError) {
+      console.error('Error checking updated profile:', checkError);
+    } else {
+      console.log('Updated question_queue after delay:', updatedProfile.question_queue);
+    }
+
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+  }
+};
 onMounted(() => {
   checkUser();
 });

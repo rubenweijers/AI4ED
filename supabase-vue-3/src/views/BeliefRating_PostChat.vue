@@ -1,152 +1,191 @@
 <template>
-    <div class="belief-rating-container">
-      <h2>Re-Rate Your Belief</h2>
-      <p v-if="loading">Loading...</p>
-      <template v-else>
-        <p>Now that you've had a chance to converse with the AI, we'd like to get back to some of the questions we asked at the beginning of the survey. At the outset of this survey, you suggested that:</p>
-        <div class="sentence-block">
-          "{{ sentence }}"
-        </div>
-        <p>On a scale of 0% to 100%, please indicate your level of confidence that this statement is true.</p>
-        <div class="rating-scale">
-          <label v-for="(label, index) in ratingLabels" :key="index">
-            <input
-              type="radio"
-              name="belief-rating"
-              :value="label.value"
-              v-model="selectedRating"
-            />
-            {{ label.text }}
-          </label>
-        </div>
-        <button class="submit-button" @click="submitRating">Submit</button>
-        <div v-if="submissionSuccess" class="success-notification">
-          Your rating has been submitted successfully!
-        </div>
-      </template>
-    </div>
+  <div class="belief-rating-container">
+    <h2>Re-Rate Your Belief</h2>
+    <p v-if="loading">Loading...</p>
+    <template v-else>
+      <p>Now that you've had a chance to converse with the AI, we'd like to revisit your initial statement:</p>
+      <div class="sentence-block">
+        "{{ sentence }}"
+      </div>
+      <p>On a scale of 0% to 100%, please indicate your level of confidence that this statement is true.</p>
+      <div class="rating-scale">
+        <label v-for="(label, index) in ratingLabels" :key="index">
+          <input
+            type="radio"
+            name="belief-rating"
+            :value="label.value"
+            v-model="selectedRating"
+          />
+          {{ label.text }}
+        </label>
+      </div>
+      <button class="submit-button" @click="submitRating">Submit</button>
+      <div v-if="submissionSuccess" class="success-notification">
+        Your rating has been submitted successfully!
+      </div>
+    </template>
+  </div>
 </template>
-  
-<script setup>
-  import { ref, onMounted } from 'vue';
-  import { useRouter } from 'vue-router';
-  import { supabase } from '../supabase';
-  
-  const sentence = ref('');
-  const selectedRating = ref(null);
-  const submissionSuccess = ref(false);
-  const loading = ref(true);
-  const router = useRouter();
-  
-  const ratingLabels = [
-    { value: 0, text: 'Definitely False' },
-    { value: 25, text: 'Probably False' },
-    { value: 50, text: 'Uncertain' },
-    { value: 75, text: 'Probably True' },
-    { value: 100, text: 'Definitely True' },
-  ];
-  
-  const fetchSummary = async () => {
-    try {
-      // const { data: userData, error: userError } = await supabase.auth.getUser();
-      // if (userError || !userData?.user) {
-      //   console.log('User not authenticated');
-      //   router.push('/login');
-      //   return;
-      // }
 
-      const userData = localStorage.getItem('user');
-                if (userData) {
-                    // const user = JSON.parse(userData);
-                    // user.value = JSON.parse(userData);
-                    // console.log("user.value",user.value)
-                } else {
-                    console.log('User not authenticated');
-                    this.$router.push('/login');
-                    return
-                }
-  
-      // const user = userData.user;
-      const user = JSON.parse(userData);
-      // const userId = user.id;
-      const { data, error } = await supabase
-        .from('answers_posttest_duplicate')
-        .select('llm_summary')
-        .eq('user_id', user.id)
-        .single();
-  
-      if (error) {
-        console.error('Error fetching summary:', error);
-        alert('An error occurred while fetching the summary. Please try again.');
-        return;
-      }
-  
-      if (data && data.llm_summary) {
-        sentence.value = data.llm_summary;
-      } else {
-        console.error('No summary found for the user');
-        alert('No summary found. Please try again.');
-      }
-    } catch (error) {
-      console.error('An unexpected error occurred:', error);
-      alert('An unexpected error occurred. Please try again.');
-    } finally {
-      loading.value = false;
-    }
-  };
-  
-  const submitRating = async () => {
-    if (selectedRating.value === null) {
-      alert('Please select a rating before submitting.');
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { supabase } from '../supabase';
+
+const user = ref(null);
+const sentence = ref('');
+const selectedRating = ref(null);
+const submissionSuccess = ref(false);
+const loading = ref(true);
+const router = useRouter();
+
+const ratingLabels = [
+  { value: 0, text: 'Definitely False' },
+  { value: 25, text: 'Probably False' },
+  { value: 50, text: 'Uncertain' },
+  { value: 75, text: 'Probably True' },
+  { value: 100, text: 'Definitely True' },
+];
+
+const fetchSummary = async () => {
+  try {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      user.value = JSON.parse(userData);
+    } else {
+      console.log('User not authenticated');
+      router.push('/login');
       return;
     }
-  
-    try {
-      // const { data: userData, error: userError } = await supabase.auth.getUser();
-      // if (userError || !userData?.user) {
-      //   console.log('User not authenticated');
-      //   router.push('/login');
-      //   return;
-      // }
-  
-      const userData = localStorage.getItem('user');
-                if (userData) {
-                    // const user = JSON.parse(userData);
-                    // user.value = JSON.parse(userData);
-                    // console.log("user.value",user.value)
-                } else {
-                    console.log('User not authenticated');
-                    this.$router.push('/login');
-                    return
-                }
-                
-      // const user = userData.user;
-      const user = JSON.parse(userData);
-  
-      const { data, error } = await supabase
-        .from('answers_posttest_duplicate')
-        .update({ 'belief_rating_2': selectedRating.value })
-        .eq('user_id', user.id);
-  
-      if (error) {
-        console.error('Error submitting rating:', error);
-        alert('An error occurred while submitting your rating. Please try again.');
-        return;
-      }
-  
-      submissionSuccess.value = true;
-      setTimeout(() => {
-        router.push('/study2'); // Adjust the route as needed
-      }, 1000);
-    } catch (error) {
-      console.error('An unexpected error occurred:', error);
-      alert('An unexpected error occurred. Please try again.');
+
+    // Fetch profile data to get question queue and current index
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles_duplicate')
+      .select('*')
+      .eq('user_id', user.value.id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError.message);
+      alert('An error occurred while fetching your data. Please try again.');
+      return;
     }
-  };
-  
-  onMounted(() => {
-    fetchSummary();
-  });
+
+    const questionQueue = profileData.question_queue;
+    const currentQuestionIndex = (profileData.current_question_index || 0) - 1;
+
+    const questionNumber = questionQueue[currentQuestionIndex];
+
+    // Fetch llm_summary from 'answers_posttest_duplicate' for this question
+    const { data, error } = await supabase
+      .from('answers_posttest_duplicate')
+      .select('llm_summary')
+      .eq('user_id', user.value.id)
+      .eq('question_number', questionNumber)
+      .single();
+
+    if (error) {
+      console.error('Error fetching summary:', error);
+      alert('An error occurred while fetching the summary. Please try again.');
+      return;
+    }
+
+    if (data && data.llm_summary) {
+      sentence.value = data.llm_summary;
+    } else {
+      console.error('No summary found for the user');
+      alert('No summary found. Please try again.');
+    }
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+    alert('An unexpected error occurred. Please try again.');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const submitRating = async () => {
+  if (selectedRating.value === null) {
+    alert('Please select a rating before submitting.');
+    return;
+  }
+
+  try {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      user.value = JSON.parse(userData);
+    } else {
+      console.log('User not authenticated');
+      router.push('/login');
+      return;
+    }
+
+    // Fetch profile data to get question queue and current index
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles_duplicate')
+      .select('*')
+      .eq('user_id', user.value.id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError.message);
+      alert('An error occurred while fetching your data. Please try again.');
+      return;
+    }
+
+    const questionQueue = profileData.question_queue;
+    const currentQuestionIndex = (profileData.current_question_index || 0) - 1;
+
+    const questionNumber = questionQueue[currentQuestionIndex];
+
+    // Update belief_rating_2 in answers_posttest_duplicate for this question
+    const { error } = await supabase
+      .from('answers_posttest_duplicate')
+      .update({ belief_rating_2: selectedRating.value })
+      .eq('user_id', user.value.id)
+      .eq('question_number', questionNumber);
+
+    if (error) {
+      console.error('Error submitting rating:', error.message);
+      alert('An error occurred while submitting your rating. Please try again.');
+      return;
+    }
+
+    submissionSuccess.value = true;
+
+    // Increment current_question_index
+    const newIndex = profileData.current_question_index || 0;
+    const updatedIndex = newIndex + 1;
+
+    // Update current_question_index in profiles_duplicate
+    const { error: updateError } = await supabase
+      .from('profiles_duplicate')
+      .update({ current_question_index: updatedIndex })
+      .eq('user_id', user.value.id);
+
+    if (updateError) {
+      console.error('Error updating current_question_index:', updateError.message);
+      alert('An error occurred while updating your progress. Please try again.');
+      return;
+    }
+
+    // Check if there are more questions
+    if (updatedIndex < questionQueue.length) {
+      // More questions to process
+      router.push('/posttest');
+    } else {
+      // All questions completed
+      router.push('/thankyou'); // Ensure you have a ThankYou.vue component or appropriate route
+    }
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+    alert('An unexpected error occurred. Please try again.');
+  }
+};
+
+onMounted(() => {
+  fetchSummary();
+});
 </script>
   
   

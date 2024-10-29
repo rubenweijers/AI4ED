@@ -56,15 +56,9 @@ export default {
             remainingRounds: 3,
             lastMessageTime: null,
             firstMsgTime: null,
+            user: null,
+            profileData: null, // Add profileData to access question queue
         };
-    },
-    computed: {
-        roundsIndicatorClass() {
-            if (this.remainingRounds === 3) return 'green';
-            if (this.remainingRounds === 2) return 'yellow';
-            if (this.remainingRounds === 1) return 'red';
-            return 'finished';
-        },
     },
     async mounted() {
         await this.loadDataAndSetSystemPrompt();
@@ -76,7 +70,15 @@ export default {
         async loadDataAndSetSystemPrompt() {
             const storedData = localStorage.getItem('chatData');
             if (storedData) {
-                const { userBeliefLevel, questionText, explanation, systemPrompt, initialSystemMessage, messages, remainingRounds } = JSON.parse(storedData);
+                const {
+                    userBeliefLevel,
+                    questionText,
+                    explanation,
+                    systemPrompt,
+                    initialSystemMessage,
+                    messages,
+                    remainingRounds,
+                } = JSON.parse(storedData);
                 this.userBeliefLevel = userBeliefLevel;
                 this.questionText = questionText;
                 this.explanation = explanation;
@@ -89,26 +91,38 @@ export default {
             }
         },
 
-
         async fetchDataAndSetSystemPrompt() {
             try {
-                //TODO this change needs double check
                 const userData = localStorage.getItem('user');
                 if (userData) {
-                    user.value = JSON.parse(userData);
-                    console.log("user.value",user.value)
+                    this.user = JSON.parse(userData);
                 } else {
                     console.log('User not authenticated');
                     this.$router.push('/login');
-                    return
+                    return;
                 }
 
-                const user = userData.user;
+                // Fetch profile data to get question queue and current index
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles_duplicate')
+                    .select('*')
+                    .eq('user_id', this.user.id)
+                    .single();
+
+                if (profileError) throw profileError;
+
+                this.profileData = profileData; // Store profileData for later use
+
+                const questionQueue = profileData.question_queue;
+                const currentQuestionIndex = profileData.current_question_index || 0;
+
+                const questionNumber = questionQueue[currentQuestionIndex];
 
                 const { data: answerData, error: answerError } = await supabase
                     .from('answers_posttest_duplicate')
-                    .select('belief_rating_1, llm_summary, question_number')
-                    .eq('user_id', user.id)
+                    .select('belief_rating_1, llm_summary')
+                    .eq('user_id', this.user.id)
+                    .eq('question_number', questionNumber)
                     .single();
 
                 if (answerError) throw answerError;
@@ -117,16 +131,16 @@ export default {
                 this.explanation = answerData.llm_summary;
 
                 const { data: questionData, error: questionError } = await supabase
-                    .from('questions')
+                    .from('questions_denton')
                     .select('question_text')
-                    .eq('question_number', answerData.question_number)
+                    .eq('question_number', questionNumber)
                     .single();
 
                 if (questionError) throw questionError;
 
                 this.questionText = questionData.question_text;
 
-                this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
+                this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
 
                 await this.generateInitialAIMessage();
 
@@ -138,7 +152,7 @@ export default {
         async generateInitialAIMessage() {
             this.loading = true;
             const apiData = {
-                model: "gpt-4o",
+                model: "gpt-4",
                 messages: [
                     { role: "system", content: this.systemPrompt },
                     { role: "user", content: "Please start the conversation by addressing the user's misconception." },
@@ -193,7 +207,7 @@ export default {
             this.remainingRounds--;
 
             const apiData = {
-                model: "gpt-4o",
+                model: "gpt-4",
                 messages: [
                     { role: "system", content: this.systemPrompt },
                     ...this.messages,
@@ -219,19 +233,7 @@ export default {
                 const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
 
                 // Get user information from Supabase
-                // TODO TODO ! need error handling
-                const userData = localStorage.getItem('user');
-                if (userData) {
-                    // const user = JSON.parse(userData);
-                    // user.value = JSON.parse(userData);
-                    // console.log("user.value",user.value)
-                } else {
-                    console.log('User not authenticated');
-                    this.$router.push('/login');
-                    return
-                }
-                const user = JSON.parse(userData);
-                const userId = user.id;
+                const userId = this.user.id;
                 const { data: profileData, error: profileError } = await supabase
                     .from('profiles_duplicate')
                     .select('display_name, group')
@@ -243,9 +245,11 @@ export default {
                 const displayName = profileData.display_name;
                 const llmType = profileData.group;
 
+                // Save chat history
                 await supabase.from('chat_history_duplicate').insert({
                     user_id: userId,
-                    system_message: this.messages,
+                    system_message: this.systemPrompt,
+                    conversation: this.messages,
                     round: Math.ceil(this.messages.length / 2 - 1),
                     user_chat: userMessageContent,
                     model_reply: modelReply,
@@ -253,6 +257,7 @@ export default {
                     time_spent: timeSpentFormatted,
                     timestamp: new Date().toISOString(),
                     initial_message: this.initialSystemMessage,
+                    question_number: this.profileData.question_queue[this.profileData.current_question_index || 0],
                 });
 
                 this.$nextTick(() => {
@@ -288,8 +293,9 @@ export default {
                 this.nextPage();
             }
         },
-        nextPage() {
+        async nextPage() {
             this.saveChatData();
+            // Redirect to the post-chat belief rating page
             this.$router.push('/beliefratingpostchat');
         },
         saveChatData() {

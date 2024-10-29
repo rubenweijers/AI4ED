@@ -92,6 +92,7 @@ import axios from 'axios';
 import ToastNotification from '../components/ToastNotification.vue';
 
 const user = ref(null);
+const profile = ref(null);
 const loading = ref(true);
 const incorrectQuestion = ref(null);
 const userAnswer = ref('');
@@ -117,7 +118,7 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value",user.value)
+    await fetchUserProfile();
     await fetchIncorrectQuestion();
   } else {
     router.push('/login'); // Redirect to login if no user is found
@@ -125,37 +126,68 @@ const checkUser = async () => {
   loading.value = false;
 };
 
+const fetchUserProfile = async () => {
+  const { data, error } = await supabase
+    .from('profiles_duplicate')
+    .select('*')
+    .eq('user_id', user.value.username)
+    .single();
+
+  if (error) {
+    console.error('Error fetching user profile:', error.message);
+  } else {
+    profile.value = data;
+  }
+};
+
 const fetchIncorrectQuestion = async () => {
   try {
-    const { data: incorrectAnswers, error: incorrectAnswersError } = await supabase
-      .from('answers_duplicate')
+    if (!profile.value.question_queue || profile.value.question_queue.length === 0) {
+      console.error('No question queue found. Please complete the FCI test first.');
+      alert('No question queue found. Please complete the FCI test first.');
+      router.push('/study'); // Redirect to the study page
+      return;
+    }
+
+    const currentIndex = profile.value.current_question_index || 0;
+    const questionQueue = profile.value.question_queue;
+
+    if (currentIndex >= questionQueue.length) {
+      // No more questions to display
+      incorrectQuestion.value = null;
+      return;
+    }
+
+    const nextQuestionNumber = questionQueue[currentIndex];
+
+    // Fetch the question from 'questions_denton' table
+    const { data: questionData, error: questionError } = await supabase
+      .from('questions_denton')
       .select('*')
-      .eq('user_id', user.value.id);
+      .eq('question_number', nextQuestionNumber)
+      .single();
 
-    if (incorrectAnswersError) {
-      console.error('Error fetching answers:', incorrectAnswersError.message);
+    if (questionError) {
+      console.error('Error fetching question:', questionError.message);
       return;
     }
 
-    const { data: questions, error: questionsError } = await supabase
-      .from('questions')
-      .select('*');
+    incorrectQuestion.value = questionData;
 
-    if (questionsError) {
-      console.error('Error fetching questions:', questionsError.message);
+    // Fetch user's answer from 'answers_duplicate' table
+    const { data: userAnswerData, error: userAnswerError } = await supabase
+      .from('answers_duplicate')
+      .select('answer')
+      .eq('user_id', user.value.username)
+      .eq('question_number', nextQuestionNumber)
+      .single();
+
+    if (userAnswerError) {
+      console.error('Error fetching user answer:', userAnswerError.message);
       return;
     }
 
-    const incorrect = incorrectAnswers.filter(answer => {
-      const question = questions.find(q => q.question_number === answer.question_number);
-      return question && question.correct_answer !== answer.answer;
-    });
-
-    if (incorrect.length > 0) {
-      const randomIndex = Math.floor(Math.random() * incorrect.length);
-      incorrectQuestion.value = questions.find(q => q.question_number === incorrect[randomIndex].question_number);
-      userAnswer.value = incorrect[randomIndex].answer;
-    }
+    userAnswer.value = userAnswerData.answer || '';
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
@@ -202,22 +234,11 @@ const checkValid = () => {
 
 const submitExplanation = async () => {
     try {
-      // Delete existing row if it exists
-      const { error: deleteError } = await supabase
-        .from('answers_posttest_duplicate')
-        .delete()
-        .eq('user_id', user.value.id)
-
-      if (deleteError) {
-        console.error('Error deleting existing row:', deleteError.message);
-        return;
-      }
-
       // Insert new row
       const { data, error } = await supabase
         .from('answers_posttest_duplicate')
         .insert({
-          user_id: user.value.id,
+          user_id: user.value.username,
           question_id: incorrectQuestion.value.id,
           question_number: incorrectQuestion.value.question_number,
           explanation: explanation.value,
@@ -235,7 +256,7 @@ const submitExplanation = async () => {
       const { error: updateError } = await supabase
         .from('answers_posttest_duplicate')
         .update({ llm_summary: summary })
-        .eq('user_id', user.value.id)
+        .eq('user_id', user.value.username)
         .eq('question_id', incorrectQuestion.value.id);
 
       if (updateError) {
@@ -243,10 +264,26 @@ const submitExplanation = async () => {
         return;
       }
 
+      // Update current_question_index
+      const newIndex = (profile.value.current_question_index || 0) + 1;
+
+      const { data: updateData, error: profileUpdateError } = await supabase
+        .from('profiles_duplicate')
+        .update({
+          current_question_index: newIndex,
+        })
+        .eq('user_id', user.value.username);
+
+      if (profileUpdateError) {
+        console.error('Error updating current_question_index:', profileUpdateError.message);
+      } else {
+        profile.value.current_question_index = newIndex;
+      }
+
       // Display submission success notification
       submissionSuccess.value = true;
-      // Navigate to thank you page after a delay
-        router.push('/beliefrating');
+      // Navigate to belief rating page
+      router.push('/beliefrating');
     } catch (error) {
       console.error('An unexpected error occurred:', error);
     }
@@ -254,22 +291,24 @@ const submitExplanation = async () => {
 
 const summarizeExplanation = async (explanation) => {
   const apiData = {
-    model: "gpt-4o",
-    // Prompt for summarizing the explanation
+    model: "gpt-4",
     messages: [
-      { role: "system", content: "Summarize the following passage, which describes a misconception, in a single sentence. Do not mention that it is a misconception, or a belief, or provide any kind of normative judgment. Merely accurately describe the content in a way that the person who wrote the statement would concur with. Frame it as an assertion. If the statement is already short, no need to change it very much. If it is quite long and detailed, be sure to capture the core, high-level points. Do not focus on the evidence provided for the belief --merely focus on the basic assertion" },
-      { role: "user", content: explanation }
+      {
+        role: "system",
+        content: "Summarize the following passage, which describes a misconception, in a single sentence. Do not mention that it is a misconception, or a belief, or provide any kind of normative judgment. Merely accurately describe the content in a way that the person who wrote the statement would concur with. Frame it as an assertion. If the statement is already short, no need to change it very much. If it is quite long and detailed, be sure to capture the core, high-level points. Do not focus on the evidence provided for the belief --merely focus on the basic assertion",
+      },
+      { role: "user", content: explanation },
     ],
     max_tokens: 100,
-    temperature: 0.7
+    temperature: 0.7,
   };
 
   try {
     const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-      }
+        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+      },
     });
     return response.data.choices[0].message.content.trim();
   } catch (error) {

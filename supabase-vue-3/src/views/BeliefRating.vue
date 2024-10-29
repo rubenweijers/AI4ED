@@ -32,17 +32,18 @@
 </template>
   
 <script setup>
-  import { ref, onMounted } from 'vue';
-  import { useRouter } from 'vue-router';
-  import { supabase } from '../supabase';
-  import ToastNotification from '../components/ToastNotification.vue';
-  
-  const sentence = ref('');
-  const selectedRating = ref(null);
-  const submissionSuccess = ref(false);
-  const loading = ref(true);
-  const router = useRouter();
-  const showToast = ref(false);
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { supabase } from '../supabase';
+import ToastNotification from '../components/ToastNotification.vue';
+
+const sentence = ref('');
+const selectedRating = ref(null);
+const submissionSuccess = ref(false);
+const loading = ref(true);
+const router = useRouter();
+const showToast = ref(false);
+const user = ref(null);
 
 // Toast notifications
 const showToastNotification = () => {
@@ -57,112 +58,127 @@ const confirmSubmit = async () => {
 const cancelSubmit = () => {
   showToast.value = false;
 };
-  
-  const ratingLabels = [
-    { value: 0, text: 'Definitely False' },
-    { value: 25, text: 'Probably False' },
-    { value: 50, text: 'Uncertain' },
-    { value: 75, text: 'Probably True' },
-    { value: 100, text: 'Definitely True' },
-  ];
-  
-  const fetchSummary = async () => {
-    try {
-      // const { data: userData, error: userError } = await supabase.auth.getUser();
-      // if (userError || !userData?.user) {
-      //   console.log('User not authenticated');
-      //   router.push('/login');
-      //   return;
-      // }
-      //TODO this change needs double check
-      const userData = localStorage.getItem('user');
-      if (userData) {
-          // user.value = JSON.parse(userData);
-          // console.log("user.value",user.value)
-      } else {
-          console.log('User not authenticated');
-          this.$router.push('/login');
-          return
-      }
-  
-      const user = JSON.parse(userData);
 
-      // user.value = JSON.parse(userData);
+const ratingLabels = [
+  { value: 0, text: 'Definitely False' },
+  { value: 25, text: 'Probably False' },
+  { value: 50, text: 'Uncertain' },
+  { value: 75, text: 'Probably True' },
+  { value: 100, text: 'Definitely True' },
+];
 
-
-      const { data, error } = await supabase
-        .from('answers_posttest_duplicate')
-        .select('llm_summary')
-        .eq('user_id', user.id)
-        .single();
-  
-      if (error) {
-        console.error('Error fetching summary:', error);
-        alert('An error occurred while fetching the summary. Please try again.');
-        return;
-      }
-  
-      if (data && data.llm_summary) {
-        sentence.value = data.llm_summary;
-      } else {
-        console.error('No summary found for the user');
-        alert('No summary found. Please try again.');
-      }
-    } catch (error) {
-      console.error('An unexpected error occurred:', error);
-      alert('An unexpected error occurred. Please try again.');
-    } finally {
-      loading.value = false;
-    }
-  };
-  
-  const submitAnswers = async () => {
-    if (selectedRating.value === null) {
-      alert('Please select a rating before submitting.');
+const fetchSummary = async () => {
+  try {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      user.value = JSON.parse(userData);
+    } else {
+      console.log('User not authenticated');
+      router.push('/login');
       return;
     }
-  
-    try {
-      // const { data: userData, error: userError } = await supabase.auth.getUser();
-      // if (userError || !userData?.user) {
-      //   console.log('User not authenticated');
-      //   router.push('/login');
-      //   return;
-      // }
-      const userData = localStorage.getItem('user');
-      if (userData) {
-          // user.value = JSON.parse(userData);
-          // console.log("user.value",user.value)
-      } else {
-          console.log('User not authenticated');
-          this.$router.push('/login');
-          return
-      }
-  
-      const user = JSON.parse(userData);
-  
-      const { data, error } = await supabase
-        .from('answers_posttest_duplicate')
-        .update({ 'belief_rating_1': selectedRating.value })
-        .eq('user_id', user.id);
-  
-      if (error) {
-        console.error('Error submitting rating:', error);
-        alert('An error occurred while submitting your rating. Please try again.');
-        return;
-      }
-  
-      submissionSuccess.value = true;
-        router.push('/prechat'); // Adjust the route as needed
-    } catch (error) {
-      console.error('An unexpected error occurred:', error);
-      alert('An unexpected error occurred. Please try again.');
+
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles_duplicate')
+      .select('*')
+      .eq('user_id', user.value.id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError.message);
+      alert('An error occurred while fetching your data. Please try again.');
+      return;
     }
-  };
-  
-  onMounted(() => {
-    fetchSummary();
-  });
+
+    const questionQueue = profileData.question_queue;
+    const currentQuestionIndex = (profileData.current_question_index || 0) - 1;
+
+    const questionNumber = questionQueue[currentQuestionIndex];
+
+    // Now fetch the llm_summary from 'answers_posttest_duplicate' for this question
+    const { data, error } = await supabase
+      .from('answers_posttest_duplicate')
+      .select('llm_summary')
+      .eq('user_id', user.value.id)
+      .eq('question_number', questionNumber)
+      .single();
+
+    if (error) {
+      console.error('Error fetching summary:', error);
+      alert('An error occurred while fetching the summary. Please try again.');
+      return;
+    }
+
+    if (data && data.llm_summary) {
+      sentence.value = data.llm_summary;
+    } else {
+      console.error('No summary found for the user');
+      alert('No summary found. Please try again.');
+    }
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+    alert('An unexpected error occurred. Please try again.');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const submitAnswers = async () => {
+  if (selectedRating.value === null) {
+    alert('Please select a rating before submitting.');
+    return;
+  }
+
+  try {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      user.value = JSON.parse(userData);
+    } else {
+      console.log('User not authenticated');
+      router.push('/login');
+      return;
+    }
+
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles_duplicate')
+      .select('*')
+      .eq('user_id', user.value.id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError.message);
+      alert('An error occurred while fetching your data. Please try again.');
+      return;
+    }
+
+    const questionQueue = profileData.question_queue;
+    const currentQuestionIndex = (profileData.current_question_index || 0) - 1;
+
+    const questionNumber = questionQueue[currentQuestionIndex];
+
+    const { data, error } = await supabase
+      .from('answers_posttest_duplicate')
+      .update({ 'belief_rating_1': selectedRating.value })
+      .eq('user_id', user.value.id)
+      .eq('question_number', questionNumber);
+
+    if (error) {
+      console.error('Error submitting rating:', error);
+      alert('An error occurred while submitting your rating. Please try again.');
+      return;
+    }
+
+    submissionSuccess.value = true;
+    router.push('/prechat'); // Adjust the route as needed
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+    alert('An unexpected error occurred. Please try again.');
+  }
+};
+
+onMounted(() => {
+  fetchSummary();
+});
 </script>
   
   

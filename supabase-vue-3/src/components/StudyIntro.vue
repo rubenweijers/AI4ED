@@ -14,7 +14,7 @@
         <br>
         Your responses are anonmyous and will <strong>not</strong> be shared with anyone outside this research.
         <br>
-        This is an <strong>ungraded</strong>ungraded test and your responses will not affect your grade in any way.
+        This is an <strong>ungraded</strong> test and your responses will not affect your grade in any way.
         <br>
         Bonus points will be awarded for participation?
       </p>

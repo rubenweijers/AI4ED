@@ -37,7 +37,7 @@
         <!-- Old button -->
         <!-- <button type="submit" class="submit-button">Submit Survey and Take the FCI</button> -->
 
-        <button @click="handleFormSubmission" class="submit-button" :disabled="formSubmitted.value">Submit Survey and Proceed to FCI.</button>
+        <button @click="handleFormSubmission" class="submit-button" :disabled="!!formSubmitted.value">Submit Survey and Proceed to FCI.</button>
 
         <ToastNotification
           :isVisible="showToast"
@@ -56,8 +56,6 @@
 </template>
 
 <script setup>
-
-
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
@@ -109,7 +107,7 @@ const checkSubmissionStatus = async () => {
       return;
     }
 
-    formSubmitted.value = data.has_submitted_survey;
+    formSubmitted.value = data?.has_submitted_survey || false;
   } catch (error) {
     console.error('Error checking submission status:', error);
   }
@@ -132,21 +130,15 @@ const fetchQuestions = async () => {
       .select('*')
       .order('question_number', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching questions:', error.message);
-      return;
-    }
+    if (error) throw error;
 
-    if (data.length === 0) {
-      console.warn('No questions found in the database.');
-    } else {
-      surveyQuestions.value = data;
-      answers.value = surveyQuestions.value.map(() => ''); // Initialize answers array with empty strings
-    }
-
-    loading.value = false; // Set loading to false after fetching questions
+    surveyQuestions.value = data || [];
+    answers.value = Object.fromEntries(data.map(q => [q.id, '']));
   } catch (error) {
     console.error('Error fetching questions:', error);
+    // Handle the error appropriately, e.g., set an error state
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -216,9 +208,7 @@ onMounted(async () => {
   await checkUser();
   await fetchQuestions();
 });
-
 </script>
-
 
 <style scoped>
 .survey-container {
