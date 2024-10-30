@@ -4,7 +4,7 @@
   </div>
   <div v-else-if="user">
     <div class="study-container">
-      <h2>2nd Force Concept Inventory</h2>
+      <h2>Force Concept Inventory Test #1</h2>
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
       <form @submit.prevent="confirmSubmission">
         <div v-for="(question, index) in questions" :key="question.id">
@@ -55,7 +55,7 @@
 
               A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
 
-              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
 
             </p>
           </div>
@@ -65,7 +65,7 @@
 
               A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
 
-              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
 
               <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
             </p>
@@ -566,7 +566,7 @@ input[type="radio"] {
 .question-image-range {
   max-width: 100%;
   margin: 0px 0;
-  margin-top: -80px;
+  margin-top: -20px;
   margin-bottom: 100px; /* Increase margin to bottom */
 }
 
