@@ -3,7 +3,7 @@
         <div class="messages">
             <div v-if="loading && messages.length === 0" class="loading">
                 <img src="/loading_spinner.gif" alt="Loading" />
-                <p>Generating initial message...</p>
+                <p>Thinking..</p>
             </div>
             <div v-for="(message, index) in messages" :key="index" :class="['message', message.role]">
                 <div v-if="message.role === 'assistant'" class="assistant-message">

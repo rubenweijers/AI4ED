@@ -134,7 +134,7 @@ const checkUser = async () => {
 };
 
 const fetchQuestions = async () => {
-  const { data, error } = await supabase.from('questions_denton').select('*').order('question_number', { ascending: true });
+  const { data, error } = await supabase.from('questions').select('*').order('question_number', { ascending: true });
   if (error) {
     console.error('Error fetching questions:', error.message);
     return;
@@ -184,7 +184,7 @@ const submitAnswers = async () => {
       question_number: question.question_number,
     }));
 
-    const { data: answerData, error: answerError } = await supabase.from('answers_denton').upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
+    const { data: answerData, error: answerError } = await supabase.from('answers').upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
     if (answerError) {
       console.error('Error submitting answers:', answerError.message);
       return;

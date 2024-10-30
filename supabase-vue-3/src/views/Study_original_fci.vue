@@ -4,7 +4,7 @@
   </div>
   <div v-else-if="user">
     <div class="study-container">
-      <h2>Force Concept Inventory</h2>
+      <h2>Force Concept Inventory Test #2</h2>
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
       <form @submit.prevent="confirmSubmission">
         <div v-for="(question, index) in questions" :key="question.id">
@@ -214,7 +214,7 @@ const handleFormSubmission = () => {
   if (formSubmitted.value) {
     console.log('Form has already been submitted.');
     alert('The form has already been submitted.');
-    router.push('/PostTest');
+    router.push('/thankyou'); // Redirect to a Thank You page or appropriate page
   } else {
     confirmSubmit();
   }
@@ -240,7 +240,7 @@ const submitAnswers = async () => {
       return;
     }
 
-    await generateQuestionQueue();
+    // Since we don't need to generate a question queue for the second FCI, we can remove that part
 
     const { error: updateError } = await supabase
       .from('profiles_duplicate')
@@ -252,13 +252,8 @@ const submitAnswers = async () => {
       return;
     }
 
-    // Reset the timer to 30 minutes
-    const newStartTime = Date.now();
-    localStorage.setItem('studyStartTime', newStartTime);
-    localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set total duration to 30 minutes in seconds
-
     submissionSuccess.value = true;
-    router.push('/PostTest');
+    router.push('/thankyou'); // Redirect to a Thank You page or appropriate page
   } catch (error) {
     console.error('An unexpected error occurred:', error);
     formSubmitted.value = false;
@@ -308,141 +303,6 @@ const loadSavedAnswers = () => {
 
 watch(answers, saveAnswersToLocalStorage, { deep: true });
 
-const generateQuestionQueue = async () => {
-  try {
-    console.log('Starting queue generation');
-    
-    // Fetch all user's answers
-    const { data: userAnswers, error: userAnswersError } = await supabase
-      .from('answers_duplicate')
-      .select('question_number, answer')
-      .eq('user_id', user.value.username);
-
-    if (userAnswersError) {
-      console.error('Error fetching user answers:', userAnswersError.message);
-      return;
-    }
-
-    console.log('User answers:', userAnswers);
-
-    if (!userAnswers || userAnswers.length === 0) {
-      console.log('No user answers found');
-      return;
-    }
-
-    // Fetch correct answers for those questions from 'questions_denton'
-    const questionNumbers = userAnswers.map(a => a.question_number);
-    const { data: questionsData, error: questionsError } = await supabase
-      .from('questions_denton')
-      .select('*')
-      .in('question_number', questionNumbers);
-
-    if (questionsError) {
-      console.error('Error fetching questions:', questionsError.message);
-      return;
-    }
-
-    console.log('Questions data:', questionsData);
-
-    if (!questionsData || questionsData.length === 0) {
-      console.log('No questions data found');
-      return;
-    }
-
-    // Determine incorrect answers by comparing user's answer with correct answer
-    const incorrectQuestionNumbers = [];
-
-    for (const userAnswer of userAnswers) {
-      const question = questionsData.find(q => q.question_number === userAnswer.question_number);
-      if (question && question.correct_answer !== userAnswer.answer) {
-        incorrectQuestionNumbers.push(userAnswer.question_number);
-      }
-    }
-
-    console.log('Incorrect question numbers:', incorrectQuestionNumbers);
-
-    if (incorrectQuestionNumbers.length === 0) {
-      console.log('User got all answers correct, no question queue to generate.');
-      return;
-    }
-
-    const { data: incorrectQuestions, error: incorrectQuestionsError } = await supabase
-      .from('questions_denton')
-      .select('*')
-      .in('question_number', incorrectQuestionNumbers);
-
-    if (incorrectQuestionsError) {
-      console.error('Error fetching incorrect questions:', incorrectQuestionsError.message);
-      return;
-    }
-
-    const questionsByNumberInCategory = {};
-
-    for (const question of incorrectQuestions) {
-      const n = question.question_number_in_category;
-      if (!questionsByNumberInCategory[n]) {
-        questionsByNumberInCategory[n] = [];
-      }
-      questionsByNumberInCategory[n].push(question);
-    }
-
-    const questionQueue = [];
-
-    const nValues = Object.keys(questionsByNumberInCategory).map(Number).sort((a, b) => a - b);
-
-    for (const n of nValues) {
-      const questionsAtN = questionsByNumberInCategory[n];
-      questionsAtN.sort(() => Math.random() - 0.5);
-
-      for (const question of questionsAtN) {
-        questionQueue.push(question.question_number);
-      }
-    }
-
-    console.log('Generated question queue:', questionQueue);
-
-    // Before update
-    console.log('Attempting to update profile with queue:', questionQueue);
-
-    const { data: updateData, error: updateError } = await supabase
-      .from('profiles_duplicate')
-      .update({
-        question_queue: questionQueue,
-        current_question_index: 0,
-      })
-      .eq('user_id', user.value.username);
-
-    if (updateError) {
-      console.error('Error updating user profile:', updateError.message);
-      return;
-    }
-
-    console.log('Update response:', updateData);
-
-    // Update profile.value
-    if (profile.value) {
-      profile.value.question_queue = questionQueue;
-      profile.value.current_question_index = 0;
-    }
-
-    // Add delay and retry fetch
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay
-    const { data: updatedProfile, error: checkError } = await supabase
-      .from('profiles_duplicate')
-      .select('question_queue')
-      .eq('user_id', user.value.username)
-      .single();
-
-    if (checkError) {
-      console.error('Error checking updated profile:', checkError);
-    } else {
-      console.log('Updated question_queue after delay:', updatedProfile.question_queue);
-    }
-
-  } catch (error) {
-    console.error('An unexpected error occurred:', error);
-  }
-};
 onMounted(() => {
   checkUser();
 });

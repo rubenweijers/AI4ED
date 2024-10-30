@@ -12,12 +12,13 @@
       <hr>
       <div class="question">
 
-        <!-- Add reminder text for question numbers 26 and 27 -->
+        <!-- Add reminder text for specific question numbers -->
         <!-- Q2 -->
         <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
           <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
         </div>
 
+        <!-- Questions 3 to 7 -->
         <div v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" class="additional-text">
           <p><i>Reminder: you used this statement to answer the question.</i><br>
             A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
@@ -26,6 +27,7 @@
           </p>  
           </div>
 
+        <!-- Questions 28 to 30 -->
         <div v-else-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
           <p><i>Reminder: you used this statement to answer the question.</i> <br>
             A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
@@ -51,30 +53,38 @@
         <img v-if="incorrectQuestion.question_number === 24" src="/fci_2/fci_q24.png" alt="Question related image" class="question-image">
         <img v-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" src="/fci_2/fci_q28-30.png" alt="Question related image" class="question-image">
         <img v-if="incorrectQuestion.question_number === 28" src="/fci_2/fci_q28.png" alt="Question related image" class="question-image">
-      
+
         <label v-html="formatQuestionText(incorrectQuestion)"></label>
+
+        <!-- Options Rendering with Conditional Labels -->
         <div v-for="(option, index) in getOptions(incorrectQuestion)" :key="index" class="option">
           <p :class="{'user-answer': userAnswer === option}">
-            <strong v-if="!startsWithLabel(option)">{{ optionLabels[index] }}</strong> {{ option }}
+            <template v-if="shouldDisplayLabels(incorrectQuestion.question_number)">
+              <strong>{{ optionLabels[index] }}. </strong>
+            </template>
+            {{ option }}
           </p>
         </div>
         <hr>
         <p><strong>Your answer was:</strong> {{ userAnswer }}</p>
+        <!-- Optional: Correct Answer Display -->
         <!-- <p><strong>Correct Answer:</strong> {{ getCorrectAnswer() }}</p> -->
       </div>
+
+      <!-- Explanation Section -->
       <div class="explanation">
         <p>Please explain your reasoning for this answer in at least 10 words:</p>
         <textarea v-model="explanation" rows="4" cols="50"></textarea>
       </div>
       <button @click="showToastNotification" class="submit-button">Submit</button>
 
-        <ToastNotification
-          :isVisible="showToast"
-          title="Submit Explanation"
-          message="Are you sure you want to submit your explanation? This action cannot be undone."
-          @confirm="confirmSubmit"
-          @cancel="cancelSubmit"
-        />
+      <ToastNotification
+        :isVisible="showToast"
+        title="Submit Explanation"
+        message="Are you sure you want to submit your explanation? This action cannot be undone."
+        @confirm="confirmSubmit"
+        @cancel="cancelSubmit"
+      />
     </div>
     <div v-else>
       <p>No incorrect answers found.</p>
@@ -99,6 +109,12 @@ const submissionSuccess = ref(false);
 const router = useRouter();
 const showToast = ref(false);
 const optionLabels = ["A", "B", "C", "D", "E"];
+
+// Array of question numbers where labels should be displayed
+const questionsWithLabels = [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 29, 30];
+
+// Function to determine if labels should be displayed for a question
+const shouldDisplayLabels = (questionNumber) => questionsWithLabels.includes(questionNumber);
 
 // Toast notifications
 const showToastNotification = () => {
@@ -175,7 +191,7 @@ const fetchIncorrectQuestion = async () => {
 
     incorrectQuestion.value = questionData;
 
-    // Fetch user's answer from 'answers_duplicate' table
+    // Fetch user's answer from 'answers_denton' table
     const { data: userAnswerData, error: userAnswerError } = await supabase
       .from('answers_denton')
       .select('answer')
@@ -195,11 +211,13 @@ const fetchIncorrectQuestion = async () => {
 };
 
 const getOptions = (question) => {
-  return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
-};
-
-const startsWithLabel = (option) => {
-  return optionLabels.some(label => option.trim().startsWith(label));
+  return [
+    question.option_1,
+    question.option_2,
+    question.option_3,
+    question.option_4,
+    question.option_5
+  ].filter(option => option);
 };
 
 const formatQuestionText = (question) => {
@@ -239,7 +257,7 @@ const submitExplanation = async () => {
       };
 
       // Perform the upsert operation
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('answers_posttest_denton')
         .upsert(upsertData, { 
           onConflict: 'user_id,question_number',
@@ -250,8 +268,6 @@ const submitExplanation = async () => {
         console.error('Error submitting explanation:', error.message);
         return;
       }
-
-      // const insertedRow = data[0]; // Get the inserted or updated row
 
       // Call OpenAI API to summarize the explanation
       const summary = await summarizeExplanation(explanation.value);
@@ -271,7 +287,7 @@ const submitExplanation = async () => {
     // Update current_question_index
     const newIndex = profile.value.current_question_index;
 
-    const { data: updateData, error: profileUpdateError } = await supabase
+    const { error: profileUpdateError } = await supabase
       .from('profiles_duplicate')
       .update({
         current_question_index: newIndex,
@@ -287,10 +303,6 @@ const submitExplanation = async () => {
     // Display submission success notification
     submissionSuccess.value = true;
     
-    // Log user data and profile data before navigation
-    console.log('User data:', user.value);
-    console.log('Profile data:', profile.value);
-
     // Navigate to belief rating page
     await router.push('/beliefrating');
   } catch (error) {
@@ -364,10 +376,11 @@ label {
   margin-left: 20px;
 }
 
-.user-answer {
-  font-weight: bold;
-  color: red;
-}
+/* .user-answer {
+  background-color: #e0f7fa;
+  border-left: 4px solid #00796b;
+  padding-left: 8px;
+} */
 
 .explanation {
   margin-bottom: 20px;
