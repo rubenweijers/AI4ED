@@ -235,7 +235,7 @@ const submitAnswers = async () => {
     }
 
     // If you need to generate a question queue, ensure it uses the correct tables
-    // await generateQuestionQueue(); // Adjust if necessary
+    await generateQuestionQueue(); // Adjust if necessary
 
     const { error: updateError } = await supabase
       .from('profiles_duplicate')

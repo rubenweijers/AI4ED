@@ -7,7 +7,7 @@
     <section>
       <h2>Principal Investigators</h2>
       <ul>
-        <li>Jean-François Godbout - <a href="mailto:ai4ed@gmail.com">jean-francois.godbout@umontreal.ca</a></li>
+        <li>Jean-François Godbout - <a href="mailto:jean-francois.godbout@umontreal.ca">ai4ed@gmail.com</a></li>
       </ul>
     </section>
 
