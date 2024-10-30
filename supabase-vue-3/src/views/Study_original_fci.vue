@@ -4,26 +4,27 @@
   </div>
   <div v-else-if="user">
     <div class="study-container">
-      <h2>2nd Force Concept Inventory</h2>
+      <h2>Force Concept Inventory</h2>
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
       <form @submit.prevent="confirmSubmission">
         <div v-for="(question, index) in questions" :key="question.id">
           <!-- Add images before the corresponding questions -->
-          <img v-if="question.question_number === 1" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image with-line">
-          <!-- <div v-if="question.question_number === 1" class="horizontal-line"></div> -->
-          <img v-if="question.question_number === 4" src="/fci_2/fci_q4-7.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 4" src="/fci_2/fci_q4.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 6" src="/fci_2/fci_q6.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 11" src="/fci_2/fci_q11.png" alt="Question related image" class="question-image-range">
-          <img v-if="question.question_number === 12" src="/fci_2/fci_q12.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 13" src="/fci_2/fci_q13.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 14" src="/fci_2/fci_q14.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 16" src="/fci_2/fci_q16.png" alt="Question related image" class="question-image-range">
-          <img v-if="question.question_number === 19" src="/fci_2/fci_q19.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 23" src="/fci_2/fci_q23.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 24" src="/fci_2/fci_q24.png" alt="Question related image" class="question-image-range">
-          <img v-if="question.question_number === 28" src="/fci_2/fci_q28-30.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 28" src="/fci_2/fci_q28.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 5" src="/fci_q5-6.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 6" src="/fci_q6.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 7" src="/fci_q7.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 8" src="/fci_q8-11.png" alt="Question related image" class="question-image-range">
+          <img v-if="question.question_number === 8" src="/fci_q8.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 12" src="/fci_q12.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 15" src="/fci_q15-16.png" alt="Question related image" class="question-image-range">
+          <img v-if="question.question_number === 17" src="/fci_q17.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 18" src="/fci_q18.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 19" src="/fci_q19.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 20" src="/fci_q20.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 21" src="/fci_q21-24.png" alt="Question related image" class="question-image-range">
+          <img v-if="question.question_number === 21" src="/fci_q21.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 23" src="/fci_q23.png" alt="Question related image" class="question-image">
+          <img v-if="question.question_number === 28" src="/fci_q28.png" alt="Question related image" class="question-image">
 
           <!-- Render question text with line breaks -->
           <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)" class="studyquestion"></label>
@@ -49,29 +50,35 @@
           </div>
 
           <!-- Add manual texts at specified positions -->
-          <div v-if="question.question_number === 3" class="manual-text">
+          <div v-if="question.question_number === 4" class="manual-text">
             <p>
-              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS<br><br>
-
-              A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
-
-              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (5 and 6).<br>
+              The accompanying figure shows a frictionless channel in the shape of a segment of a circle with a center at <i>O</i>. The channel has been anchored to a frictionless horizontal table top. You are looking down at the table. Forces exerted by the air are negligible. A ball is shot at high speed into the channel at <i>p</i> and exits at <i>r</i>.
             </p>
           </div>
-          <div v-if="question.question_number === 27" class="manual-text">
+          <div v-if="question.question_number === 7" class="manual-text">
             <p>
-              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT THREE QUESTIONS<br><br>
-
-              A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
-
-              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-
-              <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (8 through 11). <br>
+              The figure below depicts a hockey puck sliding with constant speed <i>v<span class="subscript">o</span></i> in a straight line from point <i>a</i> to point <i>b</i> on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point <i>b</i>, it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point <i>a</i>, then the kick would have set the puck in horizontal motion with a speed <i>v<span class="subscript">k</span></i> in the direction of the kick.
             </p>
           </div>
+
+          <div v-if="question.question_number === 14" class="manual-text">
+            <p>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (15 and 16). <br>
+              A large truck breaks down out on the road and receives a push back into town by a small compact car as shown in the figure below.
+            </p>
+          </div>
+
+          <div v-if="question.question_number === 20" class="manual-text">
+            <p>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (21 through 24). <br>
+              A rocket drifts sideways in outer space from point <i>a</i> to point <i>b</i> as shown below. The rocket is subject to no outside forces. Starting at position <i>b</i>, the rocket's engine is turned on and produces a constant thrust (force on the rocket) at right angles to the line <i>ab</i>. The constant thrust is maintained until the rocket reaches a point <i>c</i> in space.
+            </p>
+          </div>
+
         </div>
-        <!-- Old button -->
+        <!-- Old button! --> 
         <!-- <button type="submit" class="submit-button">Submit Questionnaire</button> -->
         
         <button @click="showToastNotification" class="next-button">Submit FCI.</button>
@@ -94,7 +101,6 @@
     <router-link to="/login">Log in</router-link>
   </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
@@ -173,7 +179,7 @@ const checkSubmissionStatus = async () => {
 };
 
 const fetchQuestions = async () => {
-  const { data, error } = await supabase.from('questions_denton').select('*').order('question_number', { ascending: true });
+  const { data, error } = await supabase.from('questions').select('*').order('question_number', { ascending: true });
   if (error) {
     console.error('Error fetching questions:', error.message);
     return;
@@ -225,7 +231,7 @@ const submitAnswers = async () => {
     }));
 
     const { data: answerData, error: answerError } = await supabase
-      .from('answers_denton')
+      .from('answers_duplicate')
       .upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
 
     if (answerError) {
@@ -234,8 +240,7 @@ const submitAnswers = async () => {
       return;
     }
 
-    // If you need to generate a question queue, ensure it uses the correct tables
-    // await generateQuestionQueue(); // Adjust if necessary
+    await generateQuestionQueue();
 
     const { error: updateError } = await supabase
       .from('profiles_duplicate')
@@ -270,7 +275,7 @@ const submitAnswer = async (question, optionIndex) => {
     };
 
     const { data, error } = await supabase
-      .from('answers_denton') // Changed from 'answers_duplicate' to 'answers_denton'
+      .from('answers_duplicate')
       .upsert([answerEntry], { onConflict: ['user_id', 'question_id'] });
 
     if (error) {
@@ -309,7 +314,7 @@ const generateQuestionQueue = async () => {
     
     // Fetch all user's answers
     const { data: userAnswers, error: userAnswersError } = await supabase
-      .from('answers_denton')
+      .from('answers_duplicate')
       .select('question_number, answer')
       .eq('user_id', user.value.username);
 

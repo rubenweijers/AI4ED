@@ -1,29 +1,41 @@
 <template>
   <div>
     <header class="header">
-      <div class="logo-container" @click="redirect">
-        <img src="/ai4edlogo-removebg.png" alt="Bookie Logo" />
-      </div>
       <nav class="nav">
-        <!-- Other nav items can go here -->
+        <!-- Display the timer if it's active -->
+        <div v-if="remainingTime !== null" class="timer">
+          Time left: {{ formattedTime }}
+        </div>
       </nav>
-      <div class="timer" v-if="remainingTime !== null">
-        Time left: {{ formattedTime }}
-      </div>
     </header>
+    <!-- Notification Modal -->
+    <div v-if="showNotification" class="modal-overlay">
+      <div class="modal">
+        <h3>Time Warning</h3>
+        <p>{{ notificationMessage }}</p>
+        <button @click="closeNotification">OK</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { supabase } from '../supabase';
 
 const router = useRouter();
 const route = useRoute();
 const user = ref(null);
 const remainingTime = ref(null); // Remaining time in seconds
 let timerInterval = null; // Reference to the interval timer
+
+// New reactive variables for warnings
+const fifteenMinuteWarningDisplayed = ref(JSON.parse(localStorage.getItem('fifteenMinuteWarningDisplayed')) || false);
+const fiveMinuteWarningDisplayed = ref(JSON.parse(localStorage.getItem('fiveMinuteWarningDisplayed')) || false);
+
+// Variables for notification
+const showNotification = ref(false);
+const notificationMessage = ref('');
 
 const checkUser = () => {
   const storedUser = localStorage.getItem('user');
@@ -34,13 +46,26 @@ const checkUser = () => {
 
 const updateRemainingTime = () => {
   const startTime = localStorage.getItem('studyStartTime');
-  if (startTime) {
+  const totalDuration = localStorage.getItem('studyTotalDuration');
+  if (startTime && totalDuration) {
     const now = Date.now();
     const elapsed = Math.floor((now - startTime) / 1000); // Elapsed time in seconds
-    const totalDuration = 45 * 60; // Total duration in seconds (45 minutes)
-    const timeLeft = totalDuration - elapsed;
+    const totalDurationSeconds = parseInt(totalDuration, 10); // Total duration in seconds
+    const timeLeft = totalDurationSeconds - elapsed;
     if (timeLeft > 0) {
       remainingTime.value = timeLeft;
+
+      // Check for 15-minute warning
+      if (timeLeft <= 15 * 60 && !fifteenMinuteWarningDisplayed.value) {
+        displayWarning('15');
+        fifteenMinuteWarningDisplayed.value = true;
+      }
+
+      // Check for 5-minute warning
+      if (timeLeft <= 5 * 60 && !fiveMinuteWarningDisplayed.value) {
+        displayWarning('5');
+        fiveMinuteWarningDisplayed.value = true;
+      }
     } else {
       remainingTime.value = 0;
       clearInterval(timerInterval);
@@ -53,13 +78,30 @@ const updateRemainingTime = () => {
   }
 };
 
+// Function to display warnings
+const displayWarning = (minutesLeft) => {
+  notificationMessage.value = `You have ${minutesLeft} minutes remaining in your study time.`;
+  showNotification.value = true;
+
+  if (minutesLeft === '15') {
+    fifteenMinuteWarningDisplayed.value = true;
+    localStorage.setItem('fifteenMinuteWarningDisplayed', 'true');
+  } else if (minutesLeft === '5') {
+    fiveMinuteWarningDisplayed.value = true;
+    localStorage.setItem('fiveMinuteWarningDisplayed', 'true');
+  }
+};
+
+const closeNotification = () => {
+  showNotification.value = false;
+};
+
 onMounted(() => {
   checkUser();
   updateRemainingTime();
   timerInterval = setInterval(updateRemainingTime, 1000); // Update every second
 });
 
-// Clear the interval timer when the component is unmounted
 onUnmounted(() => {
   if (timerInterval) {
     clearInterval(timerInterval);
@@ -71,18 +113,6 @@ watch(route, () => {
   checkUser();
 });
 
-const handleLogout = async () => {
-  // TODO: Implement logout logic, if any
-  user.value = null;
-  localStorage.removeItem('user');
-  localStorage.removeItem('studyStartTime'); // Clear the start time when logging out
-  router.push('/login');
-};
-
-const redirect = () => {
-  router.push('/');
-};
-
 // Computed property to format the remaining time as MM:SS
 const formattedTime = computed(() => {
   if (remainingTime.value !== null) {
@@ -93,6 +123,19 @@ const formattedTime = computed(() => {
     return '';
   }
 });
+
+const handleLogout = () => {
+  // TODO: Implement logout logic, if any
+  user.value = null;
+  localStorage.removeItem('user');
+  localStorage.removeItem('studyStartTime'); // Clear the start time when logging out
+  localStorage.removeItem('studyTotalDuration'); // Clear the total duration
+  router.push('/login');
+};
+
+const redirect = () => {
+  router.push('/');
+};
 </script>
 
 <style scoped>
@@ -112,9 +155,51 @@ const formattedTime = computed(() => {
   box-shadow: none;
 }
 
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.modal h3 {
+  margin-top: 0;
+}
+
+.modal button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+
+.modal button:hover {
+  background-color: #0056b3;
+}
+
 .timer {
-  font-size: 1em; /* Adjust font size as needed */
-  color: #000; /* Adjust color as needed */
+  margin-right: 15px;
+  font-size: 1em;
+  color: #000;
+  font-family: 'Roboto', sans-serif;
+  display: flex;
+  align-items: center;
 }
 
 .logo-container {

@@ -76,9 +76,9 @@ const fetchSummary = async () => {
 
     const questionNumber = questionQueue[currentQuestionIndex];
 
-    // Fetch llm_summary from 'answers_posttest_duplicate' for this question
+    // Fetch llm_summary from 'answers_posttest_denton' for this question
     const { data, error } = await supabase
-      .from('answers_posttest_duplicate')
+      .from('answers_posttest_denton')
       .select('llm_summary')
       .eq('user_id', user.value.username)
       .eq('question_number', questionNumber)
@@ -138,9 +138,9 @@ const submitRating = async () => {
 
     const questionNumber = questionQueue[currentQuestionIndex];
 
-    // Update belief_rating_2 in answers_posttest_duplicate for this question
+    // Update belief_rating_2 in answers_posttest_denton for this question
     const { error } = await supabase
-      .from('answers_posttest_duplicate')
+      .from('answers_posttest_denton')
       .update({ belief_rating_2: selectedRating.value })
       .eq('user_id', user.value.username)
       .eq('question_number', questionNumber);
@@ -174,7 +174,7 @@ const submitRating = async () => {
       router.push('/posttest');
     } else {
       // All questions completed
-      router.push('/thankyou'); // Ensure you have a ThankYou.vue component or appropriate route
+      router.push('/study2'); // Ensure you have a ThankYou.vue component or appropriate route
     }
   } catch (error) {
     console.error('An unexpected error occurred:', error);

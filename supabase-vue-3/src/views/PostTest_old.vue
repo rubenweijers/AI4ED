@@ -13,44 +13,46 @@
       <div class="question">
 
         <!-- Add reminder text for question numbers 26 and 27 -->
-        <!-- Q2 -->
-        <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
-          <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
+        <div v-if="incorrectQuestion.question_number === 26 || incorrectQuestion.question_number === 27" class="reminder-text">
+          <p><i>Reminder Q25: A woman exerts a constant horizontal force on a large box. As a result, the box moves across a horizontal floor at a constant speed "vo"</i></p>
         </div>
 
-        <div v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" class="additional-text">
+        <div v-if="incorrectQuestion.question_number >= 5 && incorrectQuestion.question_number <= 6" class="additional-text">
           <p><i>Reminder: you used this statement to answer the question.</i><br>
-            A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+          The accompanying figure shows a frictionless channel in the shape of a segment of a circle with a center at "O". The channel has been anchored to a frictionless horizontal table top. You are looking down at the table. Forces exerted by the air are negligible. A ball is shot at high speed into the channel at "p" and exits at "r."</p>
+        </div>
 
-              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-          </p>  
-          </div>
-
-        <div v-else-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
+        <div v-else-if="incorrectQuestion.question_number >= 8 && incorrectQuestion.question_number <= 11" class="additional-text">
           <p><i>Reminder: you used this statement to answer the question.</i> <br>
-            A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+          The figure depicts a hockey puck sliding with constant speed <i>v<sub>o</sub></i> in a straight line from point "a" to point "b" on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point "b," it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point "b," then the kick would have set the puck in horizontal motion with a speed <i>v<sub>k</sub></i> in the direction of the kick.</p>
+        </div>
 
-              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+        <div v-else-if="incorrectQuestion.question_number >= 15 && incorrectQuestion.question_number <= 16" class="additional-text">
+          <p><i>Reminder: you used this statement to answer the question.</i><br>
+          A large truck breaks down out on the road and receives a push back into town by a small compact car as shown in the figure below.</p>
+        </div>
 
-              <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
-            </p>
+        <div v-else-if="incorrectQuestion.question_number >= 21 && incorrectQuestion.question_number <= 24" class="additional-text">
+          <p><i>Reminder: you used this statement to answer the question.</i> <br>
+          A rocket drifts sideways in outer space from point "a" to point "b" as shown below. The rocket is subject to no outside forces. Starting at position "b", the rocket's engine is turned on and produces a constant thrust (force on the rocket) at right angles to the line "ab". The constant thrust is maintained until the rocket reaches a point "c" in space.</p>
         </div>
 
         <!-- Add images before the corresponding questions -->
-        <img v-if="incorrectQuestion.question_number === 1 || incorrectQuestion.question_number === 2" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" src="/fci_2/fci_q4-7.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 4" src="/fci_2/fci_q4.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 6" src="/fci_2/fci_q6.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 11" src="/fci_2/fci_q11.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 12" src="/fci_2/fci_q12.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 13" src="/fci_2/fci_q13.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 5 || incorrectQuestion.question_number === 6" src="/fci_q5-6.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 6" src="/fci_q6.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 7" src="/fci_q7.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 8" src="/fci_q8.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number >= 8 && incorrectQuestion.question_number <= 11" src="/fci_q8-11.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 12" src="/fci_q12.png" alt="Question related image" class="question-image">
         <img v-if="incorrectQuestion.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 16" src="/fci_2/fci_q16.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 19" src="/fci_2/fci_q19.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 23" src="/fci_2/fci_q23.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 24" src="/fci_2/fci_q24.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" src="/fci_2/fci_q28-30.png" alt="Question related image" class="question-image">
-        <img v-if="incorrectQuestion.question_number === 28" src="/fci_2/fci_q28.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number >= 15 && incorrectQuestion.question_number <= 16" src="/fci_q15-16.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 17" src="/fci_q17.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 18" src="/fci_q18.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 19" src="/fci_q19.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 20" src="/fci_q20.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number >= 21 && incorrectQuestion.question_number <= 24" src="/fci_q21-24.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 23" src="/fci_q23.png" alt="Question related image" class="question-image">
+        <img v-if="incorrectQuestion.question_number === 28" src="/fci_q28.png" alt="Question related image" class="question-image">
       
         <label v-html="formatQuestionText(incorrectQuestion)"></label>
         <div v-for="(option, index) in getOptions(incorrectQuestion)" :key="index" class="option">
@@ -177,7 +179,7 @@ const fetchIncorrectQuestion = async () => {
 
     // Fetch user's answer from 'answers_duplicate' table
     const { data: userAnswerData, error: userAnswerError } = await supabase
-      .from('answers_denton')
+      .from('answers_duplicate')
       .select('answer')
       .eq('user_id', user.value.username)
       .eq('question_number', nextQuestionNumber)
@@ -240,7 +242,7 @@ const submitExplanation = async () => {
 
       // Perform the upsert operation
       const { data, error } = await supabase
-        .from('answers_posttest_denton')
+        .from('answers_posttest_duplicate')
         .upsert(upsertData, { 
           onConflict: 'user_id,question_number',
           returning: 'minimal' 
@@ -258,7 +260,7 @@ const submitExplanation = async () => {
 
       // Update the row with the summarized explanation
       const { error: updateError } = await supabase
-        .from('answers_posttest_denton')
+        .from('answers_posttest_duplicate')
         .update({ llm_summary: summary })
         .eq('user_id', user.value.username)
         .eq('question_number', incorrectQuestion.value.question_number);

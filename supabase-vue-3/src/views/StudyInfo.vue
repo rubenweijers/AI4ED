@@ -78,6 +78,7 @@ const proceedToStudy = () => {
   showToast.value = false;
   const startTime = Date.now();
   localStorage.setItem('studyStartTime', startTime);
+  localStorage.setItem('studyTotalDuration', (45 * 60).toString()); // Set total duration to 45 minutes in seconds
   router.push('/survey');
 };
 

@@ -170,7 +170,7 @@ export default {
     // Fetch answer data
     console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
     const { data: answerData, error: answerError } = await supabase
-      .from('answers_posttest_duplicate')
+      .from('answers_posttest_denton')
       .select('belief_rating_1, llm_summary')
       .eq('user_id', this.user.username)
       .eq('question_number', questionNumber)

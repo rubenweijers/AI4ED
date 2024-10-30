@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-import Study from '../views/Study.vue'
+import Study_original_fci from '../views/Study_original_fci.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
 import PostTest from '../views/PostTest.vue'
@@ -14,7 +14,7 @@ import Study2 from '../views/Study2.vue'
 import StudyInfo from '../views/StudyInfo.vue'
 import ResetPassword from '../views/ResetPassword.vue'
 import FCI_Answers from '../views/FCI_Answers.vue'
-// import WritingScreening from '../views/WritingScreening.vue'
+import Study from '../views/Study.vue'
 
 const routes = [
   {
@@ -46,6 +46,16 @@ const routes = [
     path: '/study2',
     name: 'Study2',
     component: Study2
+  },
+  {
+    path: '/study',
+    name: 'Study',
+    component: Study
+  },
+  {
+    path: '/studyoriginalfci',
+    name: 'StudyOriginalFCI',
+    component: Study_original_fci
   },
   {
     path: '/posttest',

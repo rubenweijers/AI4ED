@@ -97,7 +97,7 @@ const fetchSummary = async () => {
 
     // Fetch the newest row based on created_at for this user and question
     const { data, error } = await supabase
-      .from('answers_posttest_duplicate')
+      .from('answers_posttest_denton')
       .select('llm_summary, created_at')
       .eq('user_id', user.value.username)
       .eq('question_number', questionNumber)
@@ -161,7 +161,7 @@ const submitAnswers = async () => {
     const questionNumber = questionQueue[currentQuestionIndex];
 
     const { data, error } = await supabase
-      .from('answers_posttest_duplicate')
+      .from('answers_posttest_denton')
       .update({ 'belief_rating_1': selectedRating.value })
       .eq('user_id', user.value.username)
       .eq('question_number', questionNumber);
