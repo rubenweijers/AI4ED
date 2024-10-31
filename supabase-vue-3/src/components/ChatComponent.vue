@@ -127,6 +127,7 @@ export default {
             userAnswer: '',
             optionLabels: ["A", "B", "C", "D", "E"],
             questionsWithLabels: [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 29, 30],
+            timerWatcherInterval: null,
         };
     },
     async mounted() {
@@ -138,6 +139,14 @@ export default {
         this.$nextTick(() => {
             this.scrollToBottom();
         });
+        // Setup the timer watcher on component mount
+        this.setupTimerWatcher();
+    },
+    beforeDestroy() {
+        // Clear the timer interval when the component is destroyed
+        if (this.timerWatcherInterval) {
+            clearInterval(this.timerWatcherInterval);
+        }
     },
     methods: {
         clearChatData() {
@@ -156,6 +165,28 @@ export default {
             this.incorrectQuestion = null;
             this.userAnswer = '';
         },
+
+        // Timer setup method
+        setupTimerWatcher() {
+            this.timerWatcherInterval = setInterval(() => {
+                const remainingTime = this.getRemainingTime();
+                if (remainingTime <= 0) {
+                    clearInterval(this.timerWatcherInterval);
+                    alert('Your study time has ended. Moving to the next section.');
+                    this.$router.push('/studyoriginalfci'); // Redirect to the next study phase
+                }
+            }, 1000);
+        },
+        // Method to calculate remaining time
+        getRemainingTime() {
+            const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
+            const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
+            const now = Date.now();
+            const elapsed = Math.floor((now - startTime) / 1000); // in seconds
+            const timeLeft = totalDuration - elapsed;
+            return timeLeft;
+        },
+
         async loadDataAndSetSystemPrompt() {
             const userData = localStorage.getItem('user');
             if (userData) {

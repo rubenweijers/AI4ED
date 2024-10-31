@@ -19,10 +19,14 @@
           {{ label.text }}
         </label>
       </div>
-      <button class="submit-button" @click="submitRating">Submit</button>
-      <div v-if="submissionSuccess" class="success-notification">
-        Your rating has been submitted successfully!
-      </div>
+      <button @click="showToastNotification" class="submit-button">Submit</button>
+      <ToastNotification
+        :isVisible="showToast"
+        title="Submit Belief Rating"
+        message="Are you sure you want to confirm your belief rating in the statement? This action cannot be undone."
+        @confirm="confirmSubmit"
+        @cancel="cancelSubmit"
+      />
     </template>
   </div>
 </template>
@@ -31,13 +35,30 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
+import ToastNotification from '../components/ToastNotification.vue';
 
 const user = ref(null);
 const sentence = ref('');
+const profile = ref(null);
 const selectedRating = ref(null);
 const submissionSuccess = ref(false);
 const loading = ref(true);
 const router = useRouter();
+const showToast = ref(false);
+
+// Toast notifications
+const showToastNotification = () => {
+  showToast.value = true;
+};
+
+const confirmSubmit = async () => {
+  showToast.value = false;
+  await submitAnswers();
+};
+
+const cancelSubmit = () => {
+  showToast.value = false;
+};
 
 const ratingLabels = [
   { value: 0, text: 'Definitely False' },
@@ -46,6 +67,32 @@ const ratingLabels = [
   { value: 75, text: 'Probably True' },
   { value: 100, text: 'Definitely True' },
 ];
+
+const checkUser = async () => {
+  const userData = localStorage.getItem('user');
+  if (userData) {
+    user.value = JSON.parse(userData);
+    console.log("user.value", user.value);
+    await fetchUserProfile();
+  } else {
+    router.push('/login');
+  }
+};
+
+const fetchUserProfile = async () => {
+  const { data, error } = await supabase
+    .from('profiles_duplicate')
+    .select('*')
+    .eq('user_id', user.value.username)
+    .single();
+
+  if (error) {
+    console.error('Error fetching user profile:', error.message);
+    alert('An error occurred while fetching your data. Please try again.');
+  } else {
+    profile.value = data;
+  }
+};
 
 const fetchSummary = async () => {
   try {
@@ -174,7 +221,7 @@ const submitRating = async () => {
       router.push('/posttest');
     } else {
       // All questions completed
-      router.push('/study2'); // Ensure you have a ThankYou.vue component or appropriate route
+      router.push('/studyoriginalfci'); // Ensure you have a ThankYou.vue component or appropriate route
     }
   } catch (error) {
     console.error('An unexpected error occurred:', error);
@@ -182,8 +229,39 @@ const submitRating = async () => {
   }
 };
 
-onMounted(() => {
-  fetchSummary();
+let timerWatcherInterval;
+
+onMounted(async () => {
+  await checkUser();
+  await fetchSummary();
+  setupTimerWatcher();
+  loading.value = false;
+});
+
+const setupTimerWatcher = () => {
+  timerWatcherInterval = setInterval(() => {
+    const remainingTime = getRemainingTime();
+    if (remainingTime <= 0) {
+      clearInterval(timerWatcherInterval);
+      alert('Your study time has ended. Moving to the next section.');
+      router.push('/studyoriginalfci'); // Redirect to the next study phase
+    }
+  }, 1000);
+};
+
+const getRemainingTime = () => {
+  const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
+  const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
+  const now = Date.now();
+  const elapsed = Math.floor((now - startTime) / 1000); // in seconds
+  const timeLeft = totalDuration - elapsed;
+  return timeLeft;
+};
+
+onUnmounted(() => {
+  if (timerWatcherInterval) {
+    clearInterval(timerWatcherInterval);
+  }
 });
 </script>
   

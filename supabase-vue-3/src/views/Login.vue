@@ -74,6 +74,12 @@ const handleLogin = async () => {
       throw new Error('Login failed: Incorrect password.');
     }
 
+    // Before storing the new user info, clear timer data
+    localStorage.removeItem('studyStartTime');
+    localStorage.removeItem('studyTotalDuration');
+    localStorage.removeItem('fifteenMinuteWarningDisplayed');
+    localStorage.removeItem('fiveMinuteWarningDisplayed');
+
     // On successful authentication
     const user = { id: profile.id, username: username.value, display_name: profile.display_name };
     console.log('User logged in:', user);

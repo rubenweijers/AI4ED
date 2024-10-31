@@ -1,43 +1,44 @@
 <template>
-    <div class="belief-rating-container">
-      <h2>Rate Your Belief</h2>
-      <p v-if="loading">Loading...</p>
-      <template v-else>
-        <p>We summarized your explanation into one sentence:</p>
-        <div class="sentence-block">
-          "{{ sentence }}"
-        </div>
-        <p>How much do you believe in this summarized explanation?</p>
-        <div class="rating-scale">
-          <label v-for="(label, index) in ratingLabels" :key="index">
-            <input
-              type="radio"
-              name="belief-rating"
-              :value="label.value"
-              v-model="selectedRating"
-            />
-            {{ label.text }}
-          </label>
-        </div>
-        <button @click="showToastNotification" class="submit-button">Submit</button>
-        <ToastNotification
-          :isVisible="showToast"
-          title="Submit Belief Rating"
-          message="Are you sure you want to confirm your belief rating in the statement? This action cannot be undone."
-          @confirm="confirmSubmit"
-          @cancel="cancelSubmit"
-        />
-      </template>
-    </div>
+  <div class="belief-rating-container">
+    <h2>Rate Your Belief</h2>
+    <p v-if="loading">Loading...</p>
+    <template v-else>
+      <p>We summarized your explanation into one sentence:</p>
+      <div class="sentence-block">
+        "{{ sentence }}"
+      </div>
+      <p>How much do you believe in this summarized explanation?</p>
+      <div class="rating-scale">
+        <label v-for="(label, index) in ratingLabels" :key="index">
+          <input
+            type="radio"
+            name="belief-rating"
+            :value="label.value"
+            v-model="selectedRating"
+          />
+          {{ label.text }}
+        </label>
+      </div>
+      <button @click="showToastNotification" class="submit-button">Submit</button>
+      <ToastNotification
+        :isVisible="showToast"
+        title="Submit Belief Rating"
+        message="Are you sure you want to confirm your belief rating in the statement? This action cannot be undone."
+        @confirm="confirmSubmit"
+        @cancel="cancelSubmit"
+      />
+    </template>
+  </div>
 </template>
-  
+
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
 import ToastNotification from '../components/ToastNotification.vue';
 
 const sentence = ref('');
+const profile = ref(null);
 const selectedRating = ref(null);
 const submissionSuccess = ref(false);
 const loading = ref(true);
@@ -67,31 +68,44 @@ const ratingLabels = [
   { value: 100, text: 'Definitely True' },
 ];
 
+const checkUser = async () => {
+  const userData = localStorage.getItem('user');
+  if (userData) {
+    user.value = JSON.parse(userData);
+    console.log("user.value", user.value);
+    await fetchUserProfile();
+  } else {
+    router.push('/login');
+  }
+};
+
+const fetchUserProfile = async () => {
+  const { data, error } = await supabase
+    .from('profiles_duplicate')
+    .select('*')
+    .eq('user_id', user.value.username)
+    .single();
+
+  if (error) {
+    console.error('Error fetching user profile:', error.message);
+    alert('An error occurred while fetching your data. Please try again.');
+  } else {
+    profile.value = data;
+  }
+};
+
 const fetchSummary = async () => {
   try {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      user.value = JSON.parse(userData);
-    } else {
-      console.log('User not authenticated');
-      router.push('/login');
-      return;
-    }
+    const profileData = profile.value;
 
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles_duplicate')
-      .select('*')
-      .eq('user_id', user.value.username)
-      .single();
-
-    if (profileError) {
-      console.error('Error fetching user profile:', profileError.message);
+    if (!profileData) {
+      console.error('Profile data not available');
       alert('An error occurred while fetching your data. Please try again.');
       return;
     }
 
     const questionQueue = profileData.question_queue;
-    const currentQuestionIndex = (profileData.current_question_index || 0);
+    const currentQuestionIndex = profileData.current_question_index || 0;
 
     const questionNumber = questionQueue[currentQuestionIndex];
 
@@ -121,11 +135,8 @@ const fetchSummary = async () => {
   } catch (error) {
     console.error('An unexpected error occurred:', error);
     alert('An unexpected error occurred. Please try again.');
-  } finally {
-    loading.value = false;
   }
 };
-
 
 const submitAnswers = async () => {
   if (selectedRating.value === null) {
@@ -134,29 +145,16 @@ const submitAnswers = async () => {
   }
 
   try {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      user.value = JSON.parse(userData);
-    } else {
-      console.log('User not authenticated');
-      router.push('/login');
-      return;
-    }
+    const profileData = profile.value;
 
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles_duplicate')
-      .select('*')
-      .eq('user_id', user.value.username)
-      .single();
-
-    if (profileError) {
-      console.error('Error fetching user profile:', profileError.message);
+    if (!profileData) {
+      console.error('Profile data not available');
       alert('An error occurred while fetching your data. Please try again.');
       return;
     }
 
     const questionQueue = profileData.question_queue;
-    const currentQuestionIndex = (profileData.current_question_index || 0);
+    const currentQuestionIndex = profileData.current_question_index || 0;
 
     const questionNumber = questionQueue[currentQuestionIndex];
 
@@ -172,9 +170,6 @@ const submitAnswers = async () => {
       return;
     }
 
-    // // Remove chat data from localStorage
-    // localStorage.removeItem('chatData');
-
     submissionSuccess.value = true;
     router.push('/prechat'); // Adjust the route as needed
   } catch (error) {
@@ -183,8 +178,39 @@ const submitAnswers = async () => {
   }
 };
 
-onMounted(() => {
-  fetchSummary();
+let timerWatcherInterval;
+
+onMounted(async () => {
+  await checkUser();
+  await fetchSummary();
+  setupTimerWatcher();
+  loading.value = false;
+});
+
+const setupTimerWatcher = () => {
+  timerWatcherInterval = setInterval(() => {
+    const remainingTime = getRemainingTime();
+    if (remainingTime <= 0) {
+      clearInterval(timerWatcherInterval);
+      alert('Your study time has ended. Moving to the next section.');
+      router.push('/studyoriginalfci'); // Redirect to the next study phase
+    }
+  }, 1000);
+};
+
+const getRemainingTime = () => {
+  const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
+  const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
+  const now = Date.now();
+  const elapsed = Math.floor((now - startTime) / 1000); // in seconds
+  const timeLeft = totalDuration - elapsed;
+  return timeLeft;
+};
+
+onUnmounted(() => {
+  if (timerWatcherInterval) {
+    clearInterval(timerWatcherInterval);
+  }
 });
 </script>
   

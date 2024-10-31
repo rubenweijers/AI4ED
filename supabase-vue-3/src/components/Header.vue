@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
@@ -29,13 +29,16 @@ const user = ref(null);
 const remainingTime = ref(null); // Remaining time in seconds
 let timerInterval = null; // Reference to the interval timer
 
-// New reactive variables for warnings
+// Reactive variables for warnings
 const fifteenMinuteWarningDisplayed = ref(JSON.parse(localStorage.getItem('fifteenMinuteWarningDisplayed')) || false);
 const fiveMinuteWarningDisplayed = ref(JSON.parse(localStorage.getItem('fiveMinuteWarningDisplayed')) || false);
 
 // Variables for notification
 const showNotification = ref(false);
 const notificationMessage = ref('');
+
+// Variable to track previous start time
+let previousStartTime = null;
 
 const checkUser = () => {
   const storedUser = localStorage.getItem('user');
@@ -47,31 +50,34 @@ const checkUser = () => {
 const updateRemainingTime = () => {
   const startTime = localStorage.getItem('studyStartTime');
   const totalDuration = localStorage.getItem('studyTotalDuration');
+
+  // Detect if the timer has been reset
+  if (startTime !== previousStartTime) {
+    previousStartTime = startTime;
+
+    // Reset warning flags
+    fifteenMinuteWarningDisplayed.value = false;
+    fiveMinuteWarningDisplayed.value = false;
+  }
+
   if (startTime && totalDuration) {
     const now = Date.now();
-    const elapsed = Math.floor((now - startTime) / 1000); // Elapsed time in seconds
-    const totalDurationSeconds = parseInt(totalDuration, 10); // Total duration in seconds
+    const elapsed = Math.floor((now - parseInt(startTime, 10)) / 1000);
+    const totalDurationSeconds = parseInt(totalDuration, 10);
     const timeLeft = totalDurationSeconds - elapsed;
     if (timeLeft > 0) {
       remainingTime.value = timeLeft;
 
-      // Check for 15-minute warning
+      // Check for warnings
       if (timeLeft <= 15 * 60 && !fifteenMinuteWarningDisplayed.value) {
         displayWarning('15');
-        fifteenMinuteWarningDisplayed.value = true;
       }
-
-      // Check for 5-minute warning
       if (timeLeft <= 5 * 60 && !fiveMinuteWarningDisplayed.value) {
         displayWarning('5');
-        fiveMinuteWarningDisplayed.value = true;
       }
     } else {
       remainingTime.value = 0;
-      clearInterval(timerInterval);
-      // Handle timer expiration (e.g., log out the user or display a message)
-      alert('Your study time has ended.');
-      handleLogout();
+      // Do not clear the interval
     }
   } else {
     remainingTime.value = null;
@@ -98,6 +104,7 @@ const closeNotification = () => {
 
 onMounted(() => {
   checkUser();
+  previousStartTime = localStorage.getItem('studyStartTime');
   updateRemainingTime();
   timerInterval = setInterval(updateRemainingTime, 1000); // Update every second
 });
@@ -125,16 +132,11 @@ const formattedTime = computed(() => {
 });
 
 const handleLogout = () => {
-  // TODO: Implement logout logic, if any
   user.value = null;
   localStorage.removeItem('user');
-  localStorage.removeItem('studyStartTime'); // Clear the start time when logging out
-  localStorage.removeItem('studyTotalDuration'); // Clear the total duration
+  localStorage.removeItem('studyStartTime');
+  localStorage.removeItem('studyTotalDuration');
   router.push('/login');
-};
-
-const redirect = () => {
-  router.push('/');
 };
 </script>
 

@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
 import ToastNotification from '../components/ToastNotification.vue';
@@ -120,6 +120,14 @@ const formSubmitted = ref(false);
 
 const showToastNotification = () => {
   showToast.value = true;
+};
+
+const refreshTimer = () => {
+  const newStartTime = Date.now();
+  localStorage.setItem('studyStartTime', newStartTime.toString());
+  localStorage.setItem('studyTotalDuration', (0.5 * 60).toString());
+  localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+  localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 };
 
 const confirmSubmit = async () => {
@@ -223,12 +231,21 @@ const handleFormSubmission = () => {
 const submitAnswers = async () => {
   try {
     formSubmitted.value = true;
-    const answerEntries = questions.value.map(question => ({
-      user_id: user.value.username,
-      question_id: question.id,
-      answer: optionMapping[answers.value[question.id]],
-      question_number: question.question_number,
-    }));
+    const answerEntries = questions.value.map(question => {
+      const answerIndex = answers.value[question.id];
+      let answer = '';
+      if (typeof answerIndex !== 'undefined' && answerIndex !== null && answerIndex !== '') {
+        answer = optionMapping[answerIndex];
+      } else {
+        answer = 'unanswered';
+      }
+      return {
+        user_id: user.value.username,
+        question_id: question.id,
+        answer: answer,
+        question_number: question.question_number,
+      };
+    });
 
     const { data: answerData, error: answerError } = await supabase
       .from('answers_duplicate')
@@ -291,11 +308,11 @@ const selectAllOption1 = () => {
 };
 
 const saveAnswersToLocalStorage = () => {
-  localStorage.setItem('studyAnswers', JSON.stringify(answers.value));
+  localStorage.setItem('studyAnswers2', JSON.stringify(answers.value));
 };
 
 const loadSavedAnswers = () => {
-  const savedAnswers = localStorage.getItem('studyAnswers');
+  const savedAnswers = localStorage.getItem('studyAnswers2');
   if (savedAnswers) {
     answers.value = JSON.parse(savedAnswers);
   }
@@ -303,8 +320,38 @@ const loadSavedAnswers = () => {
 
 watch(answers, saveAnswersToLocalStorage, { deep: true });
 
+let timerWatcherInterval;
+
+const setupTimerWatcher = () => {
+  timerWatcherInterval = setInterval(() => {
+    const remainingTime = getRemainingTime();
+    if (remainingTime <= 0) {
+      clearInterval(timerWatcherInterval);
+      alert('Your study time has ended. Submitting your answers now.');
+      submitAnswers();
+    }
+  }, 1000);
+};
+
+const getRemainingTime = () => {
+  const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
+  const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
+  const now = Date.now();
+  const elapsed = Math.floor((now - startTime) / 1000); // in seconds
+  const timeLeft = totalDuration - elapsed;
+  return timeLeft;
+};
+
+onUnmounted(() => {
+  if (timerWatcherInterval) {
+    clearInterval(timerWatcherInterval);
+  }
+});
+
 onMounted(() => {
   checkUser();
+  refreshTimer(); // This resets the timer when entering this component
+  setupTimerWatcher();
 });
 </script>
 

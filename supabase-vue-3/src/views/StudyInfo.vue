@@ -75,12 +75,17 @@ const showToastNotification = () => {
 };
 
 const proceedToStudy = () => {
-  showToast.value = false;
-  const startTime = Date.now();
-  localStorage.setItem('studyStartTime', startTime);
-  localStorage.setItem('studyTotalDuration', (45 * 60).toString()); // Set total duration to 45 minutes in seconds
-  router.push('/survey');
-};
+    showToast.value = false;
+    const startTime = Date.now();
+    localStorage.setItem('studyStartTime', startTime.toString());
+    localStorage.setItem('studyTotalDuration', (0.5 * 60).toString()); // 30 minutes in seconds
+    localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+    localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+     // Clear any previously saved answers before starting the study
+    localStorage.removeItem('studyAnswers');
+    localStorage.removeItem('studyAnswers2');
+    router.push('/survey');
+  };
 
 const cancelProceed = () => {
   showToast.value = false;

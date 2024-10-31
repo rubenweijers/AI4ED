@@ -93,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
 import axios from 'axios';
@@ -338,8 +338,37 @@ const summarizeExplanation = async (explanation) => {
   }
 };
 
+let timerWatcherInterval;
+
 onMounted(() => {
   checkUser();
+  setupTimerWatcher();
+});
+
+const setupTimerWatcher = () => {
+  timerWatcherInterval = setInterval(() => {
+    const remainingTime = getRemainingTime();
+    if (remainingTime <= 0) {
+      clearInterval(timerWatcherInterval);
+      alert('Your study time has ended. Moving to the next section.');
+      router.push('/studyoriginalfci'); // Redirect to the next study phase
+    }
+  }, 1000);
+};
+
+const getRemainingTime = () => {
+  const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
+  const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
+  const now = Date.now();
+  const elapsed = Math.floor((now - startTime) / 1000); // in seconds
+  const timeLeft = totalDuration - elapsed;
+  return timeLeft;
+};
+
+onUnmounted(() => {
+  if (timerWatcherInterval) {
+    clearInterval(timerWatcherInterval);
+  }
 });
 </script>
 

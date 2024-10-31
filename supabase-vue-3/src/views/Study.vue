@@ -83,6 +83,14 @@
           @confirm="confirmSubmit"
           @cancel="cancelSubmit"
         />
+
+        <!-- Error Toast -->
+        <ToastNotification
+          :isVisible="showErrorToast"
+          title="Incomplete Submission"
+          :message="errorMessage"
+          @confirm="closeErrorToast"
+        />
       </form>
       <div v-if="submissionSuccess" class="success-notification">
         <p>Submission successful!</p>
@@ -97,7 +105,7 @@
 
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../supabase';
 import ToastNotification from '../components/ToastNotification.vue';
@@ -112,13 +120,36 @@ const submissionSuccess = ref(false);
 const showToast = ref(false);
 const formSubmitted = ref(false);
 
+const showErrorToast = ref(false);
+const errorMessage = ref('');
+
+const showErrorPopup = () => {
+  showErrorToast.value = true;
+};
+
+const closeErrorToast = () => {
+  showErrorToast.value = false;
+};
+
 const showToastNotification = () => {
   showToast.value = true;
 };
 
+const areAllQuestionsAnswered = () => {
+  return questions.value.every(question => {
+    const answer = answers.value[question.id];
+    return answer !== null && answer !== '';
+  });
+};
+
 const confirmSubmit = async () => {
   showToast.value = false;
-  await submitAnswers();
+  if (areAllQuestionsAnswered()) {
+    await submitAnswers();
+  } else {
+    errorMessage.value = 'Please answer all questions before submitting.';
+    showErrorPopup();
+  }
 };
 
 const cancelSubmit = () => {
@@ -172,6 +203,7 @@ const checkSubmissionStatus = async () => {
   }
 };
 
+
 const fetchQuestions = async () => {
   const { data, error } = await supabase.from('questions_denton').select('*').order('question_number', { ascending: true });
   if (error) {
@@ -180,8 +212,9 @@ const fetchQuestions = async () => {
   }
   questions.value = data;
 
+  // Initialize answers to null
   questions.value.forEach(question => {
-    answers.value[question.id] = '';
+    answers.value[question.id] = null;
   });
 
   loadSavedAnswers();
@@ -202,6 +235,35 @@ const formatOptionText = (option) => {
   return formattedOption;
 };
 
+// TIMER WATCHER
+let timerWatcherInterval;
+
+const setupTimerWatcher = () => {
+  timerWatcherInterval = setInterval(() => {
+    const remainingTime = getRemainingTime();
+    if (remainingTime <= 0) {
+      clearInterval(timerWatcherInterval);
+      alert('Your study time has ended. Submitting your answers now.');
+      submitAnswers();
+    }
+  }, 1000); // Check every second
+};
+
+const getRemainingTime = () => {
+  const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
+  const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
+  const now = Date.now();
+  const elapsed = Math.floor((now - startTime) / 1000); // in seconds
+  const timeLeft = totalDuration - elapsed;
+  return timeLeft;
+};
+
+onUnmounted(() => {
+  if (timerWatcherInterval) {
+    clearInterval(timerWatcherInterval);
+  }
+});
+
 const optionMapping = ["A", "B", "C", "D", "E"];
 
 const handleFormSubmission = () => {
@@ -217,12 +279,21 @@ const handleFormSubmission = () => {
 const submitAnswers = async () => {
   try {
     formSubmitted.value = true;
-    const answerEntries = questions.value.map(question => ({
-      user_id: user.value.username,
-      question_id: question.id,
-      answer: optionMapping[answers.value[question.id]],
-      question_number: question.question_number,
-    }));
+    const answerEntries = questions.value.map(question => {
+      const answerIndex = answers.value[question.id];
+      let answer = '';
+      if (typeof answerIndex !== 'undefined' && answerIndex !== null && answerIndex !== '') {
+        answer = optionMapping[answerIndex];
+      } else {
+        answer = 'unanswered';
+      }
+      return {
+        user_id: user.value.username,
+        question_id: question.id,
+        answer: answer,
+        question_number: question.question_number,
+      };
+    });
 
     const { data: answerData, error: answerError } = await supabase
       .from('answers_denton')
@@ -250,7 +321,9 @@ const submitAnswers = async () => {
     // Reset the timer to 30 minutes
     const newStartTime = Date.now();
     localStorage.setItem('studyStartTime', newStartTime);
-    localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set total duration to 30 minutes in seconds
+    localStorage.setItem('studyTotalDuration', (0.5 * 60).toString()); // Set total duration to 30 minutes in seconds
+    localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+    localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 
     submissionSuccess.value = true;
     router.push('/PostTest');
@@ -325,12 +398,21 @@ const generateQuestionQueue = async () => {
       return;
     }
 
-    // Fetch correct answers for those questions from 'questions_denton'
-    const questionNumbers = userAnswers.map(a => a.question_number);
+    // Filter out unanswered questions
+    const answeredUserAnswers = userAnswers.filter(answer => answer.answer !== 'unanswered');
+
+    if (answeredUserAnswers.length === 0) {
+      console.log('No answered questions to process.');
+      return;
+    }
+
+    // Fetch correct answers for the answered questions from 'questions_denton'
+    const answeredQuestionNumbers = answeredUserAnswers.map(a => a.question_number);
+
     const { data: questionsData, error: questionsError } = await supabase
       .from('questions_denton')
       .select('*')
-      .in('question_number', questionNumbers);
+      .in('question_number', answeredQuestionNumbers);
 
     if (questionsError) {
       console.error('Error fetching questions:', questionsError.message);
@@ -340,14 +422,14 @@ const generateQuestionQueue = async () => {
     console.log('Questions data:', questionsData);
 
     if (!questionsData || questionsData.length === 0) {
-      console.log('No questions data found');
+      console.log('No questions data found for answered questions.');
       return;
     }
 
     // Determine incorrect answers by comparing user's answer with correct answer
     const incorrectQuestionNumbers = [];
 
-    for (const userAnswer of userAnswers) {
+    for (const userAnswer of answeredUserAnswers) {
       const question = questionsData.find(q => q.question_number === userAnswer.question_number);
       if (question && question.correct_answer !== userAnswer.answer) {
         incorrectQuestionNumbers.push(userAnswer.question_number);
@@ -361,6 +443,7 @@ const generateQuestionQueue = async () => {
       return;
     }
 
+    // Fetch incorrect questions' data
     const { data: incorrectQuestions, error: incorrectQuestionsError } = await supabase
       .from('questions_denton')
       .select('*')
@@ -396,9 +479,7 @@ const generateQuestionQueue = async () => {
 
     console.log('Generated question queue:', questionQueue);
 
-    // Before update
-    console.log('Attempting to update profile with queue:', questionQueue);
-
+    // Attempting to update profile with the new question queue
     const { data: updateData, error: updateError } = await supabase
       .from('profiles_duplicate')
       .update({
@@ -412,7 +493,7 @@ const generateQuestionQueue = async () => {
       return;
     }
 
-    console.log('Update response:', updateData);
+    console.log('Profile updated with new question queue.');
 
     // Update profile.value
     if (profile.value) {
@@ -420,7 +501,7 @@ const generateQuestionQueue = async () => {
       profile.value.current_question_index = 0;
     }
 
-    // Add delay and retry fetch
+    // Optional: Verify the update after a short delay
     await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay
     const { data: updatedProfile, error: checkError } = await supabase
       .from('profiles_duplicate')
@@ -440,6 +521,7 @@ const generateQuestionQueue = async () => {
 };
 onMounted(() => {
   checkUser();
+  setupTimerWatcher();
 });
 </script>
 
