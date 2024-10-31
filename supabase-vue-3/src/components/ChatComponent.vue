@@ -157,6 +157,15 @@ export default {
             this.userAnswer = '';
         },
         async loadDataAndSetSystemPrompt() {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                    this.user = JSON.parse(userData);
+            } 
+            else {
+                    console.log('User not authenticated');
+                    this.$router.push('/login');
+                    return;
+            }
             const storedData = localStorage.getItem('chatData');
             if (storedData) {
                 const {
