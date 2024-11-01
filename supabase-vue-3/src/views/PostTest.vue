@@ -331,6 +331,8 @@ const summarizeExplanation = async (explanation) => {
         'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
       },
     });
+    console.log('API Key:', import.meta.env.VITE_OPENAI_API_KEY.substring(0, 5) + '...');
+
     return response.data.choices[0].message.content.trim();
   } catch (error) {
     console.error('Error communicating with the OpenAI API', error);
