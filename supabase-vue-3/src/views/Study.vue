@@ -74,9 +74,10 @@
         <!-- Old button -->
         <!-- <button type="submit" class="submit-button">Submit Questionnaire</button> -->
         
-        <button type="button" @click="handleFormSubmission" class="next-button">Submit FCI.</button>
-
-        <ToastNotification
+        <!-- <button type="button" @click="handleFormSubmission" class="next-button">Submit FCI.</button> -->
+        <button type="submit" class="next-button">Submit FCI.</button>
+      </form>
+      <ToastNotification
           :isVisible="showToast"
           title="Submit FCI"
           message="Are you sure you want to submit your results? This action cannot be undone."
@@ -91,7 +92,6 @@
           :message="errorMessage"
           @confirm="closeErrorToast"
         />
-      </form>
       <div v-if="submissionSuccess" class="success-notification">
         <p>Submission successful!</p>
       </div>
