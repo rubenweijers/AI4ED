@@ -219,8 +219,6 @@ const fetchQuestions = async () => {
 
     if (!data || data.length === 0) {
       console.error('No questions data fetched.');
-    } else {
-      console.log('Questions fetched:', data);
     }
 
     questions.value = data;
