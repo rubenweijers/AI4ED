@@ -187,18 +187,18 @@ const fetchUserProfile = async () => {
 
 const checkSubmissionStatus = async () => {
   try {
-    const { data, error } = await supabase
-      .from('profiles_duplicate')
-      .select('has_submitted_survey')
-      .eq('user_id', user.value.username)
-      .single();
+      const { data, error } = await supabase
+    .from('profiles_duplicate')
+    .select('has_submitted_study_one')
+    .eq('user_id', user.value.username)
+    .single();
 
     if (error) {
       console.error('Error checking submission status:', error.message);
       return;
     }
 
-    formSubmitted.value = data?.has_submitted_survey || false;
+    formSubmitted.value = data?.has_submitted_study_one || false;
   } catch (error) {
     console.error('Error checking submission status:', error);
   }
@@ -206,37 +206,37 @@ const checkSubmissionStatus = async () => {
 
 
 const fetchQuestions = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('questions_denton')
-          .select('*')
-          .order('question_number', { ascending: true });
+  try {
+    const { data, error } = await supabase
+      .from('questions_denton')
+      .select('*')
+      .order('question_number', { ascending: true });
 
-        if (error) {
-          console.error('Supabase Error:', error);
-          throw error;
-        }
+    if (error) {
+      console.error('Supabase Error:', error);
+      throw error;
+    }
 
-        if (!data || data.length === 0) {
-          console.error('No questions data fetched.');
-        } else {
-          console.log('Questions fetched:', data);
-        }
+    if (!data || data.length === 0) {
+      console.error('No questions data fetched.');
+    } else {
+      console.log('Questions fetched:', data);
+    }
 
-        questions.value = data;
+    questions.value = data;
 
-        // Initialize answers to null
-        questions.value.forEach(question => {
-          answers.value[question.id] = null;
-        });
+    // Initialize answers to null
+    questions.value.forEach(question => {
+      answers.value[question.id] = null;
+    });
 
-        loadSavedAnswers();
-      } catch (error) {
-        console.error('Error in fetchQuestions:', error);
-      } finally {
-        loading.value = false;
-      }
-    };
+    loadSavedAnswers();
+  } catch (error) {
+    console.error('Error in fetchQuestions:', error);
+  } finally {
+    loading.value = false;
+  }
+};
 
 const getOptions = (question) => {
   return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
@@ -335,7 +335,7 @@ const submitAnswers = async () => {
 
     const { error: updateError } = await supabase
       .from('profiles_duplicate')
-      .update({ has_submitted_survey: true })
+      .update({ has_submitted_study_one: true })
       .eq('user_id', user.value.username);
 
     if (updateError) {
