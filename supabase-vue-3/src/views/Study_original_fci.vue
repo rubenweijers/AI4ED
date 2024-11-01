@@ -125,7 +125,7 @@ const showToastNotification = () => {
 const refreshTimer = () => {
   const newStartTime = Date.now();
   localStorage.setItem('studyStartTime', newStartTime.toString());
-  localStorage.setItem('studyTotalDuration', (0.5 * 60).toString());
+  localStorage.setItem('studyTotalDuration', (30 * 60).toString());
   localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
   localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 };
@@ -222,7 +222,7 @@ const handleFormSubmission = () => {
   if (formSubmitted.value) {
     console.log('Form has already been submitted.');
     alert('The form has already been submitted.');
-    router.push('/thankyou'); // Redirect to a Thank You page or appropriate page
+    router.push('/feedback'); // Redirect to a Thank You page or appropriate page
   } else {
     confirmSubmit();
   }
@@ -270,7 +270,7 @@ const submitAnswers = async () => {
     }
 
     submissionSuccess.value = true;
-    router.push('/thankyou'); // Redirect to a Thank You page or appropriate page
+    router.push('/feedback'); // Redirect to a Thank You page or appropriate page
   } catch (error) {
     console.error('An unexpected error occurred:', error);
     formSubmitted.value = false;

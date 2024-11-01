@@ -171,12 +171,19 @@ const submitAnswers = async () => {
     }
 
     submissionSuccess.value = true;
-    router.push('/prechat'); // Adjust the route as needed
+
+    // Check if current question index is 0
+    if (currentQuestionIndex === 0) {
+      router.push('/prechat');
+    } else {
+      router.push('/chat');
+    }
   } catch (error) {
     console.error('An unexpected error occurred:', error);
     alert('An unexpected error occurred. Please try again.');
   }
 };
+
 
 let timerWatcherInterval;
 

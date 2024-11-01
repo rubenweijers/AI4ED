@@ -7,7 +7,7 @@
     <section>
       <h2>Principal Investigators</h2>
       <ul>
-        <li>Jean-François Godbout - <a href="mailto:jean-francois.godbout@umontreal.ca">ai4ed@gmail.com</a></li>
+        <li>Jean-François Godbout - <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></li>
       </ul>
     </section>
 
@@ -17,7 +17,7 @@
         This study aimed to assess how AI could enhance learning in physics by addressing common misconceptions. <br><br>Participants were divided into two groups: one group received support from an AI companion across three sessions to identify and address specific misunderstandings in Newtonian mechanics. The other group, serving as the control group, was given a series of questions on physics history unrelated to the concepts assessed by the Force Concept Inventory (FCI) test. This setup allowed us to evaluate the AI's impact on learning outcomes compared to traditional question-based learning.
       </p>
       <p>
-        If you would like a summary of the study's findings once the analysis is complete, we would be happy to provide this. Please contact <strong>XXX NAME</strong>, the principal investigator, to request the results.<br><br>
+        If you would like a summary of the study's findings once the analysis is complete, we would be happy to provide this. Please contact <strong>Jean-François Godbout: <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></strong>, the principal investigator, to request the results.<br><br>
       </p>
     </section>
 
@@ -44,12 +44,22 @@
       </p>
     </section>
 
-    <!-- <router-link to="/">Go back to Home</router-link> -->
+  <section>
+    <button @click="clearLocalStorage" class="clear-storage-button">Clear Login Data</button>
+  </section>
   </div>
 </template>
 
   
 <script setup>
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const clearLocalStorage = () => {
+  localStorage.removeItem('user');
+  router.push('/login'); // Redirect to login after clearing data
+};
   import { onMounted } from 'vue';
   import confetti from 'canvas-confetti'; // Import the confetti library
   

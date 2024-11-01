@@ -15,6 +15,7 @@ import StudyInfo from '../views/StudyInfo.vue'
 import ResetPassword from '../views/ResetPassword.vue'
 import FCI_Answers from '../views/FCI_Answers.vue'
 import Study from '../views/Study.vue'
+import Feedback from '../views/Feedback.vue'
 
 const routes = [
   {
@@ -56,6 +57,11 @@ const routes = [
     path: '/studyoriginalfci',
     name: 'StudyOriginalFCI',
     component: Study_original_fci
+  },
+  {
+    path: '/feedback',
+    name: 'Feedback',
+    component: Feedback
   },
   {
     path: '/posttest',

@@ -5,7 +5,7 @@
       <input v-model="username" type="text" placeholder="UserName" required />
       <input v-model="password" type="password" placeholder="Password" required />
       <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Log In' }}</button>
-      <p>Don't have an account? <router-link to="/signup">Sign up!</router-link></p>
+      <!-- <p>Don't have an account? <router-link to="/signup">Sign up!</router-link></p> -->
       <p><a href="#" @click.prevent="showResetPassword = true">Forgot Password?</a></p>
       <div class="form-group">
         <label>
