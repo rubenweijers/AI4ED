@@ -6,7 +6,7 @@
     <div class="study-container">
       <h2>Force Concept Inventory Test #1</h2>
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
-      <form @submit.prevent="handleFormSubmission">
+      <form @submit.prevent>
         <div v-for="(question, index) in questions" :key="question.id">
           <!-- Add images before the corresponding questions -->
           <img v-if="question.question_number === 1" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image with-line">
@@ -75,7 +75,8 @@
         <!-- <button type="submit" class="submit-button">Submit Questionnaire</button> -->
         
         <!-- <button type="button" @click="handleFormSubmission" class="next-button">Submit FCI.</button> -->
-        <button type="submit" class="next-button">Submit FCI.</button>
+        <button type="button" @click="handleFormSubmission" class="next-button">Submit FCI.</button>
+
       </form>
       <ToastNotification
           :isVisible="showToast"
