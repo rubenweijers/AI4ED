@@ -5,9 +5,13 @@
   <div v-else-if="user">
     <div class="study-info-container">
       <h2>Study Information</h2>
+      <!-- Add Logout Button -->
+      <button @click="logoutUser" class="logout-button">Logout</button>
+
+      <!-- Existing content -->
       <StudyIntro />
       <StudyInfo1 />
-      
+
       <div class="consent-checkbox" :class="{ 'flash-red': isFlashing }">
         <input type="checkbox" id="consent" v-model="consentChecked">
         <label for="consent">I agree to the terms and services</label>
@@ -16,7 +20,7 @@
       <button @click="showToastNotification" class="submit-button">
         I confirm to have read the above text.
       </button>
-    
+
       <ToastNotification
         :isVisible="showToast"
         title="Proceed to Study"
@@ -31,7 +35,7 @@
     <router-link to="/login">Log in</router-link>
   </div>
 </template>
-  
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -50,7 +54,7 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value",user.value)
+    console.log("user.value", user.value);
   } else {
     router.push('/login'); // Redirect to login if no user is found
   }
@@ -75,20 +79,33 @@ const showToastNotification = () => {
 };
 
 const proceedToStudy = () => {
-    showToast.value = false;
-    const startTime = Date.now();
-    localStorage.setItem('studyStartTime', startTime.toString());
-    localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // 30 minutes in seconds
-    localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
-    localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
-     // Clear any previously saved answers before starting the study
-    localStorage.removeItem('studyAnswers');
-    localStorage.removeItem('studyAnswers2');
-    router.push('/survey');
-  };
+  showToast.value = false;
+  const startTime = Date.now();
+  localStorage.setItem('studyStartTime', startTime.toString());
+  localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // 30 minutes in seconds
+  localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+  localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+  // Clear any previously saved answers before starting the study
+  localStorage.removeItem('studyAnswers');
+  localStorage.removeItem('studyAnswers2');
+  router.push('/survey');
+};
 
 const cancelProceed = () => {
   showToast.value = false;
+};
+
+// Add logoutUser function
+const logoutUser = async () => {
+  // Clear user data from localStorage
+  localStorage.removeItem('user');
+  // Sign out from Supabase auth (if you're using Supabase authentication)
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error('Error logging out:', error.message);
+  }
+  // Redirect to login page
+  router.push('/login');
 };
 </script>
   
@@ -102,6 +119,7 @@ const cancelProceed = () => {
     box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
     text-align: left;
     font-family: Arial, sans-serif;
+    position: relative; /* Needed for positioning the logout button */
   }
   
   .study-info-container h2 {
@@ -189,4 +207,22 @@ const cancelProceed = () => {
     background-color: #ffcccc;
   }
 }
+
+  .logout-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    /* Additional styling as needed */
+    padding: 10px 15px;
+    font-size: 14px;
+    background-color: #f44336; /* Red background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .logout-button:hover {
+    background-color: #d32f2f; /* Darker red on hover */
+  }
 </style>

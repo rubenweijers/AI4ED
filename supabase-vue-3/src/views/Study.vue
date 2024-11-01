@@ -74,7 +74,7 @@
         <!-- Old button -->
         <!-- <button type="submit" class="submit-button">Submit Questionnaire</button> -->
         
-        <button @click="showToastNotification" class="next-button">Submit FCI.</button>
+        <button type="button" @click="handleFormSubmission" class="next-button">Submit FCI.</button>
 
         <ToastNotification
           :isVisible="showToast"
@@ -266,15 +266,22 @@ onUnmounted(() => {
 
 const optionMapping = ["A", "B", "C", "D", "E"];
 
+// Replace showToastNotification with handleFormSubmission
 const handleFormSubmission = () => {
   if (formSubmitted.value) {
     console.log('Form has already been submitted.');
     alert('The form has already been submitted.');
     router.push('/PostTest');
   } else {
-    confirmSubmit();
+    if (areAllQuestionsAnswered()) {
+      showToastNotification();
+    } else {
+      errorMessage.value = 'Please answer all questions before submitting.';
+      showErrorPopup();
+    }
   }
 };
+
 
 const submitAnswers = async () => {
   try {
