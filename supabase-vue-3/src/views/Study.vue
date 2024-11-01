@@ -6,7 +6,7 @@
     <div class="study-container">
       <h2>Force Concept Inventory Test #1</h2>
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
-      <form @submit.prevent>
+      <form @submit.prevent="confirmSubmission">
         <div v-for="(question, index) in questions" :key="question.id">
           <!-- Add images before the corresponding questions -->
           <img v-if="question.question_number === 1" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image with-line">
@@ -75,7 +75,7 @@
         <!-- <button type="submit" class="submit-button">Submit Questionnaire</button> -->
         
         <!-- <button type="button" @click="handleFormSubmission" class="next-button">Submit FCI.</button> -->
-        <button type="button" @click="handleFormSubmission" class="next-button">Submit FCI.</button>
+        <button @click="handleFormSubmission" class="submit-button" :disabled="!!formSubmitted.value">Submit FCI.</button>
 
       </form>
       <ToastNotification
@@ -206,28 +206,37 @@ const checkSubmissionStatus = async () => {
 
 
 const fetchQuestions = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('questions_denton')
-      .select('*')
-      .order('question_number', { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from('questions_denton')
+          .select('*')
+          .order('question_number', { ascending: true });
 
-    if (error) throw error;
+        if (error) {
+          console.error('Supabase Error:', error);
+          throw error;
+        }
 
-    questions.value = data;
+        if (!data || data.length === 0) {
+          console.error('No questions data fetched.');
+        } else {
+          console.log('Questions fetched:', data);
+        }
 
-    // Initialize answers to null
-    questions.value.forEach(question => {
-      answers.value[question.id] = null;
-    });
+        questions.value = data;
 
-    loadSavedAnswers();
-  } catch (error) {
-    console.error('Error fetching questions:', error.message);
-  } finally {
-    loading.value = false; // Ensure loading is set to false after fetching questions
-  }
-};
+        // Initialize answers to null
+        questions.value.forEach(question => {
+          answers.value[question.id] = null;
+        });
+
+        loadSavedAnswers();
+      } catch (error) {
+        console.error('Error in fetchQuestions:', error);
+      } finally {
+        loading.value = false;
+      }
+    };
 
 const getOptions = (question) => {
   return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
