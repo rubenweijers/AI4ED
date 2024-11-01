@@ -206,19 +206,27 @@ const checkSubmissionStatus = async () => {
 
 
 const fetchQuestions = async () => {
-  const { data, error } = await supabase.from('questions_denton').select('*').order('question_number', { ascending: true });
-  if (error) {
+  try {
+    const { data, error } = await supabase
+      .from('questions_denton')
+      .select('*')
+      .order('question_number', { ascending: true });
+
+    if (error) throw error;
+
+    questions.value = data;
+
+    // Initialize answers to null
+    questions.value.forEach(question => {
+      answers.value[question.id] = null;
+    });
+
+    loadSavedAnswers();
+  } catch (error) {
     console.error('Error fetching questions:', error.message);
-    return;
+  } finally {
+    loading.value = false; // Ensure loading is set to false after fetching questions
   }
-  questions.value = data;
-
-  // Initialize answers to null
-  questions.value.forEach(question => {
-    answers.value[question.id] = null;
-  });
-
-  loadSavedAnswers();
 };
 
 const getOptions = (question) => {
