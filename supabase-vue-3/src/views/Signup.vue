@@ -14,32 +14,31 @@
   </div>
 </template>
 
-
+<!-- src/components/GenerateRandomUser.vue -->
 <script setup>
-import { ref } from 'vue'
-import { supabase } from '../supabase'
-import bcrypt from 'bcryptjs'
-import { v4 as uuidv4 } from 'uuid'
+import { ref } from 'vue';
+import { supabase } from '../supabase';
+import bcrypt from 'bcryptjs';
 
-const loading = ref(false)
-const numberOfUsersToGenerate = ref('')
+const loading = ref(false);
+const numberOfUsersToGenerate = ref('');
 
 const hashPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   return hashedPassword;
-}
+};
 
 const generateRandomUser = () => {
-  const generatedUsername = uuidv4();
-  const generatedPassword = uuidv4();
+  const randomString = () => Math.random().toString(36).substr(2, 6);
+  const generatedUsername = randomString();
+  const generatedPassword = randomString();
   return {
     username: generatedUsername,
     password: generatedPassword,
     displayName: generatedUsername,
-    // ... other fields if needed
-  }
-}
+  };
+};
 
 const createAndDownloadTxtFile = (userDetails) => {
   let fileContent = 'Generated Users:\n\n';
@@ -55,18 +54,14 @@ const createAndDownloadTxtFile = (userDetails) => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
+};
 
 const handleSignUp = async (user) => {
   try {
     loading.value = true;
 
-    console.log('Password before hashing:', user.password);
-
     // Hash the user's password
     const hashedPassword = await hashPassword(user.password);
-
-    console.log('Hashed password:', hashedPassword);
 
     // Check if username already exists
     const { data: existingUser, error: existingUserError } = await supabase
@@ -120,11 +115,8 @@ const handleSignUp = async (user) => {
           username: user.username,
           display_name: user.displayName,
           password: hashedPassword,
-          // age: user.age,
-          // group: group,
+          group: group,
           created_at: now,
-          // gender: user.gender,
-          // first_language: user.firstLanguage
         }
       ]);
 
@@ -132,9 +124,9 @@ const handleSignUp = async (user) => {
 
     console.log('Profile created:', profile);
 
-    // only alert if we are using individual sign-up
+    // Only alert if we are using individual sign-up
     const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
-    if (usersToGenerate < 1){
+    if (usersToGenerate < 1) {
       alert('User registered successfully!');
     }
 
@@ -144,7 +136,7 @@ const handleSignUp = async (user) => {
   } finally {
     loading.value = false;
   }
-}
+};
 
 const autoSignUp = async () => {
   loading.value = true;
@@ -163,7 +155,7 @@ const autoSignUp = async () => {
 
   createAndDownloadTxtFile(userDetails);
   loading.value = false;
-}
+};
 </script>
 
 <style scoped>
