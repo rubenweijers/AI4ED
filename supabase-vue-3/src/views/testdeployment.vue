@@ -4,7 +4,7 @@
     </div>
     <div v-else-if="user">
       <div class="study-container">
-        <h2>Force Concept Inventory</h2>
+        <h2>Force Concept Inventory.</h2>
         <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
         <form @submit.prevent="confirmSubmission">
           <div v-for="(question, index) in questions" :key="question.id">
