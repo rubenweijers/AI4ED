@@ -1,7 +1,7 @@
 <template>
-    <div class="chat-container">
+         <div v-if="isLoading">Loading...</div>
         <!-- Start of question display -->
-        <div class="question" v-if="incorrectQuestion">
+        <div class="question" v-else-if="incorrectQuestion">
 
             <!-- Add reminder text for specific question numbers -->
             <!-- Example for Question 2 -->
@@ -98,7 +98,6 @@
             </div>
             <button v-if="isChatFinished()" @click="confirmNextPage" class="next-button">Next</button>
         </div>
-    </div>
 </template>
 
 <script>
@@ -131,7 +130,9 @@ export default {
         };
     },
     async mounted() {
+        this.isLoading = true;
         await this.loadDataAndSetSystemPrompt();
+        this.isLoading = false;
         if (!this.incorrectQuestion) {
             console.error('Incorrect Question is not set.');
             return;
