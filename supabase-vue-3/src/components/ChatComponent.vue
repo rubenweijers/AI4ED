@@ -134,9 +134,6 @@ export default {
         await this.loadDataAndSetSystemPrompt();
         if (!this.incorrectQuestion) {
             console.error('Incorrect Question is not set.');
-            console.log('Profile Data:', this.profileData);
-            console.log('Question Queue:', this.profileData?.question_queue);
-            console.log('Current Question Index:', this.profileData?.current_question_index);
             return;
         }
         this.$nextTick(() => {
@@ -377,7 +374,7 @@ export default {
                 const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
                     },
                 });
 
