@@ -5,7 +5,7 @@
   <div v-else-if="user">
     <div class="study-info-container">
       <!-- <h2>Study Information</h2> -->
-      <!-- Add Logout Button -->
+
       <button @click="logoutUser" class="logout-button">Logout</button>
 
       <!-- Existing content -->
