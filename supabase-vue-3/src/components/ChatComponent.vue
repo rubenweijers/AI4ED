@@ -134,6 +134,9 @@ export default {
         await this.loadDataAndSetSystemPrompt();
         if (!this.incorrectQuestion) {
             console.error('Incorrect Question is not set.');
+            console.log('Profile Data:', this.profileData);
+            console.log('Question Queue:', this.profileData?.question_queue);
+            console.log('Current Question Index:', this.profileData?.current_question_index);
             return;
         }
         this.$nextTick(() => {
