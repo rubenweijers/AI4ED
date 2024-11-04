@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import ChatComponent from '@/components/ChatComponent.vue';
-import DeleteDataComponent from '@/components/DeleteDataComponent.vue';
+import ChatComponent from '../components/ChatComponent.vue';
+import DeleteDataComponent from '../components/DeleteDataComponent.vue';
 
 export default {
   name: 'Chat',
