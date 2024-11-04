@@ -215,11 +215,17 @@ export default {
         async fetchDataAndSetSystemPrompt() {
         try {
             console.log('Fetching profile data for user:', this.user.username);
+            console.log('Starting fetchDataAndSetSystemPrompt');
             const { data: profileData, error: profileError } = await supabase
-            .from('profiles_duplicate')
-            .select('*')
-            .eq('user_id', this.user.username)
-            .maybeSingle();
+                .from('profiles_duplicate')
+                .select('*')
+                .eq('user_id', this.user.username)
+                .maybeSingle();
+
+                console.log('Profile data:', profileData);
+                console.log('Question queue:', questionQueue);
+                console.log('Current question index:', currentQuestionIndex);
+                console.log('Question number:', questionNumber);
 
             if (profileError) throw new Error(`Error fetching profile data: ${profileError.message}`);
             if (!profileData) throw new Error(`No profile data found for user: ${this.user.username}`);
@@ -229,24 +235,24 @@ export default {
             const currentQuestionIndex = this.profileData.current_question_index || 0;
 
             if (!questionQueue || questionQueue.length === 0) {
-            throw new Error('Question queue is empty.');
+                throw new Error('Question queue is empty.');
             }
             if (currentQuestionIndex >= questionQueue.length) {
-            throw new Error('No more questions left.');
+                throw new Error('No more questions left.');
             }
 
             const questionNumber = questionQueue[currentQuestionIndex];
             if (questionNumber === undefined) {
-            throw new Error('Question number is undefined.');
+                throw new Error('Question number is undefined.');
             }
 
             console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
             const { data: answerData, error: answerError } = await supabase
-            .from('answers_posttest_denton')
-            .select('belief_rating_1, llm_summary')
-            .eq('user_id', this.user.username)
-            .eq('question_number', questionNumber)
-            .maybeSingle();
+                .from('answers_posttest_denton')
+                .select('belief_rating_1, llm_summary')
+                .eq('user_id', this.user.username)
+                .eq('question_number', questionNumber)
+                .maybeSingle();
 
             if (answerError) throw new Error(`Error fetching answer data: ${answerError.message}`);
             if (!answerData) throw new Error('No answer data found for this user and question number.');
@@ -256,10 +262,10 @@ export default {
 
             console.log('Fetching question data for question number:', questionNumber);
             const { data: questionData, error: questionError } = await supabase
-            .from('questions_denton')
-            .select('*')
-            .eq('question_number', questionNumber)
-            .single();
+                .from('questions_denton')
+                .select('*')
+                .eq('question_number', questionNumber)
+                .single();
 
             if (questionError) throw new Error(`Error fetching question data: ${questionError.message}`);
             if (!questionData) throw new Error(`No question data found for question number: ${questionNumber}`);
@@ -267,12 +273,15 @@ export default {
             this.questionText = questionData.question_text;
             this.incorrectQuestion = questionData;
 
+            console.log('Question data:', questionData);
+            console.log('Incorrect question set:', this.incorrectQuestion);
+
             const { data: userAnswerData, error: userAnswerError } = await supabase
-            .from('answers_denton')
-            .select('answer')
-            .eq('user_id', this.user.username)
-            .eq('question_number', questionNumber)
-            .single();
+                .from('answers_denton')
+                .select('answer')
+                .eq('user_id', this.user.username)
+                .eq('question_number', questionNumber)
+                .single();
 
             if (userAnswerError) throw new Error(`Error fetching user answer: ${userAnswerError.message}`);
             this.userAnswer = userAnswerData.answer || '';
@@ -361,7 +370,7 @@ export default {
                 const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
                     },
                 });
 
