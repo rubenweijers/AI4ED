@@ -1,7 +1,7 @@
 <template>
     <div class="study-info">
-      <h2>Force Concept Inventory</h2>
-      <p>
+      <h2>Important:</h2>
+      <!-- <p>
         The Force Concept Inventory (FCI) is a multiple-choice "test" designed to assess student
         understanding of the most basic concepts in Newtonian mechanics, namely: 
         <ul>
@@ -13,7 +13,7 @@
 
         <br><br>
         It specifically targets common misconceptions and "commonsense beliefs" about force and motion that students often hold.
-      </p>
+      </p> -->
       <p>
         Please:
         <ul>
@@ -23,7 +23,7 @@
         </ul>
       </p>
       <p>
-        Pressing the button below will set a 45 minute timer for you to finish the survey and the FCI test <br>
+        Pressing the button below will set a 30 minute timer for you to finish the survey and the FCI test <br>
       </p>
     </div>
 </template>

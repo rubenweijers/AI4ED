@@ -1,26 +1,61 @@
 <template>
-    <div class="study-info">
-      <h2>Thank you for participating in our study!</h2>
+  <div class="consent-info">
+      <h1>Welcome to the AI4ED Project Study!</h1>
       <p>
-        In this study, you will be taking the <i>Force Concept Inventory (FCI)</i> test to evaluate your understanding of fundamental Newtonian mechanics concepts.
-        <br><br>
-        After completing the test, you will interact with an AI tutor to help you understand the concepts better.<br>
-        <br><br>
-        Then, you will be asked to complete a different version of the FCI to evaluate your learning experience.
-        <br><br> 
-        Aditionally, we will ask some additional questions about your experience throughout the experiment. 
-        <br>
-        We ask you to answer these questions honestly and to the best of your ability.
-        <br>
-        Your responses are anonmyous and will <strong>not</strong> be shared with anyone outside this research.
-        <br>
-        This is an <strong>ungraded</strong> test and your responses will not affect your grade in any way.
-        <br>
-        Bonus points will be awarded for participation?
+          Thank you for considering participation in a research study on the use of artificial intelligence (AI) for 
+          providing personalized, targeted interventions in physics education.
+          <h2><strong>Information</strong></h2>
+          This study involves three key steps:
+          <h3><strong> 1. Pre-Test:</strong></h3> You will start by completing a <u>modified</u> version of the Force Concept Inventory (FCI), 
+          a 30-item multiple-choice questionnaire designed to assess your understanding of fundamental concepts 
+          in Newtonian mechanics, including:
+          <ul>
+              <li>Velocity</li>
+              <li>Acceleration</li>
+              <li>Force</li>
+              <li>Newton’s Laws of Motion</li>
+          </ul>
+          The modified FCI is crafted to address common misconceptions about force and motion. Please follow these guidelines:
+          <ul>
+              <li>Select only one option per question.</li>
+              <li>Do not leave any question unanswered.</li>
+              <li>Avoid guessing; answer based on your understanding.</li>
+          </ul>
+          Once you start the study, a timer of 30 minutes will start. Plan to complete this FCI within 30 minutes.
+          <h3><strong>2. AI Interaction:</strong></h3> In the next part of the study, we ask you to explain your reasoning for a question you got wrong in the modified FCI. 
+          After that, you will interact with an AI companion in a three-round dialogue. In each message, 
+          the AI reviews your responses from the modified FCI questionnaire you took, and offers
+          explanations for those questions, similar to a peer study group. The AI companion will only talk to you about questions you got wrong. This part lasts for 30 minutes, 
+          or until all wrongly answered questions have been discussed.
+          <h3><strong>3. Post-Test and Feedback:</strong></h3> After the AI interactions, you will complete another FCI test
+          to evaluate the AI’s impact on your understanding of Newtonian Mechanics. You will also be asked provide feedback to the study.
+          We kindly ask that you answer all questions honestly and to the best of your ability. Your responses are anonymous 
+          and will not be shared outside of the research team. This is an <strong>ungraded</strong> test, and your answers 
+          will not affect your grades or standing in any way.
+          <h2><strong>Accuracy of the AI Companion</strong></h2>
+          The AI system used in this study has been thoroughly tested and is accurate in identifying incorrect responses on 
+          the modified FCI questionnaire. Any questions selected by the AI for discussion are indeed ones where your 
+          initial answer was incorrect. However, similar to a peer in a study group, the AI companion may not always provide 
+          accurate explanations for every question. (INSERT % QUESTIONS WRONG HERE) It’s essential to review the explanations critically for a more 
+          effective learning experience.
+          <h2><strong>Voluntary Participation</strong></h2>
+          Participation is entirely voluntary, and you may withdraw at any point by closing your browser.
+          <h2><strong>Risks</strong></h2>
+          There are no anticipated risks associated with participating. As no identifying information is collected, your 
+          responses will remain anonymous and cannot be traced back to you.
+          <h2><strong>Benefits</strong></h2>
+          Your participation will help us understand how AI can support personalized learning, particularly in physics education.
+          <h2><strong>Consent</strong></h2>
+          By agreeing to participate, you consent to the use of your anonymized responses for research purposes. No identifying 
+          information will be collected, and your participation is voluntary. You may withdraw at any time without consequence. 
+          This study does not offer compensation.
       </p>
-      <img src="/studypipeline.svg" alt="Welcome Image" class="welcome-image">
-
-    </div>
+      <!-- <img src="/consentform.svg" alt="Consent Form Image" class="consent-image"> -->
+      <p>
+        <h2><strong>Contact</strong></h2>
+          For questions, please reach out to the principal investigator:  <strong>Jean-François Godbout - <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></strong>
+      </p>
+  </div>
 </template>
   
 <script>

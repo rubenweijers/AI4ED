@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const { explanation } = req.body;
 
   const apiData = {
-    model: "gpt-4",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",
