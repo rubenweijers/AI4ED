@@ -6,6 +6,7 @@
           providing personalized, targeted interventions in physics education.
           <h2><strong>Information</strong></h2>
           This study involves three key steps:
+          <img src="/studypipeline.svg" alt="Studypipeline" class="welcome-image">
           <h3><strong> 1. Pre-Test:</strong></h3> You will start by completing a <u>modified</u> version of the Force Concept Inventory (FCI), 
           a 30-item multiple-choice questionnaire designed to assess your understanding of fundamental concepts 
           in Newtonian mechanics, including:
@@ -50,11 +51,10 @@
           information will be collected, and your participation is voluntary. You may withdraw at any time without consequence. 
           This study does not offer compensation.
       </p>
-      <!-- <img src="/consentform.svg" alt="Consent Form Image" class="consent-image"> -->
       <p>
         <h2><strong>Contact</strong></h2>
           For questions, please reach out to the principal investigator:  <strong>Jean-François Godbout - <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></strong>
-      </p>
+      </p><br><br>
   </div>
 </template>
   
