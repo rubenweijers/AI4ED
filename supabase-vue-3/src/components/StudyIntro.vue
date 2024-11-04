@@ -45,7 +45,7 @@
           There are no anticipated risks associated with participating. As no identifying information is collected, your 
           responses will remain anonymous and cannot be traced back to you.
           <h2><strong>Benefits</strong></h2>
-          Your participation will help us understand how AI can support personalized learning, particularly in physics education.
+          Your participation will help us understand how AI can support personalized learning, particularly in physics education. <br>You will also get to practice questions on the concepts you are learning this semester.
           <h2><strong>Consent</strong></h2>
           By agreeing to participate, you consent to the use of your anonymized responses for research purposes. No identifying 
           information will be collected, and your participation is voluntary. You may withdraw at any time without consequence. 

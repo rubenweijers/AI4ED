@@ -136,7 +136,7 @@ const checkUser = async () => {
 const fetchQuestions = async () => {
   const { data, error } = await supabase.from('questions').select('*').order('question_number', { ascending: true });
   if (error) {
-    console.error('Error fetching questions:', error.message);
+    // console.error('Error fetching questions:', error.message);
     return;
   }
   questions.value = data;

@@ -14,31 +14,33 @@
   </div>
 </template>
 
-<!-- src/components/GenerateRandomUser.vue -->
-<script setup>
-import { ref } from 'vue';
-import { supabase } from '../supabase';
-import bcrypt from 'bcryptjs';
 
-const loading = ref(false);
-const numberOfUsersToGenerate = ref('');
+<script setup>
+import { ref } from 'vue'
+import { supabase } from '../supabase'
+import bcrypt from 'bcryptjs'
+import { v4 as uuidv4 } from 'uuid'
+
+const loading = ref(false)
+const numberOfUsersToGenerate = ref('')
 
 const hashPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   return hashedPassword;
-};
+}
 
-const generateRandomUser = () => {
-  const randomString = () => Math.random().toString(36).substr(2, 6);
-  const generatedUsername = randomString();
-  const generatedPassword = randomString();
+const generateRandomUser = (group) => {
+  const generatedUsername = uuidv4();
+  const generatedPassword = uuidv4();
   return {
     username: generatedUsername,
     password: generatedPassword,
     displayName: generatedUsername,
-  };
-};
+    group: group,
+    // ... other fields if needed
+  }
+}
 
 const createAndDownloadTxtFile = (userDetails) => {
   let fileContent = 'Generated Users:\n\n';
@@ -54,7 +56,7 @@ const createAndDownloadTxtFile = (userDetails) => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-};
+}
 
 const handleSignUp = async (user) => {
   try {
@@ -115,18 +117,16 @@ const handleSignUp = async (user) => {
           username: user.username,
           display_name: user.displayName,
           password: hashedPassword,
-          group: group,
+          group: user.group,
           created_at: now,
         }
       ]);
 
     if (profileError) throw profileError;
 
-    console.log('Profile created:', profile);
-
-    // Only alert if we are using individual sign-up
+    // only alert if we are using individual sign-up
     const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
-    if (usersToGenerate < 1) {
+    if (usersToGenerate < 1){
       alert('User registered successfully!');
     }
 
@@ -136,26 +136,44 @@ const handleSignUp = async (user) => {
   } finally {
     loading.value = false;
   }
-};
+}
 
 const autoSignUp = async () => {
   loading.value = true;
   const userDetails = [];
 
   const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
+  let controlCount = 0;
+  let treatmentCount = 0;
 
   for (let i = 0; i < usersToGenerate; i++) {
-    const newUser = generateRandomUser();
+    let group;
+    if (controlCount < usersToGenerate / 2 && treatmentCount < usersToGenerate / 2) {
+      // Randomly assign group if both are under half
+      group = Math.random() < 0.5 ? 'control' : 'treatment';
+    } else if (controlCount < usersToGenerate / 2) {
+      group = 'control';
+    } else {
+      group = 'treatment';
+    }
+
+    const newUser = generateRandomUser(group);
 
     // Push a shallow copy of newUser to userDetails before handleSignUp
     userDetails.push({ ...newUser });
 
     await handleSignUp(newUser);
+
+    if (group === 'control') {
+      controlCount++;
+    } else {
+      treatmentCount++;
+    }
   }
 
   createAndDownloadTxtFile(userDetails);
   loading.value = false;
-};
+}
 </script>
 
 <style scoped>

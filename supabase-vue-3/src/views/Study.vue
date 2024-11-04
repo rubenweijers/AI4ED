@@ -401,7 +401,7 @@ watch(answers, saveAnswersToLocalStorage, { deep: true });
 
 const generateQuestionQueue = async () => {
   try {
-    console.log('Starting queue generation');
+    // console.log('Starting queue generation');
     
     // Fetch all user's answers
     const { data: userAnswers, error: userAnswersError } = await supabase
@@ -414,7 +414,7 @@ const generateQuestionQueue = async () => {
       return;
     }
 
-    console.log('User answers:', userAnswers);
+    // console.log('User answers:', userAnswers);
 
     if (!userAnswers || userAnswers.length === 0) {
       console.log('No user answers found');
@@ -442,7 +442,7 @@ const generateQuestionQueue = async () => {
       return;
     }
 
-    console.log('Questions data:', questionsData);
+    // console.log('Questions data:', questionsData);
 
     if (!questionsData || questionsData.length === 0) {
       console.log('No questions data found for answered questions.');
@@ -459,10 +459,10 @@ const generateQuestionQueue = async () => {
       }
     }
 
-    console.log('Incorrect question numbers:', incorrectQuestionNumbers);
+    // console.log('Incorrect question numbers:', incorrectQuestionNumbers);
 
     if (incorrectQuestionNumbers.length === 0) {
-      console.log('User got all answers correct, no question queue to generate.');
+      // console.log('User got all answers correct, no question queue to generate.');
       return;
     }
 
@@ -500,8 +500,6 @@ const generateQuestionQueue = async () => {
       }
     }
 
-    console.log('Generated question queue:', questionQueue);
-
     // Attempting to update profile with the new question queue
     const { data: updateData, error: updateError } = await supabase
       .from('profiles_duplicate')
@@ -535,7 +533,7 @@ const generateQuestionQueue = async () => {
     if (checkError) {
       console.error('Error checking updated profile:', checkError);
     } else {
-      console.log('Updated question_queue after delay:', updatedProfile.question_queue);
+      // console.log('Updated question_queue after delay:', updatedProfile.question_queue);
     }
 
   } catch (error) {
