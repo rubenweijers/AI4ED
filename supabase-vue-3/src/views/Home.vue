@@ -3,7 +3,7 @@
     <div class="welcome-image-container">
       <img src="/pasteloilpainting.png" alt="Welcome Image" class="welcome-image">
       <div class="welcome-text">
-        <h2>AI for Education</h2>
+        <!-- <h2>AI for Education</h2> -->
         <p>Reducing misconceptions in physics using state of the art AI models.</p>
         <!-- <button @click="learnMore" class="learn-more-button">Learn More</button> -->
         <router-link :to="{ name: 'Study'}" class="learn-more-button">Learn more</router-link>
