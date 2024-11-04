@@ -188,175 +188,104 @@ export default {
         },
 
         async loadDataAndSetSystemPrompt() {
+        try {
             const userData = localStorage.getItem('user');
-            if (userData) {
-                    this.user = JSON.parse(userData);
-            } 
-            else {
-                    console.log('User not authenticated');
-                    this.$router.push('/login');
-                    return;
+            if (!userData) {
+            console.log('User not authenticated');
+            this.$router.push('/login');
+            return;
             }
+            this.user = JSON.parse(userData);
+
             const storedData = localStorage.getItem('chatData');
             if (storedData) {
-                const {
-                    userBeliefLevel,
-                    questionText,
-                    explanation,
-                    systemPrompt,
-                    initialSystemMessage,
-                    messages,
-                    remainingRounds,
-                    incorrectQuestion,
-                    userAnswer,
-                } = JSON.parse(storedData);
-                this.userBeliefLevel = userBeliefLevel;
-                this.questionText = questionText;
-                this.explanation = explanation;
-                this.systemPrompt = systemPrompt;
-                this.initialSystemMessage = initialSystemMessage;
-                this.messages = messages || [{ role: 'assistant', content: this.initialSystemMessage }];
-                this.remainingRounds = remainingRounds !== undefined ? remainingRounds : 3; // Default to 3 if not set
-                this.incorrectQuestion = incorrectQuestion;
-                this.userAnswer = userAnswer;
+            const parsedData = JSON.parse(storedData);
+            Object.assign(this, parsedData);
+            this.messages = this.messages || [{ role: 'assistant', content: this.initialSystemMessage }];
+            this.remainingRounds = this.remainingRounds !== undefined ? this.remainingRounds : 3;
             } else {
-                await this.fetchDataAndSetSystemPrompt();
+            await this.fetchDataAndSetSystemPrompt();
             }
+        } catch (error) {
+            console.error('Error in loadDataAndSetSystemPrompt:', error);
+            alert('An error occurred while loading data. Please try again.');
+        }
         },
 
         async fetchDataAndSetSystemPrompt() {
-            try {
-                const userData = localStorage.getItem('user');
-                if (userData) {
-                    this.user = JSON.parse(userData);
-                } else {
-                    console.log('User not authenticated');
-                    this.$router.push('/login');
-                    return;
-                }
+        try {
+            console.log('Fetching profile data for user:', this.user.username);
+            const { data: profileData, error: profileError } = await supabase
+            .from('profiles_duplicate')
+            .select('*')
+            .eq('user_id', this.user.username)
+            .maybeSingle();
 
-                // Fetch profile data to get question queue and current index
-                console.log('Fetching profile data for user:', this.user.username);
-                const { data: profileData, error: profileError } = await supabase
-                    .from('profiles_duplicate')
-                    .select('*')
-                    .eq('user_id', this.user.username)
-                    .maybeSingle();
+            if (profileError) throw new Error(`Error fetching profile data: ${profileError.message}`);
+            if (!profileData) throw new Error(`No profile data found for user: ${this.user.username}`);
 
-                if (profileError) {
-                    console.error('Error fetching profile data:', profileError.message);
-                    alert('No profile data found. Please complete the previous steps first.');
-                    this.$router.push('/study'); // Redirect to the appropriate page
-                    return;
-                }
+            this.profileData = profileData;
+            const questionQueue = this.profileData.question_queue;
+            const currentQuestionIndex = this.profileData.current_question_index || 0;
 
-                if (!profileData) {
-                    console.error('No profile data found for user:', this.user.username);
-                    alert('No profile data found. Please complete the previous steps first.');
-                    this.$router.push('/study');
-                    return;
-                }
-
-                this.profileData = profileData;
-
-                const questionQueue = this.profileData.question_queue;
-                const currentQuestionIndex = this.profileData.current_question_index || 0;
-
-                // Check if questionQueue is valid and has the next question
-                if (!questionQueue || questionQueue.length === 0) {
-                    console.error('Question queue is empty.');
-                    alert('No questions to display. Please complete the previous steps.');
-                    this.$router.push('/study');
-                    return;
-                }
-
-                if (currentQuestionIndex >= questionQueue.length) {
-                    console.error('No more questions left.');
-                    alert('You have completed all the questions. Thank you!');
-                    this.$router.push('/completion'); // Redirect to a completion page
-                    return;
-                }
-
-                const questionNumber = questionQueue[currentQuestionIndex];
-
-                // Ensure questionNumber is defined
-                if (questionNumber === undefined) {
-                    console.error('Question number is undefined.');
-                    alert('An error occurred. Please try again later.');
-                    return;
-                }
-
-                // Fetch answer data
-                console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
-                const { data: answerData, error: answerError } = await supabase
-                    .from('answers_posttest_denton')
-                    .select('belief_rating_1, llm_summary')
-                    .eq('user_id', this.user.username)
-                    .eq('question_number', questionNumber)
-                    .maybeSingle();
-
-                if (answerError) {
-                    console.error('Error fetching answer data:', answerError.message);
-                    alert('An error occurred while fetching answer data.');
-                    return;
-                }
-
-                if (!answerData) {
-                    console.error('No answer data found for this user and question number.');
-                    alert('No answer data found. Please complete the previous steps first.');
-                    return;
-                }
-
-                this.userBeliefLevel = answerData.belief_rating_1;
-                this.explanation = answerData.llm_summary;
-
-                // Fetch question data
-                console.log('Fetching question data for question number:', questionNumber);
-                const { data: questionData, error: questionError } = await supabase
-                    .from('questions_denton')
-                    .select('*') // Fetch all fields
-                    .eq('question_number', questionNumber)
-                    .single();
-
-                if (questionError) {
-                    console.error('Error fetching question data:', questionError.message);
-                    alert('An error occurred while fetching question data.');
-                    return;
-                }
-
-                if (!questionData) {
-                    console.error('No question data found for question number:', questionNumber);
-                    alert('No question data found. Please contact support.');
-                    return;
-                }
-
-                this.questionText = questionData.question_text;
-                this.incorrectQuestion = questionData;
-
-                // Fetch user's answer from 'answers_denton' table
-                const { data: userAnswerData, error: userAnswerError } = await supabase
-                    .from('answers_denton')
-                    .select('answer')
-                    .eq('user_id', this.user.username)
-                    .eq('question_number', questionNumber)
-                    .single();
-
-                if (userAnswerError) {
-                    console.error('Error fetching user answer:', userAnswerError.message);
-                    return;
-                }
-
-                this.userAnswer = userAnswerData.answer || '';
-
-                // Set the system prompt
-                this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
-
-                await this.generateInitialAIMessage();
-
-                this.saveChatData();
-            } catch (error) {
-                console.error('Error fetching data:', error);
+            if (!questionQueue || questionQueue.length === 0) {
+            throw new Error('Question queue is empty.');
             }
+            if (currentQuestionIndex >= questionQueue.length) {
+            throw new Error('No more questions left.');
+            }
+
+            const questionNumber = questionQueue[currentQuestionIndex];
+            if (questionNumber === undefined) {
+            throw new Error('Question number is undefined.');
+            }
+
+            console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
+            const { data: answerData, error: answerError } = await supabase
+            .from('answers_posttest_denton')
+            .select('belief_rating_1, llm_summary')
+            .eq('user_id', this.user.username)
+            .eq('question_number', questionNumber)
+            .maybeSingle();
+
+            if (answerError) throw new Error(`Error fetching answer data: ${answerError.message}`);
+            if (!answerData) throw new Error('No answer data found for this user and question number.');
+
+            this.userBeliefLevel = answerData.belief_rating_1;
+            this.explanation = answerData.llm_summary;
+
+            console.log('Fetching question data for question number:', questionNumber);
+            const { data: questionData, error: questionError } = await supabase
+            .from('questions_denton')
+            .select('*')
+            .eq('question_number', questionNumber)
+            .single();
+
+            if (questionError) throw new Error(`Error fetching question data: ${questionError.message}`);
+            if (!questionData) throw new Error(`No question data found for question number: ${questionNumber}`);
+
+            this.questionText = questionData.question_text;
+            this.incorrectQuestion = questionData;
+
+            const { data: userAnswerData, error: userAnswerError } = await supabase
+            .from('answers_denton')
+            .select('answer')
+            .eq('user_id', this.user.username)
+            .eq('question_number', questionNumber)
+            .single();
+
+            if (userAnswerError) throw new Error(`Error fetching user answer: ${userAnswerError.message}`);
+            this.userAnswer = userAnswerData.answer || '';
+
+            this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
+
+            await this.generateInitialAIMessage();
+            this.saveChatData();
+        } catch (error) {
+            console.error('Error in fetchDataAndSetSystemPrompt:', error);
+            alert(error.message);
+            this.$router.push('/study');
+        }
         },
         async generateInitialAIMessage() {
             this.loading = true;
