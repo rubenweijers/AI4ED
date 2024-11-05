@@ -13,15 +13,15 @@ export default {
   name: 'Chat',
   components: {
     ChatComponent,
-    DeleteDataComponent
+    // DeleteDataComponent
   },
   methods: {
-    handleDataDeleted() {
-      // Reset the ChatComponent
-      if (this.$refs.chatComponent) {
-        this.$refs.chatComponent.handleDataDeleted();
-      }
-    }
+    // handleDataDeleted() {
+    //   // Reset the ChatComponent
+    //   if (this.$refs.chatComponent) {
+    //     this.$refs.chatComponent.handleDataDeleted();
+    //   }
+    // }
   }
 };
 </script>
@@ -35,9 +35,9 @@ export default {
   position: relative;
 }
 
-.delete-button {
+/* .delete-button {
   position: absolute;
   bottom: 20px;
   left: 20px;
-}
+} */
 </style>
