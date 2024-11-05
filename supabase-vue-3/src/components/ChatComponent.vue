@@ -408,12 +408,10 @@ export default {
             this.loading = true;
 
             try {
-                const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                    },
-                });
+                const response = await axios.post('/api/openai', apiData);
+                // Handle the response
+                const aiMessage = response.data.choices[0].message.content;
+                this.messages.push({ role: 'assistant', content: aiMessage });
 
                 const modelReply = response.data.choices[0].message.content.trim();
                 this.messages.push({ role: 'assistant', content: modelReply });
