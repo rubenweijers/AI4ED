@@ -270,6 +270,10 @@ const submitAnswers = async () => {
     }
 
     submissionSuccess.value = true;
+    localStorage.removeItem('studyStartTime');
+    localStorage.removeItem('studyTotalDuration');
+    localStorage.removeItem('fifteenMinuteWarningDisplayed');
+    localStorage.removeItem('fiveMinuteWarningDisplayed');
     router.push('/feedback'); // Redirect to a Thank You page or appropriate page
   } catch (error) {
     console.error('An unexpected error occurred:', error);
