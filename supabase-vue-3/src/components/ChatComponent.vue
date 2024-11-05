@@ -300,12 +300,12 @@ export default {
                 }
                 console.log('Fetched questionData:', questionData);
 
-                if (!questionData.question_text || !questionData.question_number) {
+                if (!questionData.question_text_with_images_descriptions || !questionData.question_number) {
                     console.error('Incomplete question data:', questionData);
                     throw new Error('Incomplete question data.');
                 }
 
-                this.questionText = questionData.question_text;
+                this.questionText = questionData.question_text_with_images_descriptions;
                 this.incorrectQuestion = questionData;
                 console.log('incorrectQuestion set:', this.incorrectQuestion);
 

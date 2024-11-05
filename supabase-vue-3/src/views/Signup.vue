@@ -19,7 +19,6 @@
 import { ref } from 'vue'
 import { supabase } from '../supabase'
 import bcrypt from 'bcryptjs'
-import { v4 as uuidv4 } from 'uuid'
 
 const loading = ref(false)
 const numberOfUsersToGenerate = ref('')
@@ -30,15 +29,24 @@ const hashPassword = async (password) => {
   return hashedPassword;
 }
 
+const generateRandomString = (length, chars) => {
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
 const generateRandomUser = (group) => {
-  const generatedUsername = uuidv4();
-  const generatedPassword = uuidv4();
+  // Generate a 6-character lowercase username
+  const username = generateRandomString(5, 'abcdefghijklmnopqrstuvwxyz0123456789');
+  // Generate an 8-character alphanumeric password with both letters and numbers
+  const password = generateRandomString(5, 'abcdefghijklmnopqrstuvwxyz0123456789');
   return {
-    username: generatedUsername,
-    password: generatedPassword,
-    displayName: generatedUsername,
+    username: username,
+    password: password,
+    displayName: username,
     group: group,
-    // ... other fields if needed
   }
 }
 
