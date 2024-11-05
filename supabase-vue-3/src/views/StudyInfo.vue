@@ -98,7 +98,8 @@ const cancelProceed = () => {
 // Add logoutUser function
 const logoutUser = async () => {
   // Clear user data from localStorage
-  localStorage.removeItem('user');
+  localStorage.clear();
+  
   // Sign out from Supabase auth (if you're using Supabase authentication)
   const { error } = await supabase.auth.signOut();
   if (error) {
