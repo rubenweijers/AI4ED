@@ -5,7 +5,7 @@
             <!-- Start of question display -->
             <div v-if="incorrectQuestion">
             <!-- Add reminder text for specific question numbers -->
-            <!-- Example for Question 2 -->
+            <!-- Example for Q 2 -->
             <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
                 <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
             </div>
