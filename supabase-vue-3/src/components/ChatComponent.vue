@@ -1,8 +1,9 @@
 <template>
-         <div v-if="isLoading">Loading...</div>
-        <!-- Start of question display -->
-        <div class="question" v-else-if="incorrectQuestion">
-
+    <div class="chat-container">
+        <!-- Existing chat messages -->
+        <div class="messages">
+            <!-- Start of question display -->
+            <div v-if="incorrectQuestion">
             <!-- Add reminder text for specific question numbers -->
             <!-- Example for Question 2 -->
             <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
@@ -59,11 +60,8 @@
             </div>
             <hr>
             <p><strong>Your answer was:</strong> {{ userAnswer }}</p>
-        </div>
-        <!-- End of question display -->
-
-        <!-- Existing chat messages -->
-        <div class="messages">
+            </div>
+            <!-- End of question display -->
             <div v-if="loading && messages.length === 0" class="loading">
                 <img src="/loading_spinner.gif" alt="Loading" />
                 <p>Thinking...</p>
@@ -98,6 +96,8 @@
             </div>
             <button v-if="isChatFinished()" @click="confirmNextPage" class="next-button">Next</button>
         </div>
+    </div>
+
 </template>
 
 <script>
