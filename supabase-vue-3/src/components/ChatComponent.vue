@@ -143,7 +143,7 @@ export default {
         // Setup the timer watcher on component mount
         this.setupTimerWatcher();
     },
-    beforeDestroy() {
+    beforeUnmount() { // Use beforeUnmount instead of beforeDestroy
         // Clear the timer interval when the component is destroyed
         if (this.timerWatcherInterval) {
             clearInterval(this.timerWatcherInterval);
@@ -214,85 +214,128 @@ export default {
         },
 
         async fetchDataAndSetSystemPrompt() {
-        try {
-            console.log('Fetching username data for user:', this.user.username);
-            //console.log('Fetching profile data for user:', this.user.value.username);
-            console.log('Starting fetchDataAndSetSystemPrompt');
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles_duplicate')
-                .select('*')
-                .eq('user_id', this.user.username)
-                .maybeSingle();
+            try {
+                console.log('Starting fetchDataAndSetSystemPrompt...');
 
+                const userData = localStorage.getItem('user');
+                if (!userData) {
+                    console.log('User not authenticated. Redirecting to login.');
+                    this.$router.push('/login');
+                    return;
+                }
+                this.user = JSON.parse(userData);
+                console.log('User data loaded:', this.user);
 
-            if (profileError) throw new Error(`Error fetching profile data: ${profileError.message}`);
-            if (!profileData) throw new Error(`No profile data found for user: ${this.user.username}`);
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles_duplicate')
+                    .select('*')
+                    .eq('user_id', this.user.username)
+                    .maybeSingle();
 
-            this.profileData = profileData;
-            const questionQueue = this.profileData.question_queue;
-            const currentQuestionIndex = this.profileData.current_question_index || 0;
+                if (profileError) {
+                    console.error(`Error fetching profile data: ${profileError.message}`);
+                    throw new Error(`Error fetching profile data: ${profileError.message}`);
+                }
+                if (!profileData) {
+                    console.error(`No profile data found for user: ${this.user.username}`);
+                    throw new Error(`No profile data found for user: ${this.user.username}`);
+                }
+                console.log('Fetched profileData:', profileData);
+                this.profileData = profileData;
 
-            if (!questionQueue || questionQueue.length === 0) {
-                throw new Error('Question queue is empty.');
+                const questionQueue = this.profileData.question_queue;
+                const currentQuestionIndex = parseInt(this.profileData.current_question_index, 10) || 0;
+                console.log('Question queue:', questionQueue);
+                console.log('Current question index:', currentQuestionIndex);
+
+                if (!questionQueue || !Array.isArray(questionQueue) || questionQueue.length === 0) {
+                    throw new Error('Question queue is empty or invalid.');
+                }
+                if (currentQuestionIndex < 0 || currentQuestionIndex >= questionQueue.length) {
+                    throw new Error('Invalid current question index.');
+                }
+
+                const questionNumber = questionQueue[currentQuestionIndex];
+                console.log('Question number:', questionNumber);
+
+                if (typeof questionNumber !== 'number' || isNaN(questionNumber)) {
+                    throw new Error(`Invalid question number: ${questionNumber}`);
+                }
+
+                console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
+                const { data: answerData, error: answerError } = await supabase
+                    .from('answers_posttest_denton')
+                    .select('belief_rating_1, llm_summary')
+                    .eq('user_id', this.user.username)
+                    .eq('question_number', questionNumber)
+                    .maybeSingle();
+
+                if (answerError) {
+                    console.error(`Error fetching answer data: ${answerError.message}`);
+                    throw new Error(`Error fetching answer data: ${answerError.message}`);
+                }
+                if (!answerData) {
+                    console.error('No answer data found for this user and question number.');
+                    throw new Error('No answer data found for this user and question number.');
+                }
+                console.log('Fetched answerData:', answerData);
+
+                this.userBeliefLevel = answerData.belief_rating_1;
+                this.explanation = answerData.llm_summary;
+
+                console.log('Fetching question data for question number:', questionNumber);
+                const { data: questionData, error: questionError } = await supabase
+                    .from('questions_denton')
+                    .select('*')
+                    .eq('question_number', questionNumber)
+                    .single();
+
+                if (questionError) {
+                    console.error(`Error fetching question data: ${questionError.message}`);
+                    throw new Error(`Error fetching question data: ${questionError.message}`);
+                }
+                if (!questionData) {
+                    console.error(`No question data found for question number: ${questionNumber}`);
+                    throw new Error(`No question data found for question number: ${questionNumber}`);
+                }
+                console.log('Fetched questionData:', questionData);
+
+                if (!questionData.question_text || !questionData.question_number) {
+                    console.error('Incomplete question data:', questionData);
+                    throw new Error('Incomplete question data.');
+                }
+
+                this.questionText = questionData.question_text;
+                this.incorrectQuestion = questionData;
+                console.log('incorrectQuestion set:', this.incorrectQuestion);
+
+                console.log('Fetching user answer for question number:', questionNumber);
+                const { data: userAnswerData, error: userAnswerError } = await supabase
+                    .from('answers_denton')
+                    .select('answer')
+                    .eq('user_id', this.user.username)
+                    .eq('question_number', questionNumber)
+                    .single();
+
+                if (userAnswerError) {
+                    console.error(`Error fetching user answer: ${userAnswerError.message}`);
+                    throw new Error(`Error fetching user answer: ${userAnswerError.message}`);
+                }
+                console.log('Fetched userAnswerData:', userAnswerData);
+
+                this.userAnswer = userAnswerData.answer || '';
+                console.log('User answer set:', this.userAnswer);
+
+                this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
+                console.log('System prompt set:', this.systemPrompt);
+
+                await this.generateInitialAIMessage();
+                this.saveChatData();
+            } catch (error) {
+                console.error('Error in fetchDataAndSetSystemPrompt:', error);
+                alert(error.message);
+                this.$router.push('/study');
             }
-            if (currentQuestionIndex >= questionQueue.length) {
-                throw new Error('No more questions left.');
-            }
-
-            const questionNumber = questionQueue[currentQuestionIndex];
-            if (questionNumber === undefined) {
-                throw new Error('Question number is undefined.');
-            }
-
-            console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
-            const { data: answerData, error: answerError } = await supabase
-                .from('answers_posttest_denton')
-                .select('belief_rating_1, llm_summary')
-                .eq('user_id', this.user.username)
-                .eq('question_number', questionNumber)
-                .maybeSingle();
-
-            if (answerError) throw new Error(`Error fetching answer data: ${answerError.message}`);
-            if (!answerData) throw new Error('No answer data found for this user and question number.');
-
-            this.userBeliefLevel = answerData.belief_rating_1;
-            this.explanation = answerData.llm_summary;
-
-            console.log('Fetching question data for question number:', questionNumber);
-            const { data: questionData, error: questionError } = await supabase
-                .from('questions_denton')
-                .select('*')
-                .eq('question_number', questionNumber)
-                .single();
-
-            if (questionError) throw new Error(`Error fetching question data: ${questionError.message}`);
-            if (!questionData) throw new Error(`No question data found for question number: ${questionNumber}`);
-
-            this.questionText = questionData.question_text;
-            this.incorrectQuestion = questionData;
-
-            console.log('Question data:', questionData);
-            console.log('Incorrect question set:', this.incorrectQuestion);
-
-            const { data: userAnswerData, error: userAnswerError } = await supabase
-                .from('answers_denton')
-                .select('answer')
-                .eq('user_id', this.user.username)
-                .eq('question_number', questionNumber)
-                .single();
-
-            if (userAnswerError) throw new Error(`Error fetching user answer: ${userAnswerError.message}`);
-            this.userAnswer = userAnswerData.answer || '';
-
-            this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
-
-            await this.generateInitialAIMessage();
-            this.saveChatData();
-        } catch (error) {
-            console.error('Error in fetchDataAndSetSystemPrompt:', error);
-            alert(error.message);
-            this.$router.push('/study');
-        }
         },
         async generateInitialAIMessage() {
             this.loading = true;
@@ -444,7 +487,7 @@ export default {
         this.$router.push('/beliefratingpostchat');
         },
         saveChatData() {
-            localStorage.setItem('chatData', JSON.stringify({
+            const chatData = {
                 userBeliefLevel: this.userBeliefLevel,
                 questionText: this.questionText,
                 explanation: this.explanation,
@@ -453,9 +496,12 @@ export default {
                 messages: this.messages,
                 remainingRounds: this.remainingRounds,
                 lastMessageTime: this.lastMessageTime,
-                incorrectQuestion: this.incorrectQuestion,
-                userAnswer: this.userAnswer,
-            }));
+                incorrectQuestion: this.incorrectQuestion, // Ensure this is included
+                userAnswer: this.userAnswer, // Ensure this is included
+            };
+            console.log('Saving chatData:', chatData);
+            localStorage.setItem('chatData', JSON.stringify(chatData));
+        },
         },
         shouldDisplayLabels(questionNumber) {
             return this.questionsWithLabels.includes(questionNumber);
@@ -474,8 +520,7 @@ export default {
             const formattedText = question.question_text.replace(/\\n/g, '<br>');
             return numberText + formattedText;
         },
-    },
-};
+    };
 </script>
 
 <style scoped>
