@@ -215,21 +215,18 @@ export default {
 
         async fetchDataAndSetSystemPrompt() {
         try {
-            console.log('Fetching profile data for user:', user.value.username);
+            console.log('Fetching username data for user:', this.user.username);
+            //console.log('Fetching profile data for user:', this.user.value.username);
             console.log('Starting fetchDataAndSetSystemPrompt');
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles_duplicate')
                 .select('*')
-                .eq('user_id', user.value.username)
+                .eq('user_id', this.user.username)
                 .maybeSingle();
 
-                console.log('Profile data:', profileData);
-                console.log('Question queue:', questionQueue);
-                console.log('Current question index:', currentQuestionIndex);
-                console.log('Question number:', questionNumber);
 
             if (profileError) throw new Error(`Error fetching profile data: ${profileError.message}`);
-            if (!profileData) throw new Error(`No profile data found for user: ${user.value.username}`);
+            if (!profileData) throw new Error(`No profile data found for user: ${this.user.username}`);
 
             this.profileData = profileData;
             const questionQueue = this.profileData.question_queue;
@@ -247,11 +244,11 @@ export default {
                 throw new Error('Question number is undefined.');
             }
 
-            console.log('Fetching answer data for user:', user.value.username, 'and question number:', questionNumber);
+            console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
             const { data: answerData, error: answerError } = await supabase
                 .from('answers_posttest_denton')
                 .select('belief_rating_1, llm_summary')
-                .eq('user_id', user.value.username)
+                .eq('user_id', this.user.username)
                 .eq('question_number', questionNumber)
                 .maybeSingle();
 
@@ -280,7 +277,7 @@ export default {
             const { data: userAnswerData, error: userAnswerError } = await supabase
                 .from('answers_denton')
                 .select('answer')
-                .eq('user_id', user.value.username)
+                .eq('user_id', this.user.username)
                 .eq('question_number', questionNumber)
                 .single();
 
@@ -381,7 +378,7 @@ export default {
                 const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
 
                 // Get user information from Supabase
-                const userId = user.value.username;
+                const userId = this.user.username;
                 const { data: profileData, error: profileError } = await supabase
                     .from('profiles_duplicate')
                     .select('display_name, group')
