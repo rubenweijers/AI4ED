@@ -4,62 +4,62 @@
         <div class="messages">
             <!-- Start of question display -->
             <div v-if="incorrectQuestion">
-            <!-- Add reminder text for specific question numbers -->
-            <!-- Example for Q 2 -->
-            <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
-                <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
-            </div>
+                <!-- Add reminder text for specific question numbers -->
+                <!-- Example for Q 2 -->
+                <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
+                    <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
+                </div>
 
-            <!-- Example for Questions 3 to 7 -->
-            <div v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" class="additional-text">
-                <p><i>Reminder: you used this statement to answer the question.</i><br>
-                    A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+                <!-- Example for Questions 3 to 7 -->
+                <div v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" class="additional-text">
+                    <p><i>Reminder: you used this statement to answer the question.</i><br>
+                        A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
 
-                    <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-                </p>  
-            </div>
+                        <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+                    </p>  
+                </div>
 
-            <!-- Example for Questions 28 to 30 -->
-            <div v-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
-                <p><i>Reminder: you used this statement to answer the question.</i><br>
-                    A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+                <!-- Example for Questions 28 to 30 -->
+                <div v-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
+                    <p><i>Reminder: you used this statement to answer the question.</i><br>
+                        A person is sitting on a sled which is on a slope. The slope is so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
 
-                    <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+                        <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
 
-                    <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
-                </p>
-            </div>
+                        <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
+                    </p>
+                </div>
 
-            <!-- Add images before the corresponding questions -->
-            <img v-if="incorrectQuestion.question_number === 1 || incorrectQuestion.question_number === 2" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" src="/fci_2/fci_q4-7.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 4" src="/fci_2/fci_q4.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 6" src="/fci_2/fci_q6.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 11" src="/fci_2/fci_q11.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 12" src="/fci_2/fci_q12.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 13" src="/fci_2/fci_q13.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 16" src="/fci_2/fci_q16.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 19" src="/fci_2/fci_q19.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 23" src="/fci_2/fci_q23.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 24" src="/fci_2/fci_q24.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" src="/fci_2/fci_q28-30.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 28" src="/fci_2/fci_q28.png" alt="Question related image" class="question-image">
+                <!-- Add images before the corresponding questions -->
+                <img v-if="incorrectQuestion.question_number === 1 || incorrectQuestion.question_number === 2" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" src="/fci_2/fci_q4-7.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 4" src="/fci_2/fci_q4.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 6" src="/fci_2/fci_q6.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 11" src="/fci_2/fci_q11.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 12" src="/fci_2/fci_q12.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 13" src="/fci_2/fci_q13.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 16" src="/fci_2/fci_q16.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 19" src="/fci_2/fci_q19.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 23" src="/fci_2/fci_q23.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 24" src="/fci_2/fci_q24.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" src="/fci_2/fci_q28-30.png" alt="Question related image" class="question-image">
+                <img v-if="incorrectQuestion.question_number === 28" src="/fci_2/fci_q28.png" alt="Question related image" class="question-image">
 
-            <!-- Display the question text -->
-            <label v-html="formatQuestionText(incorrectQuestion)"></label>
+                <!-- Display the question text -->
+                <label v-html="formatQuestionText(incorrectQuestion)"></label>
 
-            <!-- Options Rendering with Conditional Labels -->
-            <div v-for="(option, index) in getOptions(incorrectQuestion)" :key="index" class="option">
-                <p :class="{'user-answer': userAnswer === option}">
-                    <template v-if="shouldDisplayLabels(incorrectQuestion.question_number)">
-                        <strong>{{ optionLabels[index] }}. </strong>
-                    </template>
-                    {{ option }}
-                </p>
-            </div>
-            <hr>
-            <p><strong>Your answer was:</strong> {{ userAnswer }}</p>
+                <!-- Options Rendering with Conditional Labels -->
+                <div v-for="(option, index) in getOptions(incorrectQuestion)" :key="index" class="option">
+                    <p :class="{'user-answer': userAnswer === option}">
+                        <template v-if="shouldDisplayLabels(incorrectQuestion.question_number)">
+                            <strong>{{ optionLabels[index] }}. </strong>
+                        </template>
+                        {{ option }}
+                    </p>
+                </div>
+                <hr>
+                <p><strong>Your answer was:</strong> {{ userAnswer }}</p>
             </div>
             <!-- End of question display -->
             <div v-if="loading && messages.length === 0" class="loading">
@@ -104,9 +104,13 @@
 import axios from 'axios';
 import { marked } from 'marked';
 import { supabase } from '../supabase';
+import ToastNotification from '../components/ToastNotification.vue';
 
 export default {
     name: 'ChatComponent',
+    components: {
+        ToastNotification,
+    },
     data() {
         return {
             userMessage: '',
@@ -127,16 +131,11 @@ export default {
             optionLabels: ["A", "B", "C", "D", "E"],
             questionsWithLabels: [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 29, 30],
             timerWatcherInterval: null,
+            showToast: false,
         };
     },
     async mounted() {
-        this.isLoading = true;
-        await this.loadDataAndSetSystemPrompt();
-        this.isLoading = false;
-        if (!this.incorrectQuestion) {
-            console.error('Incorrect Question is not set.');
-            return;
-        }
+        await this.checkUser();
         this.$nextTick(() => {
             this.scrollToBottom();
         });
@@ -150,6 +149,18 @@ export default {
         }
     },
     methods: {
+        // Toast notifications
+        showToastNotification() {
+            this.showToast = true;
+        },
+        confirmSubmit() {
+            this.showToast = false;
+            this.checkValid();
+        },
+        cancelSubmit() {
+            this.showToast = false;
+        },
+
         clearChatData() {
             localStorage.removeItem('chatData');
             this.userMessage = '';
@@ -167,102 +178,102 @@ export default {
             this.userAnswer = '';
         },
 
-        // Timer setup method
-        setupTimerWatcher() {
-            this.timerWatcherInterval = setInterval(() => {
-                const remainingTime = this.getRemainingTime();
-                if (remainingTime <= 0) {
-                    clearInterval(this.timerWatcherInterval);
-                    alert('Your study time has ended. Moving to the next section.');
-                    this.$router.push('/studyoriginalfci'); // Redirect to the next study phase
-                }
-            }, 1000);
-        },
-        // Method to calculate remaining time
-        getRemainingTime() {
-            const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
-            const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
-            const now = Date.now();
-            const elapsed = Math.floor((now - startTime) / 1000); // in seconds
-            const timeLeft = totalDuration - elapsed;
-            return timeLeft;
-        },
-
-        async loadDataAndSetSystemPrompt() {
-        try {
+        async checkUser() {
             const userData = localStorage.getItem('user');
-            if (!userData) {
-            console.log('User not authenticated');
-            this.$router.push('/login');
-            return;
-            }
-            this.user = JSON.parse(userData);
-
-            const storedData = localStorage.getItem('chatData');
-            if (storedData) {
-            const parsedData = JSON.parse(storedData);
-            Object.assign(this, parsedData);
-            this.messages = this.messages || [{ role: 'assistant', content: this.initialSystemMessage }];
-            this.remainingRounds = this.remainingRounds !== undefined ? this.remainingRounds : 3;
+            if (userData) {
+                this.user = JSON.parse(userData);
+                await this.fetchUserProfile();
+                await this.fetchIncorrectQuestion();
+                // After fetching the incorrect question, set up the system prompt
+                await this.setupSystemPrompt();
             } else {
-            await this.fetchDataAndSetSystemPrompt();
+                this.$router.push('/login'); // Redirect to login if no user is found
             }
-        } catch (error) {
-            console.error('Error in loadDataAndSetSystemPrompt:', error);
-            alert('An error occurred while loading data. Please try again.');
-        }
+            this.loading = false;
         },
 
-        async fetchDataAndSetSystemPrompt() {
-            try {
-                console.log('Starting fetchDataAndSetSystemPrompt...');
+        async fetchUserProfile() {
+            const { data, error } = await supabase
+                .from('profiles_duplicate')
+                .select('*')
+                .eq('user_id', this.user.username)
+                .maybeSingle();
 
-                const userData = localStorage.getItem('user');
-                if (!userData) {
-                    console.log('User not authenticated. Redirecting to login.');
-                    this.$router.push('/login');
+            if (error) {
+                console.error('Error fetching user profile:', error.message);
+                alert('Error fetching user profile. Please try again.');
+            } else if (data === null) {
+                console.error('No profile found for user');
+                alert('No profile found for user. Please complete your profile.');
+                // Handle case where no profile is found
+            } else {
+                this.profileData = data;
+            }
+        },
+
+        async fetchIncorrectQuestion() {
+            try {
+                if (!this.profileData.question_queue || this.profileData.question_queue.length === 0) {
+                    console.error('No question queue found. Please complete the FCI test first.');
+                    alert('No question queue found. Please complete the FCI test first.');
+                    this.$router.push('/study'); // Redirect to the study page
                     return;
                 }
-                this.user = JSON.parse(userData);
-                console.log('User data loaded:', this.user);
 
-                const { data: profileData, error: profileError } = await supabase
-                    .from('profiles_duplicate')
-                    .select('*')
-                    .eq('user_id', this.user.username)
-                    .maybeSingle();
-
-                if (profileError) {
-                    console.error(`Error fetching profile data: ${profileError.message}`);
-                    throw new Error(`Error fetching profile data: ${profileError.message}`);
-                }
-                if (!profileData) {
-                    console.error(`No profile data found for user: ${this.user.username}`);
-                    throw new Error(`No profile data found for user: ${this.user.username}`);
-                }
-                console.log('Fetched profileData:', profileData);
-                this.profileData = profileData;
-
+                const currentIndex = this.profileData.current_question_index || 0;
                 const questionQueue = this.profileData.question_queue;
-                const currentQuestionIndex = parseInt(this.profileData.current_question_index, 10) || 0;
-                console.log('Question queue:', questionQueue);
-                console.log('Current question index:', currentQuestionIndex);
 
-                if (!questionQueue || !Array.isArray(questionQueue) || questionQueue.length === 0) {
-                    throw new Error('Question queue is empty or invalid.');
-                }
-                if (currentQuestionIndex < 0 || currentQuestionIndex >= questionQueue.length) {
-                    throw new Error('Invalid current question index.');
+                if (currentIndex >= questionQueue.length) {
+                    // No more questions to display
+                    this.incorrectQuestion = null;
+                    return;
                 }
 
-                const questionNumber = questionQueue[currentQuestionIndex];
-                console.log('Question number:', questionNumber);
+                const nextQuestionNumber = questionQueue[currentIndex];
 
-                if (typeof questionNumber !== 'number' || isNaN(questionNumber)) {
-                    throw new Error(`Invalid question number: ${questionNumber}`);
+                // Fetch the question from 'questions_denton' table
+                const { data: questionData, error: questionError } = await supabase
+                    .from('questions_denton')
+                    .select('*')
+                    .eq('question_number', nextQuestionNumber)
+                    .single();
+
+                if (questionError) {
+                    console.error('Error fetching question:', questionError.message);
+                    alert('Error fetching question. Please try again.');
+                    return;
                 }
 
-                console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
+                this.incorrectQuestion = questionData;
+
+                // Fetch user's answer from 'answers_denton' table
+                const { data: userAnswerData, error: userAnswerError } = await supabase
+                    .from('answers_denton')
+                    .select('answer')
+                    .eq('user_id', this.user.username)
+                    .eq('question_number', nextQuestionNumber)
+                    .single();
+
+                if (userAnswerError) {
+                    console.error('Error fetching user answer:', userAnswerError.message);
+                    alert('Error fetching your answer. Please try again.');
+                    return;
+                }
+
+                this.userAnswer = userAnswerData.answer || '';
+            } catch (error) {
+                console.error('An unexpected error occurred:', error);
+                alert('An unexpected error occurred. Please try again.');
+            }
+        },
+
+        async setupSystemPrompt() {
+            try {
+                if (!this.incorrectQuestion) return;
+
+                const questionNumber = this.incorrectQuestion.question_number;
+
+                // Fetch answer data for belief_rating_1 and llm_summary
                 const { data: answerData, error: answerError } = await supabase
                     .from('answers_posttest_denton')
                     .select('belief_rating_1, llm_summary')
@@ -272,92 +283,48 @@ export default {
 
                 if (answerError) {
                     console.error(`Error fetching answer data: ${answerError.message}`);
-                    throw new Error(`Error fetching answer data: ${answerError.message}`);
+                    alert(`Error fetching answer data: ${answerError.message}`);
+                    return;
                 }
                 if (!answerData) {
                     console.error('No answer data found for this user and question number.');
-                    throw new Error('No answer data found for this user and question number.');
+                    alert('No answer data found for your answer. Please provide an explanation.');
+                    return;
                 }
-                console.log('Fetched answerData:', answerData);
 
                 this.userBeliefLevel = answerData.belief_rating_1;
                 this.explanation = answerData.llm_summary;
 
-                console.log('Fetching question data for question number:', questionNumber);
-                const { data: questionData, error: questionError } = await supabase
-                    .from('questions_denton')
-                    .select('*')
-                    .eq('question_number', questionNumber)
-                    .single();
+                // Set the system prompt
+                this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText = this.incorrectQuestion.question_text}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
 
-                if (questionError) {
-                    console.error(`Error fetching question data: ${questionError.message}`);
-                    throw new Error(`Error fetching question data: ${questionError.message}`);
-                }
-                if (!questionData) {
-                    console.error(`No question data found for question number: ${questionNumber}`);
-                    throw new Error(`No question data found for question number: ${questionNumber}`);
-                }
-                console.log('Fetched questionData:', questionData);
-
-                if (!questionData.question_text || !questionData.question_number) {
-                    console.error('Incomplete question data:', questionData);
-                    throw new Error('Incomplete question data.');
-                }
-
-                this.questionText = questionData.question_text;
-                this.incorrectQuestion = questionData;
-                console.log('incorrectQuestion set:', this.incorrectQuestion);
-
-                console.log('Fetching user answer for question number:', questionNumber);
-                const { data: userAnswerData, error: userAnswerError } = await supabase
-                    .from('answers_denton')
-                    .select('answer')
-                    .eq('user_id', this.user.username)
-                    .eq('question_number', questionNumber)
-                    .single();
-
-                if (userAnswerError) {
-                    console.error(`Error fetching user answer: ${userAnswerError.message}`);
-                    throw new Error(`Error fetching user answer: ${userAnswerError.message}`);
-                }
-                console.log('Fetched userAnswerData:', userAnswerData);
-
-                this.userAnswer = userAnswerData.answer || '';
-                console.log('User answer set:', this.userAnswer);
-
-                this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
-                console.log('System prompt set:', this.systemPrompt);
-
+                // Generate the initial AI message
                 await this.generateInitialAIMessage();
                 this.saveChatData();
             } catch (error) {
-                console.error('Error in fetchDataAndSetSystemPrompt:', error);
-                alert(error.message);
-                this.$router.push('/study');
+                console.error('Error in setupSystemPrompt:', error);
+                alert('Error setting up the chat. Please try again.');
             }
         },
+
         async generateInitialAIMessage() {
             this.loading = true;
-            const apiData = {
-                model: "gpt-4o",
-                messages: [
-                    { role: "system", content: this.systemPrompt },
-                    { role: "user", content: "Please start the conversation by addressing the user's misconception." },
-                ],
-                max_tokens: 2000,
-                temperature: 0.7,
-            };
+
+            // Initialize messages with the system prompt and the initial user message
+            const messages = [
+                { role: "system", content: this.systemPrompt },
+                { role: "user", content: "Please start the conversation by addressing the user's misconception." },
+            ];
 
             try {
-                const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                    },
+                const response = await axios.post('/api/chat', {
+                    messages,
+                    model: "gpt-4",
+                    max_tokens: 2000,
+                    temperature: 0.7,
                 });
 
-                const initialMessage = response.data.choices[0].message.content.trim();
+                const initialMessage = response.data.reply;
                 this.initialSystemMessage = initialMessage;
                 this.messages.push({ role: 'assistant', content: initialMessage });
                 this.firstMsgTime = new Date();
@@ -370,7 +337,10 @@ export default {
             } finally {
                 this.loading = false;
             }
+
+            this.scrollToBottom();
         },
+
         async sendMessage() {
             if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
 
@@ -394,28 +364,15 @@ export default {
             this.messages.push({ role: 'user', content: userMessageContent });
             this.remainingRounds--;
 
-            const apiData = {
-                model: "gpt-4o",
-                messages: [
-                    { role: "system", content: this.systemPrompt },
-                    ...this.messages,
-                ],
-                max_tokens: 2000,
-                temperature: 0.7,
-            };
-
-            this.userMessage = '';
-            this.loading = true;
-
             try {
-                const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                    },
+                const response = await axios.post('/api/chat', {
+                    messages: this.messages,
+                    model: "gpt-4",
+                    max_tokens: 2000,
+                    temperature: 0.7,
                 });
 
-                const modelReply = response.data.choices[0].message.content.trim();
+                const modelReply = response.data.reply;
                 this.messages.push({ role: 'assistant', content: modelReply });
 
                 const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
@@ -428,7 +385,10 @@ export default {
                     .eq('user_id', userId)
                     .single();
 
-                if (profileError) throw profileError;
+                if (profileError) {
+                    console.error('Error fetching profile data:', profileError.message);
+                    throw profileError;
+                }
 
                 const displayName = profileData.display_name;
                 const llmType = profileData.group;
@@ -448,11 +408,10 @@ export default {
                     question_number: this.profileData.question_queue[this.profileData.current_question_index || 0],
                 });
 
-                this.$nextTick(() => {
-                    this.scrollToBottom();
-                });
+                this.scrollToBottom();
             } catch (error) {
-                console.error('Error communicating with the OpenAI API', error);
+                console.error('Error communicating with the Chat API:', error);
+                alert('Error communicating with the chat service. Please try again.');
             } finally {
                 this.loading = false;
             }
@@ -462,30 +421,39 @@ export default {
                     role: 'system',
                     content: "Thank you for participating in this conversation. You have used all your available inputs.",
                 });
+                this.scrollToBottom();
             }
 
             this.saveChatData();
         },
-        marked(content) {
+
+        formatMessage(content) {
             return marked(content);
         },
+
         scrollToBottom() {
             const messagesContainer = this.$el.querySelector('.messages');
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
         },
+
         isChatFinished() {
             return this.remainingRounds <= 0;
         },
+
         confirmNextPage() {
             if (confirm('Are you sure you want to proceed to the next page?')) {
                 this.nextPage();
             }
         },
+
         async nextPage() {
-        this.clearChatData(); // Clear chat data before moving to the next page
-        // Redirect to the post-chat belief rating page
-        this.$router.push('/beliefratingpostchat');
+            this.clearChatData(); // Clear chat data before moving to the next page
+            // Redirect to the post-chat belief rating page
+            this.$router.push('/beliefratingpostchat');
         },
+
         saveChatData() {
             const chatData = {
                 userBeliefLevel: this.userBeliefLevel,
@@ -502,9 +470,11 @@ export default {
             console.log('Saving chatData:', chatData);
             localStorage.setItem('chatData', JSON.stringify(chatData));
         },
+
         shouldDisplayLabels(questionNumber) {
             return this.questionsWithLabels.includes(questionNumber);
         },
+
         getOptions(question) {
             return [
                 question.option_1,
@@ -514,10 +484,111 @@ export default {
                 question.option_5,
             ].filter(option => option);
         },
+
         formatQuestionText(question) {
             const numberText = question.question_number + '. ';
             const formattedText = question.question_text.replace(/\\n/g, '<br>');
             return numberText + formattedText;
+        },
+
+        checkValid() {
+            if (this.isExplanationValid()) {
+                this.submitExplanation();
+            }
+        },
+
+        isExplanationValid() {
+            if (!this.explanation || this.explanation.trim().length === 0) {
+                alert("Please provide an explanation before submitting.");
+                return false;
+            }
+
+            const wordCount = this.explanation.trim().split(/\s+/).length;
+            if (wordCount < 10) {
+                alert("Your explanation is too short. Please provide a more detailed explanation containing at least 10 words.");
+                return false;
+            }
+
+            return true;
+        },
+
+        async submitExplanation() {
+            try {
+                // Prepare the data to upsert
+                const upsertData = {
+                    user_id: this.user.username,
+                    question_number: this.incorrectQuestion.question_number,
+                    explanation: this.explanation,
+                };
+
+                // Perform the upsert operation
+                const { error } = await supabase
+                    .from('answers_posttest_denton')
+                    .upsert(upsertData, { 
+                        onConflict: 'user_id,question_number',
+                        returning: 'minimal' 
+                    });
+
+                if (error) {
+                    console.error('Error submitting explanation:', error.message);
+                    alert('Error submitting your explanation. Please try again.');
+                    return;
+                }
+
+                // Call OpenAI API to summarize the explanation
+                const summary = await this.summarizeExplanation(this.explanation);
+
+                // Update the row with the summarized explanation
+                const { error: updateError } = await supabase
+                    .from('answers_posttest_denton')
+                    .update({ llm_summary: summary })
+                    .eq('user_id', this.user.username)
+                    .eq('question_number', this.incorrectQuestion.question_number);
+
+                if (updateError) {
+                    console.error('Error updating row with summary:', updateError.message);
+                    alert('Error updating summary. Please try again.');
+                    return;
+                }
+
+                // Update current_question_index
+                const newIndex = this.profileData.current_question_index + 1;
+
+                const { error: profileUpdateError } = await supabase
+                    .from('profiles_duplicate')
+                    .update({
+                        current_question_index: newIndex,
+                    })
+                    .eq('user_id', this.user.username);
+
+                if (profileUpdateError) {
+                    console.error('Error updating current_question_index:', profileUpdateError.message);
+                    alert('Error updating your progress. Please try again.');
+                } else {
+                    this.profileData.current_question_index = newIndex;
+                }
+
+                // Display submission success notification
+                this.showToastNotification();
+
+                // Optionally, navigate to belief rating page after confirmation
+                // await this.$router.push('/beliefrating'); // Uncomment if needed
+
+            } catch (error) {
+                console.error('An unexpected error occurred:', error);
+                alert('An unexpected error occurred. Please try again.');
+            }
+        },
+
+        async summarizeExplanation(explanation) {
+            try {
+                const response = await axios.post('/api/summarize', { explanation });
+                return response.data.summary;
+            } catch (error) {
+                console.error('Error communicating with the summarization API', error);
+                alert('Error summarizing your explanation. Please try again.');
+                return '';
+            }
         },
     }
 }
@@ -558,7 +629,7 @@ export default {
 }
 
 
-.user-message {
+.user-message p {
     background-color: #efefef;
     color: black;
     padding: 10px;
@@ -637,10 +708,10 @@ button {
 }
 
 .next-button {
-    position: fixed;
+    position: absolute;
     bottom: 20px;
     right: 20px;
-    background-color: #00008B;
+    background-color: #00008B; /* Dark Blue */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -652,6 +723,10 @@ button {
 
 button:hover {
     background-color: #0056b3;
+}
+
+.next-button:hover {
+    background-color: #000066; /* Darker Blue */
 }
 
 input:disabled, button:disabled {
@@ -669,23 +744,5 @@ input:disabled, button:disabled {
 .loading img {
     width: 30px;
     height: 30px;
-}
-
-.next-button {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background-color: #00008B; /* Dark Blue */
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-}
-
-.next-button:hover {
-  background-color: #000066; /* Darker Blue */
 }
 </style>
