@@ -56,19 +56,16 @@
 
         <label v-html="formatQuestionText(incorrectQuestion)"></label>
 
-        <!-- Options Rendering with Conditional Labels -->
         <div v-for="(option, index) in getOptions(incorrectQuestion)" :key="index" class="option">
           <p :class="{'user-answer': userAnswer === option}">
             <template v-if="shouldDisplayLabels(incorrectQuestion.question_number)">
               <strong>{{ optionLabels[index] }}. </strong>
             </template>
-            {{ option }}
+            <span v-html="formatOptionText(option)"></span>
           </p>
         </div>
         <hr>
-        <p><strong>Your answer was:</strong> {{ userAnswer }}</p>
-        <!-- Optional: Correct Answer Display -->
-        <!-- <p><strong>Correct Answer:</strong> {{ getCorrectAnswer() }}</p> -->
+        <p><strong>Your answer was:</strong> <span v-html="formatOptionText(userAnswer)"></span></p>
       </div>
 
       <!-- Explanation Section -->
@@ -224,6 +221,11 @@ const formatQuestionText = (question) => {
   const numberText = question.question_number + '. ';
   const formattedText = question.question_text.replace(/\\n/g, '<br>');
   return numberText + formattedText;
+};
+
+const formatOptionText = (option) => {
+  const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
+  return formattedOption;
 };
 
 const isExplanationValid = () => {
