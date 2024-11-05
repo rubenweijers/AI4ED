@@ -151,7 +151,7 @@ const fetchSummary = async () => {
   }
 };
 
-const submitRating = async () => {
+const submitAnswers = async () => {
   if (selectedRating.value === null) {
     alert('Please select a rating before submitting.');
     return;
