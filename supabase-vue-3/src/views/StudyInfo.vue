@@ -88,6 +88,7 @@ const proceedToStudy = () => {
   // Clear any previously saved answers before starting the study
   localStorage.removeItem('studyAnswers');
   localStorage.removeItem('studyAnswers2');
+  localStorage.setItem('controlChatData');
   router.push('/survey');
 };
 
