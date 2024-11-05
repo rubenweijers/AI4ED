@@ -124,7 +124,7 @@ const fetchSummary = async () => {
       alert('An error occurred while fetching the summary. Please try again.');
       return;
     }
-
+    data.llm_summary = "I love physics"
     if (data && data.llm_summary) {
       sentence.value = data.llm_summary;
       console.log('Summary fetched, created at:', data.created_at);
