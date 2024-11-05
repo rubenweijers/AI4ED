@@ -350,12 +350,7 @@ export default {
             };
 
             try {
-                const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                    },
-                });
+                const response = await axios.post('/api/openai', apiData);
 
                 const initialMessage = response.data.choices[0].message.content.trim();
                 this.initialSystemMessage = initialMessage;
@@ -371,6 +366,7 @@ export default {
                 this.loading = false;
             }
         },
+
         async sendMessage() {
             if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
 
@@ -409,12 +405,8 @@ export default {
 
             try {
                 const response = await axios.post('/api/openai', apiData);
-                // Handle the response
-                const aiMessage = response.data.choices[0].message.content;
+                const aiMessage = response.data.choices[0].message.content.trim();
                 this.messages.push({ role: 'assistant', content: aiMessage });
-
-                const modelReply = response.data.choices[0].message.content.trim();
-                this.messages.push({ role: 'assistant', content: modelReply });
 
                 const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
 
@@ -438,7 +430,7 @@ export default {
                     conversation: this.messages,
                     round: Math.ceil(this.messages.length / 2 - 1),
                     user_chat: userMessageContent,
-                    model_reply: modelReply,
+                    model_reply: aiMessage,
                     llm_type: llmType,
                     time_spent: timeSpentFormatted,
                     timestamp: new Date().toISOString(),
