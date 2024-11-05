@@ -502,7 +502,6 @@ export default {
             console.log('Saving chatData:', chatData);
             localStorage.setItem('chatData', JSON.stringify(chatData));
         },
-        },
         shouldDisplayLabels(questionNumber) {
             return this.questionsWithLabels.includes(questionNumber);
         },
@@ -520,7 +519,8 @@ export default {
             const formattedText = question.question_text.replace(/\\n/g, '<br>');
             return numberText + formattedText;
         },
-    };
+    }
+}
 </script>
 
 <style scoped>
