@@ -114,7 +114,56 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
-})
+});
 
+router.beforeEach((to, from, next) => {
+  // Define the restricted back navigations
+
+  // 1. Block Study back to Survey
+  if (from.name === 'Study' && to.name === 'Survey') {
+    next(false);
+  }
+  
+  // 2. Block PostTest back to Study
+  else if (from.name === 'PostTest' && to.name === 'Study') {
+    next(false);
+  }
+  
+  // 3. Block PostTest back to BeliefRatingPostChat
+  else if (from.name === 'PostTest' && to.name === 'BeliefRatingPostChat') {
+    next(false);
+  }
+  
+  // 4. Block Chat to BeliefRating
+  else if (from.name === 'Chat' && to.name === 'BeliefRating') {
+    next(false);
+  }
+  
+  // 5. Block Chat to PreChat
+  else if (from.name === 'Chat' && to.name === 'PreChat') {
+    next(false);
+  }
+  
+  // 6. Block BeliefRating to PostTest
+  else if (from.name === 'BeliefRating' && to.name === 'PostTest') {
+    next(false);
+  }
+  
+  // 7. Block StudyOriginalFCI to Chat, PostTest, BeliefRating, or BeliefRatingPostChat
+  else if (from.name === 'StudyOriginalFCI' && 
+           (to.name === 'Chat' || to.name === 'PostTest' || to.name === 'BeliefRating' || to.name === 'BeliefRatingPostChat')) {
+    next(false);
+  }
+  
+  // 8. Block Feedback to StudyOriginalFCI
+  else if (from.name === 'Feedback' && to.name === 'StudyOriginalFCI') {
+    next(false);
+  }
+  
+  // If none of the above restrictions apply, allow navigation
+  else {
+    next();
+  }
+});
 
 export default router
