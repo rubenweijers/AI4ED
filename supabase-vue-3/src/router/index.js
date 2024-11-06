@@ -16,6 +16,7 @@ import ResetPassword from '../views/ResetPassword.vue'
 import FCI_Answers from '../views/FCI_Answers.vue'
 import Study from '../views/Study.vue'
 import Feedback from '../views/Feedback.vue'
+import Chats from '../views/Chats.vue'
 
 const routes = [
   {
@@ -95,6 +96,11 @@ const routes = [
     component: Chat
   },
   {
+    path: '/chats',
+    name: 'Chats',
+    component: Chats
+  },
+  {
     path: '/survey',
     name: 'Survey',
     component: Survey
@@ -135,7 +141,7 @@ router.beforeEach((to, from, next) => {
   }
   
   // 4. Block Chat to BeliefRating
-  else if (from.name === 'Chat' && to.name === 'BeliefRating') {
+  else if (from.name === 'BeliefRating' && to.name === 'Chat') {
     next(false);
   }
   
