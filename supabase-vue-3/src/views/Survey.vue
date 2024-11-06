@@ -117,7 +117,7 @@ const handleFormSubmission = () => {
   if (formSubmitted.value) {
     console.log('Form has already been submitted.');
     alert('The form has already been submitted.');
-    router.push('/study');
+    router.replace('/study');
   } else {
     confirmSubmit();
   }
@@ -190,7 +190,7 @@ const submitAnswers = async () => {
       return;
     }
 
-    router.push('/study');
+    router.replace('/study');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
     formSubmitted.value = false;  // Re-enable the form if there is an error
