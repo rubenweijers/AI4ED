@@ -54,9 +54,33 @@
     <!-- Chat Section -->
     <div v-else>
       <div class="messages">
-        <!-- Display question and user's answer at the top of the chat -->
+        <!-- Display question, options, and user's answer at the top of the chat -->
         <div class="question-summary">
           <p><strong>Question:</strong> <span v-html="formatQuestionText(currentQuestion)"></span></p>
+          <!-- Display options -->
+          <div v-if="shouldDisplayLabels(currentQuestion.question_number)">
+            <div
+              v-for="(option, index) in getOptions(currentQuestion)"
+              :key="index"
+              class="option"
+            >
+              <p :class="{'user-answer': selectedAnswer === option}">
+                <strong>{{ optionLabels[index] }}. </strong>{{ option }}
+              </p>
+            </div>
+          </div>
+          <!-- Display options without labels -->
+          <div v-else>
+            <div
+              v-for="(option, index) in getOptions(currentQuestion)"
+              :key="index"
+              class="option"
+            >
+              <p :class="{'user-answer': selectedAnswer === option}">
+                {{ option }}
+              </p>
+            </div>
+          </div>
           <p><strong>Your Answer:</strong> {{ selectedAnswer }}</p>
         </div>
 
@@ -243,8 +267,6 @@ export default {
         user_id: this.user.username,
         question_number: this.currentQuestion.question_number,
         answer: this.selectedAnswer,
-        // Remove 'timestamp' if it doesn't exist in your table
-        // timestamp: new Date().toISOString(),
       });
 
       if (error) {
@@ -253,8 +275,28 @@ export default {
         return;
       }
 
+      // Include the answer_explanation and correct_answer in the system prompt
+      const { answer_explanation, correct_answer } = this.currentQuestion;
+
+      // Format the correct answer with label if labels are used
+      let correctAnswerText = correct_answer;
+      if (this.shouldDisplayLabels(this.currentQuestion.question_number)) {
+        const correctIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(correct_answer);
+        const options = this.getOptions(this.currentQuestion);
+        if (correctIndex >= 0 && correctIndex < options.length) {
+          correctAnswerText = `${correct_answer}. ${options[correctIndex]}`;
+        }
+      }
+
       // Set up the system prompt including the question and user's answer
-      this.systemPrompt = `You are a helpful assistant. Please have a three-round dialogue with the user regarding their answer to the following question:\n\n"${this.formatQuestionText(this.currentQuestion)}"\n\nThe user's answer was: "${this.selectedAnswer}". Focus on discussing their answer and any reasoning they might have had.`;
+      this.systemPrompt = `You are a helpful assistant. Please have a three-round dialogue with the user regarding their answer to the following question:
+
+"${this.formatQuestionText(this.currentQuestion)}"
+
+Options:
+${this.getFormattedOptions(this.currentQuestion)}
+
+The user's answer was: "${this.selectedAnswer}". The correct answer is: "${correctAnswerText}". Here is an explanation for the correct answer: "${answer_explanation}". Focus on discussing their answer and any reasoning they might have had. Do not mention that you know the correct answer unless the user asks.`;
 
       this.remainingRounds = 3;
       this.messages = [];
@@ -360,10 +402,21 @@ export default {
         this.questionAnswered = false;
         this.userMessage = '';
         this.messages = [];
+        // Scroll to top when moving to the next question
+        window.scrollTo(0, 0);
       } else {
         // No more questions, redirect to /Study_original_fci
         alert('You have completed all the questions.');
         this.$router.push('/Study_original_fci');
+      }
+    },
+    // Format options for displaying in the prompt
+    getFormattedOptions(question) {
+      const options = this.getOptions(question);
+      if (this.shouldDisplayLabels(question.question_number)) {
+        return options.map((option, index) => `${this.optionLabels[index]}. ${option}`).join('\n');
+      } else {
+        return options.join('\n');
       }
     },
     // Markdown rendering for assistant messages
@@ -401,6 +454,7 @@ export default {
   background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
+  max-height: calc(100vh - 200px); /* Adjusted for input area height */
 }
 
 .message {
@@ -535,5 +589,12 @@ button:disabled {
   background-color: #ececec;
   padding: 10px;
   margin-bottom: 10px;
+}
+
+.user-answer {
+  font-weight: bold;
+  background-color: #d1e7dd; /* Light green background to highlight the selected answer */
+  padding: 5px;
+  border-radius: 5px;
 }
 </style>
