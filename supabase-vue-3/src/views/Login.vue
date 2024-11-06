@@ -6,17 +6,11 @@
       <input v-model="password" type="password" placeholder="Password" required />
       <button type="submit" :disabled="loading">{{ loading ? 'Loading...' : 'Log In' }}</button>
       <!-- <p>Don't have an account? <router-link to="/signup">Sign up!</router-link></p> -->
-      <p><a href="#" @click.prevent="showResetPassword = true">Forgot Password?</a></p>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" v-model="consent" />
-          <a href="https://www.termsfeed.com/live/50a688ef-662a-4eb2-ace4-ded3baa4a903" target="_blank">I consent to the terms and conditions.</a>
-        </label>
-      </div>
+      <!-- <p><a href="#" @click.prevent="showResetPassword = true">Forgot Password?</a></p> -->
     </form>
 
     <!-- Reset Password Modal -->
-    <div v-if="showResetPassword" class="reset-password-modal">
+    <!-- <div v-if="showResetPassword" class="reset-password-modal">
       <form @submit.prevent="handleResetPassword">
         <h2>Reset Password</h2>
         <input v-model="resetEmail" type="email" placeholder="Enter your email" required />
@@ -25,7 +19,7 @@
         </button>
         <button @click="showResetPassword = false">Cancel</button>
       </form>
-    </div>
+    </div> -->
   </div>
 </template>
 
