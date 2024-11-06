@@ -2,7 +2,8 @@
   <div class="chat-container">
     <!-- Question and Answer Section -->
     <div v-if="!questionAnswered">
-      <div class="question">
+      <!-- Ensure currentQuestion is loaded before rendering -->
+      <div class="question" v-if="currentQuestion">
         <!-- Display the current question -->
         <p v-html="formatQuestionText(currentQuestion)"></p>
         <!-- Display options with labels if applicable -->
@@ -43,6 +44,10 @@
         </div>
         <!-- Submit Answer Button -->
         <button @click="submitAnswer" :disabled="!selectedAnswer">Submit Answer</button>
+      </div>
+      <div v-else>
+        <!-- Loading indicator or message while the question is being fetched -->
+        <p>Loading question...</p>
       </div>
     </div>
 
@@ -115,23 +120,27 @@ export default {
       loading: false,
       systemPrompt: '',
       remainingRounds: 3,
-      lastMessageTime: null,
       user: null,
+      profileData: null,
       questions: [],
       currentQuestionIndex: 0,
       currentQuestion: null,
       selectedAnswer: '',
       questionAnswered: false,
       optionLabels: ["A", "B", "C", "D", "E"],
-      questionsWithLabels: [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18], // Update this array based on your labeled questions
+      questionsWithLabels: [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18],
       timerWatcherInterval: null,
-      totalQuestions: 18, // Total number of questions
     };
   },
   async mounted() {
-    await this.loadUserData();
-    await this.loadQuestions();
-    this.startTimer();
+    try {
+      await this.loadUserData();
+      await this.loadQuestions();
+      this.startTimer();
+    } catch (error) {
+      console.error('Error during component mounting:', error);
+      alert('An error occurred while loading the component. Please try again.');
+    }
   },
   beforeUnmount() {
     if (this.timerWatcherInterval) {
@@ -139,7 +148,7 @@ export default {
     }
   },
   methods: {
-    // Load user data from localStorage
+    // Load user data from localStorage and fetch profile from Supabase
     async loadUserData() {
       const userData = localStorage.getItem('user');
       if (!userData) {
@@ -148,6 +157,24 @@ export default {
         return;
       }
       this.user = JSON.parse(userData);
+
+      // Fetch user profile from profiles_duplicate
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles_duplicate')
+        .select('*')
+        .eq('user_id', this.user.id || this.user.user_id || this.user.username)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error(`Error fetching profile data: ${profileError.message}`);
+        throw new Error(`Error fetching profile data: ${profileError.message}`);
+      }
+      if (!profileData) {
+        console.error(`No profile data found for user: ${this.user.username}`);
+        throw new Error(`No profile data found for user: ${this.user.username}`);
+      }
+      console.log('Fetched profileData:', profileData);
+      this.profileData = profileData;
     },
     // Load questions from Supabase
     async loadQuestions() {
@@ -162,11 +189,14 @@ export default {
       }
 
       this.questions = questionsData;
-      this.currentQuestion = this.questions[this.currentQuestionIndex];
+      if (this.questions.length > 0) {
+        this.currentQuestion = this.questions[this.currentQuestionIndex];
+      } else {
+        console.error('No questions found in questions_control table');
+      }
     },
     // Start the timer
     startTimer() {
-      // Start time and duration should be stored in localStorage
       this.timerWatcherInterval = setInterval(() => {
         const remainingTime = this.getRemainingTime();
         if (remainingTime <= 0) {
@@ -209,19 +239,21 @@ export default {
     async submitAnswer() {
       // Save the answer to answers_control table
       const { error } = await supabase.from('answers_control').insert({
-        user_id: this.user.username,
+        user_id: this.user.id || this.user.user_id || this.user.username,
         question_number: this.currentQuestion.question_number,
         answer: this.selectedAnswer,
-        timestamp: new Date().toISOString(),
+        // Remove 'timestamp' if it doesn't exist in your table
+        // timestamp: new Date().toISOString(),
       });
 
       if (error) {
         console.error('Error saving answer:', error);
+        alert('There was an error saving your answer. Please try again.');
         return;
       }
 
       // Set up the system prompt including the question and user's answer
-      this.systemPrompt = `You are a helpful assistant. Please have a three-round dialogue with the user regarding their answer to the following question: "${this.formatQuestionText(this.currentQuestion)}". The user's answer was: "${this.selectedAnswer}". Focus on discussing their answer and any reasoning they might have had.`;
+      this.systemPrompt = `You are a helpful assistant. Please have a three-round dialogue with the user regarding their answer to the following question:\n\n"${this.formatQuestionText(this.currentQuestion)}"\n\nThe user's answer was: "${this.selectedAnswer}". Focus on discussing their answer and any reasoning they might have had.`;
 
       this.remainingRounds = 3;
       this.messages = [];
@@ -258,6 +290,10 @@ export default {
         });
       } finally {
         this.loading = false;
+        // Scroll to bottom after AI responds
+        this.$nextTick(() => {
+          this.scrollToBottom();
+        });
       }
     },
     // Send a message in the chat
@@ -286,7 +322,7 @@ export default {
 
         // Optionally, save chat history
         await supabase.from('control_chat_history').insert({
-          user_id: this.user.username,
+          user_id: this.user.id || this.user.user_id || this.user.username,
           question_number: this.currentQuestion.question_number,
           conversation: this.messages,
           timestamp: new Date().toISOString(),
@@ -297,6 +333,7 @@ export default {
         });
       } catch (error) {
         console.error('Error communicating with the OpenAI API', error);
+        alert('There was an error communicating with the AI. Please try again.');
       } finally {
         this.loading = false;
       }
@@ -335,7 +372,9 @@ export default {
     // Scroll to the bottom of the chat
     scrollToBottom() {
       const messagesContainer = this.$el.querySelector('.messages');
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
     },
   },
 };
