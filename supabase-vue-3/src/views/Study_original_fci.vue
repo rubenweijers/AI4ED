@@ -125,7 +125,7 @@ const showToastNotification = () => {
 const refreshTimer = () => {
   const newStartTime = Date.now();
   localStorage.setItem('studyStartTime', newStartTime.toString());
-  localStorage.setItem('studyTotalDuration', (30 * 60).toString());
+  localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set to 30 minutes in seconds
   localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
   localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 };
@@ -143,7 +143,6 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value", user.value);
     await fetchUserProfile();
     await checkSubmissionStatus();
     await fetchQuestions();
@@ -168,22 +167,18 @@ const fetchUserProfile = async () => {
 };
 
 const checkSubmissionStatus = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('profiles_duplicate')
-      .select('has_submitted_survey')
-      .eq('user_id', user.value.username)
-      .single();
+  const { data, error } = await supabase
+    .from('profiles_duplicate')
+    .select('has_submitted_survey')
+    .eq('user_id', user.value.username)
+    .single();
 
-    if (error) {
-      console.error('Error checking submission status:', error.message);
-      return;
-    }
-
-    formSubmitted.value = data?.has_submitted_survey || false;
-  } catch (error) {
-    console.error('Error checking submission status:', error);
+  if (error) {
+    console.error('Error checking submission status:', error.message);
+    return;
   }
+
+  formSubmitted.value = data?.has_submitted_survey || false;
 };
 
 const fetchQuestions = async () => {
@@ -222,7 +217,7 @@ const handleFormSubmission = () => {
   if (formSubmitted.value) {
     console.log('Form has already been submitted.');
     alert('The form has already been submitted.');
-    router.push('/feedback'); // Redirect to a Thank You page or appropriate page
+    router.push('/feedback');
   } else {
     confirmSubmit();
   }
@@ -233,12 +228,10 @@ const submitAnswers = async () => {
     formSubmitted.value = true;
     const answerEntries = questions.value.map(question => {
       const answerIndex = answers.value[question.id];
-      let answer = '';
-      if (typeof answerIndex !== 'undefined' && answerIndex !== null && answerIndex !== '') {
-        answer = optionMapping[answerIndex];
-      } else {
-        answer = 'unanswered';
-      }
+      const answer = typeof answerIndex !== 'undefined' && answerIndex !== null && answerIndex !== '' 
+        ? optionMapping[answerIndex] 
+        : 'unanswered';
+
       return {
         user_id: user.value.username,
         question_id: question.id,
@@ -247,7 +240,7 @@ const submitAnswers = async () => {
       };
     });
 
-    const { data: answerData, error: answerError } = await supabase
+    const { error: answerError } = await supabase
       .from('answers_duplicate')
       .upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
 
@@ -256,8 +249,6 @@ const submitAnswers = async () => {
       formSubmitted.value = false;
       return;
     }
-
-    // Since we don't need to generate a question queue for the second FCI, we can remove that part
 
     const { error: updateError } = await supabase
       .from('profiles_duplicate')
@@ -270,38 +261,38 @@ const submitAnswers = async () => {
     }
 
     submissionSuccess.value = true;
-    localStorage.removeItem('studyStartTime');
-    localStorage.removeItem('studyTotalDuration');
-    localStorage.removeItem('fifteenMinuteWarningDisplayed');
-    localStorage.removeItem('fiveMinuteWarningDisplayed');
-    router.push('/feedback'); // Redirect to a Thank You page or appropriate page
+    clearTimer(); // Clear the timer when submission is successful
+    router.push('/feedback');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
     formSubmitted.value = false;
   }
 };
 
+const clearTimer = () => {
+  clearInterval(timerWatcherInterval);
+  localStorage.removeItem('studyStartTime');
+  localStorage.removeItem('studyTotalDuration');
+  localStorage.removeItem('fifteenMinuteWarningDisplayed');
+  localStorage.removeItem('fiveMinuteWarningDisplayed');
+};
+
 const submitAnswer = async (question, optionIndex) => {
-  try {
-    const answerEntry = {
-      user_id: user.value.username,
-      question_id: question.id,
-      answer: optionMapping[optionIndex],
-      question_number: question.question_number,
-    };
+  const answerEntry = {
+    user_id: user.value.username,
+    question_id: question.id,
+    answer: optionMapping[optionIndex],
+    question_number: question.question_number,
+  };
 
-    const { data, error } = await supabase
-      .from('answers_duplicate')
-      .upsert([answerEntry], { onConflict: ['user_id', 'question_id'] });
+  const { error } = await supabase
+    .from('answers_duplicate')
+    .upsert([answerEntry], { onConflict: ['user_id', 'question_id'] });
 
-    if (error) {
-      console.error('Error submitting the answer:', error.message);
-      return;
-    }
-
+  if (error) {
+    console.error('Error submitting the answer:', error.message);
+  } else {
     console.log(`Answer for question ${question.question_number} submitted successfully.`);
-  } catch (error) {
-    console.error('An unexpected error occurred:', error);
   }
 };
 
@@ -330,7 +321,7 @@ const setupTimerWatcher = () => {
   timerWatcherInterval = setInterval(() => {
     const remainingTime = getRemainingTime();
     if (remainingTime <= 0) {
-      clearInterval(timerWatcherInterval);
+      clearTimer();
       alert('Your study time has ended. Submitting your answers now.');
       submitAnswers();
     }
@@ -341,23 +332,21 @@ const getRemainingTime = () => {
   const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
   const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
   const now = Date.now();
-  const elapsed = Math.floor((now - startTime) / 1000); // in seconds
-  const timeLeft = totalDuration - elapsed;
-  return timeLeft;
+  const elapsed = Math.floor((now - startTime) / 1000);
+  return totalDuration - elapsed;
 };
 
 onUnmounted(() => {
-  if (timerWatcherInterval) {
-    clearInterval(timerWatcherInterval);
-  }
+  clearTimer();
 });
 
 onMounted(() => {
   checkUser();
-  refreshTimer(); // This resets the timer when entering this component
+  refreshTimer(); // Ensures timer resets when entering this component
   setupTimerWatcher();
 });
 </script>
+
 
 <style scoped>
 .subscript {
