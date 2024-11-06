@@ -157,12 +157,13 @@ export default {
         return;
       }
       this.user = JSON.parse(userData);
+      console.log('User data:', this.user);
 
-      // Fetch user profile from profiles_duplicate
+      // Fetch user profile from profiles_duplicate using display_name
       const { data: profileData, error: profileError } = await supabase
         .from('profiles_duplicate')
         .select('*')
-        .eq('user_id', this.user.id || this.user.user_id || this.user.username)
+        .eq('display_name', this.user.username)
         .maybeSingle();
 
       if (profileError) {
@@ -239,7 +240,7 @@ export default {
     async submitAnswer() {
       // Save the answer to answers_control table
       const { error } = await supabase.from('answers_control').insert({
-        user_id: this.user.id || this.user.user_id || this.user.username,
+        user_id: this.user.username,
         question_number: this.currentQuestion.question_number,
         answer: this.selectedAnswer,
         // Remove 'timestamp' if it doesn't exist in your table
@@ -322,7 +323,7 @@ export default {
 
         // Optionally, save chat history
         await supabase.from('control_chat_history').insert({
-          user_id: this.user.id || this.user.user_id || this.user.username,
+          user_id: this.user.username,
           question_number: this.currentQuestion.question_number,
           conversation: this.messages,
           timestamp: new Date().toISOString(),
