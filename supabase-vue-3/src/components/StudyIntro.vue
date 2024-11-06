@@ -23,11 +23,12 @@
               <li>Avoid guessing; answer based on your understanding.</li>
           </ul>
           Once you start the study, a timer of 30 minutes will start. Plan to complete this FCI within 30 minutes.
-          <h3><strong>2. AI Interaction:</strong></h3> In the next part of the study, we ask you to explain your reasoning for a question you got wrong in the modified FCI. 
-          After that, you will interact with an AI companion in a three-round dialogue. In each message, 
+          <h3><strong>2. AI Interaction:</strong></h3> In the next part of the study, we ask you to explain your reasoning for a question you got wrong in the modified FCI.
+          After that, you will interact with an AI companion in a three-round dialogue. In each message,
           the AI reviews your responses from the modified FCI questionnaire you took, and offers
-          explanations for those questions, similar to a peer study group. The AI companion will only talk to you about questions you got wrong. This part lasts for 30 minutes, 
-          or until all wrongly answered questions have been discussed.
+          explanations for those questions, similar to a peer study group. The AI companion will only talk to you about questions you got wrong. 
+          This part lasts for 30 minutes, or until all wrongly answered questions have been discussed. 
+          Note that in each dialogue, you must complete the 3 rounds to advance - the AI may prompt you with a question directly, but if it doesn't, please ask it any followup questions you have or anything else you feel will be helpful for improving your understanding of the question at hand.
           <h3><strong>3. Post-Test and Feedback:</strong></h3> After the AI interactions, you will complete another FCI test
           to evaluate the AI’s impact on your understanding of Newtonian Mechanics. You will also be asked provide feedback to the study.
           We kindly ask that you answer all questions honestly and to the best of your ability. Your responses are anonymous 
