@@ -364,11 +364,8 @@ const setupTimerWatcher = () => {
     const remainingTime = getRemainingTime();
     if (remainingTime <= 0) {
       clearInterval(timerWatcherInterval);
-      alert('Your study time has ended. Moving to the next section.');
-      router.push('/studyoriginalfci'); // Redirect to the next study phase
-    }
-    else {
-      displayTime(remainingTime); // Optional: Display time left in desired format
+      // alert('Your study time has ended. Moving to the next section.');
+      // router.push('/studyoriginalfci'); // Redirect to the next study phase
     }
   }, 1000);
 };
@@ -376,18 +373,10 @@ const setupTimerWatcher = () => {
 const getRemainingTime = () => {
   const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
   const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
-  // const now = Date.now();
-  const now = Math.floor(Date.now() / 1000); // Convert current time to seconds
+  const now = Date.now();
   const elapsed = Math.floor((now - startTime) / 1000); // in seconds
   const timeLeft = totalDuration - elapsed;
   return timeLeft;
-};
-
-const displayTime = (remainingTime) => {
-  const hours = Math.floor(remainingTime / 3600);
-  const minutes = Math.floor((remainingTime % 3600) / 60);
-  const seconds = remainingTime % 60;
-  console.log(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
 };
 
 onUnmounted(() => {
