@@ -435,116 +435,170 @@ The user's answer was: "${this.selectedAnswer}". The correct answer is: "${corre
 </script>
 
 <style scoped>
+/* General container for the entire component */
 .chat-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
-  background-color: white;
+  background-color: #f4f6f8;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
   overflow: hidden;
 }
 
+/* Style for the question section */
+.question {
+  padding: 20px;
+  background-color: #fff;
+  border-left: 4px solid rgb(29, 29, 184);
+  border-radius: 8px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  margin-bottom: 10px;
+}
+
+.question p {
+  color: #333;
+  font-size: 18px;
+}
+
+.option {
+  padding: 8px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.option:hover {
+  background-color: #eef3fd;
+}
+
+input[type="radio"] {
+  margin-right: 10px;
+}
+
+/* Style for the question summary (for displaying previously answered questions) */
+.question-summary {
+  background-color: #ececec;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.user-answer {
+  font-weight: bold;
+  background-color: #d1e7dd; /* Light green for user-selected answer */
+  padding: 8px;
+  border-radius: 8px;
+}
+
+/* Styling for submit button */
+.submit-button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: rgb(29, 29, 184);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 20px;
+}
+
+.submit-button:hover {
+  background-color: rgb(23, 23, 250);
+}
+
+/* Chat message section */
 .messages {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  background-color: #f9f9f9;
+  background-color: #f4f6f8;
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 200px); /* Adjusted for input area height */
 }
 
 .message {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto 10px;
+  margin-bottom: 10px;
+  max-width: 80%;
 }
 
 .user-message {
   background-color: #efefef;
   color: black;
-  padding: 10px;
-  border-radius: 20px;
-  margin-left: auto;
-  max-width: 70%;
+  padding: 12px;
+  border-radius: 12px;
+  align-self: flex-end;
 }
 
 .assistant-message {
+  background-color: #d9e7ff;
+  color: #333;
+  padding: 12px;
+  border-radius: 12px;
+  align-self: flex-start;
   display: flex;
-  align-items: flex-start;
-  max-width: 70%;
+  align-items: center;
 }
 
-.openai-icon {
+.assistant-message img {
   width: 30px;
   height: 30px;
   margin-right: 10px;
+  border-radius: 50%;
 }
 
-.assistant-message .openai-icon {
-  margin-right: 10px;
-  margin-top: 5px;
-}
-
-.assistant-message p {
-  background: none;
-  margin: 0;
-  text-align: left;
-}
-
+/* Input area for chat */
 .input-area {
-  padding: 20px;
-  background-color: #f9f9f9;
+  padding: 15px;
+  background-color: #fff;
   border-top: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .input-wrapper {
   display: flex;
   align-items: center;
+  width: 100%;
   max-width: 800px;
-  margin: 0 auto;
 }
 
 .rounds-indicator {
-  white-space: nowrap;
   margin-right: 15px;
   font-size: 14px;
+  color: #666;
 }
 
-input {
+input[type="text"] {
   flex-grow: 1;
-  padding: 15px;
+  padding: 12px;
   border: 1px solid #ccc;
-  border-radius: 25px;
-  margin-right: 10px;
+  border-radius: 20px;
   font-size: 16px;
-  background-color: rgb(241, 241, 241);
-  color: rgb(0, 0, 0);
+  margin-right: 10px;
+  background-color: #f0f4f8;
 }
 
 button {
-  padding: 15px 25px;
-  background-color: #007bff;
-  border: none;
-  border-radius: 25px;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-  white-space: nowrap;
-}
-
-.next-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #00008B;
-  color: white;
-  border: none;
   padding: 10px 20px;
-  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s;
@@ -554,47 +608,40 @@ button:hover {
   background-color: #0056b3;
 }
 
-input:disabled,
 button:disabled {
-  opacity: 0.5;
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
+/* Loading spinner */
 .loading {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 10px;
 }
 
 .loading img {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+/* Fixed Next button for navigation */
+.next-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: rgb(29, 29, 184);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
 .next-button:hover {
-  background-color: #000066; /* Darker Blue */
-}
-
-.option {
-  margin-bottom: 10px;
-}
-
-.question {
-  padding: 20px;
-  background-color: #f9f9f9;
-}
-
-.question-summary {
-  background-color: #ececec;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
-.user-answer {
-  font-weight: bold;
-  background-color: #d1e7dd; /* Light green background to highlight the selected answer */
-  padding: 5px;
-  border-radius: 5px;
+  background-color: rgb(23, 23, 250);
 }
 </style>
