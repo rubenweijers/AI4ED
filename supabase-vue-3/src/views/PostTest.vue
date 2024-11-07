@@ -364,8 +364,8 @@ const setupTimerWatcher = () => {
     const remainingTime = getRemainingTime();
     if (remainingTime <= 0) {
       clearInterval(timerWatcherInterval);
-      alert('Your study time has ended. Moving to the next section.');
-      router.push('/studyoriginalfci'); // Redirect to the next study phase
+      // alert('Your study time has ended. Moving to the next section.');
+      // router.push('/studyoriginalfci'); // Redirect to the next study phase
     }
   }, 1000);
 };

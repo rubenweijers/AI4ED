@@ -3,47 +3,61 @@
     <!-- Question and Answer Section -->
     <div v-if="!questionAnswered">
       <!-- Ensure currentQuestion is loaded before rendering -->
-      <div class="question" v-if="currentQuestion">
-        <!-- Display the current question -->
-        <p v-html="formatQuestionText(currentQuestion)"></p>
-        <!-- Display options with labels if applicable -->
-        <div v-if="shouldDisplayLabels(currentQuestion.question_number)">
-          <div
-            v-for="(option, index) in getOptions(currentQuestion)"
-            :key="index"
-            class="option"
-          >
-            <label>
-              <input
-                type="radio"
-                :value="option"
-                v-model="selectedAnswer"
-                :disabled="questionAnswered"
-              />
-              <strong>{{ optionLabels[index] }}. </strong>{{ option }}
-            </label>
+      <div class="survey-container" v-if="currentQuestion">
+        <div class="survey-question">
+          <!-- Display the current question -->
+          <div class="question-text">
+            <p v-html="formatQuestionText(currentQuestion)"></p>
           </div>
-        </div>
-        <!-- Display options without labels -->
-        <div v-else>
-          <div
-            v-for="(option, index) in getOptions(currentQuestion)"
-            :key="index"
-            class="option"
-          >
-            <label>
-              <input
-                type="radio"
-                :value="option"
-                v-model="selectedAnswer"
-                :disabled="questionAnswered"
-              />
-              {{ option }}
-            </label>
+          <!-- Display options with labels if applicable -->
+          <div v-if="shouldDisplayLabels(currentQuestion.question_number)">
+            <div
+              v-for="(option, index) in getOptions(currentQuestion)"
+              :key="index"
+              class="option"
+            >
+              <label class="radio-label" :for="'question-' + currentQuestion.question_number + '-' + index">
+                <input
+                  type="radio"
+                  :id="'question-' + currentQuestion.question_number + '-' + index"
+                  :name="'question-' + currentQuestion.question_number"
+                  :value="option"
+                  v-model="selectedAnswer"
+                  :disabled="questionAnswered"
+                >
+                <span class="radio-custom"></span>
+                <span class="label-text">
+                  <strong>{{ optionLabels[index] }}. </strong>{{ option }}
+                </span>
+              </label>
+            </div>
           </div>
+          <!-- Display options without labels -->
+          <div v-else>
+            <div
+              v-for="(option, index) in getOptions(currentQuestion)"
+              :key="index"
+              class="option"
+            >
+              <label class="radio-label" :for="'question-' + currentQuestion.question_number + '-' + index">
+                <input
+                  type="radio"
+                  :id="'question-' + currentQuestion.question_number + '-' + index"
+                  :name="'question-' + currentQuestion.question_number"
+                  :value="option"
+                  v-model="selectedAnswer"
+                  :disabled="questionAnswered"
+                >
+                <span class="radio-custom"></span>
+                <span class="label-text">
+                  {{ option }}
+                </span>
+              </label>
+            </div>
+          </div>
+          <!-- Submit Answer Button -->
+          <button @click="submitAnswer" :disabled="!selectedAnswer" class="submit-button">Submit Answer</button>
         </div>
-        <!-- Submit Answer Button -->
-        <button @click="submitAnswer" :disabled="!selectedAnswer">Submit Answer</button>
       </div>
       <div v-else>
         <!-- Loading indicator or message while the question is being fetched -->
@@ -112,19 +126,21 @@
 
       <!-- Input Area -->
       <div class="input-area">
-        <div class="input-wrapper">
-          <div class="rounds-indicator">
-            Inputs remaining: {{ remainingRounds }}
+        <div class="input-content">
+          <div class="input-wrapper">
+            <div class="rounds-indicator">
+              Inputs remaining: {{ remainingRounds }}
+            </div>
+            <input
+              v-model="userMessage"
+              @keyup.enter="sendMessage"
+              placeholder="Type a message..."
+              :disabled="isChatFinished()"
+            />
+            <button @click="sendMessage" :disabled="isChatFinished()">Send</button>
           </div>
-          <input
-            v-model="userMessage"
-            @keyup.enter="sendMessage"
-            placeholder="Type a message..."
-            :disabled="isChatFinished()"
-          />
-          <button @click="sendMessage" :disabled="isChatFinished()">Send</button>
+          <button v-if="isChatFinished()" @click="nextQuestion" class="next-button">Next Question</button>
         </div>
-        <button v-if="isChatFinished()" @click="nextQuestion" class="next-button">Next</button>
       </div>
     </div>
   </div>
@@ -438,23 +454,73 @@ The user's answer was: "${this.selectedAnswer}". The correct answer is: "${corre
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
   background-color: white;
-  overflow: hidden;
+}
+
+.survey-container {
+  max-width: 800px;
+  margin: 10px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  padding-bottom: 100px; /* To prevent content from being hidden behind the fixed input area */
+}
+
+.survey-question {
+  margin-bottom: 60px;
+}
+
+.question-text {
+  border-left: 4px solid rgb(29, 29, 184);
+  padding-left: 15px;
+  margin-bottom: 10px;
+}
+
+.submit-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  border: none;
+  border-radius: 25px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.submit-button:hover {
+  background-color: rgb(23, 23, 250);
+}
+
+.option {
+  margin-bottom: 10px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.radio-label input {
+  margin-right: 10px;
+}
+
+.label-text {
+  font-size: 16px;
 }
 
 .messages {
-  flex: 1;
   padding: 20px;
-  overflow-y: auto;
   background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 200px); /* Adjusted for input area height */
+  padding-bottom: 120px; /* Adjusted to prevent content being hidden under the fixed input area */
 }
 
 .message {
@@ -496,16 +562,26 @@ The user's answer was: "${this.selectedAnswer}". The correct answer is: "${corre
 }
 
 .input-area {
-  padding: 20px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px 20px;
   background-color: #f9f9f9;
   border-top: 1px solid #ccc;
+}
+
+.input-content {
+  display: flex;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .input-wrapper {
   display: flex;
   align-items: center;
-  max-width: 800px;
-  margin: 0 auto;
+  flex: 1;
 }
 
 .rounds-indicator {
@@ -537,21 +613,23 @@ button {
 }
 
 .next-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
+  margin-left: 10px;
+  padding: 15px 25px;
   background-color: #00008B;
-  color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: 25px;
+  color: white;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.3s;
+  white-space: nowrap;
 }
 
 button:hover {
   background-color: #0056b3;
+}
+
+.next-button:hover {
+  background-color: #000066;
 }
 
 input:disabled,
@@ -572,19 +650,6 @@ button:disabled {
   height: 30px;
 }
 
-.next-button:hover {
-  background-color: #000066; /* Darker Blue */
-}
-
-.option {
-  margin-bottom: 10px;
-}
-
-.question {
-  padding: 20px;
-  background-color: #f9f9f9;
-}
-
 .question-summary {
   background-color: #ececec;
   padding: 10px;
@@ -593,7 +658,7 @@ button:disabled {
 
 .user-answer {
   font-weight: bold;
-  background-color: #d1e7dd; /* Light green background to highlight the selected answer */
+  background-color: rgb(84, 81, 171); /* Light green background to highlight the selected answer */
   padding: 5px;
   border-radius: 5px;
 }
