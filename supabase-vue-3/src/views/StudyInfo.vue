@@ -82,7 +82,7 @@ const proceedToStudy = () => {
   showToast.value = false;
   const startTime = Date.now();
   localStorage.setItem('studyStartTime', startTime.toString());
-  localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // 30 minutes in seconds
+  localStorage.setItem('studyTotalDuration', (60 * 60).toString()); // 30 minutes in seconds
   localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
   localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
   // Clear any previously saved answers before starting the study
