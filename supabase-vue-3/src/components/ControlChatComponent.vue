@@ -227,7 +227,7 @@ export default {
         if (remainingTime <= 0) {
           clearInterval(this.timerWatcherInterval);
           alert('Your study time has ended. Moving to the next section.');
-          this.$router.push('/Study_original_fci'); // Redirect to the next study phase
+          this.$router.push('/studyoriginalfci'); // Redirect to the next study phase
         }
       }, 1000);
     },

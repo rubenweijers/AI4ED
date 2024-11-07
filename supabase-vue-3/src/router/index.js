@@ -141,7 +141,7 @@ router.beforeEach((to, from, next) => {
   }
   
   // 4. Block Chat to BeliefRating
-  else if (from.name === 'BeliefRating' && to.name === 'Chat') {
+  else if (from.name === 'Chat' && to.name === 'BeliefRating') {
     next(false);
   }
   
