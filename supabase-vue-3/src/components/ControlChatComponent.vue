@@ -1,20 +1,17 @@
 <template>
   <div class="chat-container">
     <!-- Question and Answer Section -->
-    <div v-if="!questionAnswered" class="question-section">
+    <div v-if="!questionAnswered">
       <!-- Ensure currentQuestion is loaded before rendering -->
       <div class="question" v-if="currentQuestion">
         <!-- Display the current question -->
         <p v-html="formatQuestionText(currentQuestion)"></p>
-
         <!-- Display options with labels if applicable -->
-        <div v-if="shouldDisplayLabels(currentQuestion.question_number)" class="options-container">
+        <div v-if="shouldDisplayLabels(currentQuestion.question_number)">
           <div
             v-for="(option, index) in getOptions(currentQuestion)"
             :key="index"
             class="option"
-            @click="selectedAnswer = option"
-            :class="{ 'selected-option': selectedAnswer === option }"
           >
             <label>
               <input
@@ -27,15 +24,12 @@
             </label>
           </div>
         </div>
-
         <!-- Display options without labels -->
-        <div v-else class="options-container">
+        <div v-else>
           <div
             v-for="(option, index) in getOptions(currentQuestion)"
             :key="index"
             class="option"
-            @click="selectedAnswer = option"
-            :class="{ 'selected-option': selectedAnswer === option }"
           >
             <label>
               <input
@@ -48,11 +42,9 @@
             </label>
           </div>
         </div>
-
         <!-- Submit Answer Button -->
         <button @click="submitAnswer" :disabled="!selectedAnswer">Submit Answer</button>
       </div>
-
       <div v-else>
         <!-- Loading indicator or message while the question is being fetched -->
         <p>Loading question...</p>
@@ -60,11 +52,12 @@
     </div>
 
     <!-- Chat Section -->
-    <div v-else class="chat-section">
+    <div v-else>
       <div class="messages">
         <!-- Display question, options, and user's answer at the top of the chat -->
         <div class="question-summary">
           <p><strong>Question:</strong> <span v-html="formatQuestionText(currentQuestion)"></span></p>
+          <!-- Display options -->
           <div v-if="shouldDisplayLabels(currentQuestion.question_number)">
             <div
               v-for="(option, index) in getOptions(currentQuestion)"
@@ -76,6 +69,7 @@
               </p>
             </div>
           </div>
+          <!-- Display options without labels -->
           <div v-else>
             <div
               v-for="(option, index) in getOptions(currentQuestion)"
@@ -440,94 +434,167 @@ The user's answer was: "${this.selectedAnswer}". The correct answer is: "${corre
 };
 </script>
 
-<style>
-/* General container style */
+<style scoped>
 .chat-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  background-color: white;
   overflow: hidden;
-}
-
-/* Question Section */
-.question-section {
-  padding: 16px;
-  overflow-y: auto;
-}
-
-.options-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.option {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  display: flex;
-  align-items: center;
-}
-
-.option:hover {
-  background-color: #e6f7ff;
-}
-
-.option.selected-option {
-  background-color: #f0f8ff;
-  border-color: #00aaff;
-}
-
-.option input[type="radio"] {
-  margin-right: 8px;
-  pointer-events: none; /* Prevent double-click requirement on radio buttons */
-}
-
-/* Chat Section */
-.chat-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
 }
 
 .messages {
   flex: 1;
+  padding: 20px;
   overflow-y: auto;
-  padding: 16px;
-  min-height: 100px; /* Ensures chat area is stable */
-  max-height: calc(100vh - 200px); /* Adjust to fit within the viewport */
-}
-
-/* Input Area */
-.input-area {
+  background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
-  padding: 8px 16px;
+  max-height: calc(100vh - 200px); /* Adjusted for input area height */
+}
+
+.message {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 10px;
+}
+
+.user-message {
+  background-color: #efefef;
+  color: black;
+  padding: 10px;
+  border-radius: 20px;
+  margin-left: auto;
+  max-width: 70%;
+}
+
+.assistant-message {
+  display: flex;
+  align-items: flex-start;
+  max-width: 70%;
+}
+
+.openai-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.assistant-message .openai-icon {
+  margin-right: 10px;
+  margin-top: 5px;
+}
+
+.assistant-message p {
+  background: none;
+  margin: 0;
+  text-align: left;
+}
+
+.input-area {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #ccc;
 }
 
 .input-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.input-wrapper input {
-  flex: 1;
-  padding: 8px;
-  font-size: 1rem;
+.rounds-indicator {
+  white-space: nowrap;
+  margin-right: 15px;
+  font-size: 14px;
+}
+
+input {
+  flex-grow: 1;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  margin-right: 10px;
+  font-size: 16px;
+  background-color: rgb(241, 241, 241);
+  color: rgb(0, 0, 0);
+}
+
+button {
+  padding: 15px 25px;
+  background-color: #007bff;
+  border: none;
+  border-radius: 25px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  white-space: nowrap;
 }
 
 .next-button {
-  margin-top: 8px;
-  align-self: flex-end;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #00008B;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
-/* Additional Styles for scrolling */
-.chat-container,
-.messages {
-  overflow-y: auto;
+button:hover {
+  background-color: #0056b3;
+}
+
+input:disabled,
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.loading img {
+  width: 30px;
+  height: 30px;
+}
+
+.next-button:hover {
+  background-color: #000066; /* Darker Blue */
+}
+
+.option {
+  margin-bottom: 10px;
+}
+
+.question {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.question-summary {
+  background-color: #ececec;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.user-answer {
+  font-weight: bold;
+  background-color: #d1e7dd; /* Light green background to highlight the selected answer */
+  padding: 5px;
+  border-radius: 5px;
 }
 </style>
