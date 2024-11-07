@@ -1,17 +1,20 @@
 <template>
   <div class="chat-container">
     <!-- Question and Answer Section -->
-    <div v-if="!questionAnswered">
+    <div v-if="!questionAnswered" class="question-section">
       <!-- Ensure currentQuestion is loaded before rendering -->
       <div class="question" v-if="currentQuestion">
         <!-- Display the current question -->
         <p v-html="formatQuestionText(currentQuestion)"></p>
+
         <!-- Display options with labels if applicable -->
-        <div v-if="shouldDisplayLabels(currentQuestion.question_number)">
+        <div v-if="shouldDisplayLabels(currentQuestion.question_number)" class="options-container">
           <div
             v-for="(option, index) in getOptions(currentQuestion)"
             :key="index"
             class="option"
+            @click="selectedAnswer = option"
+            :class="{ 'selected-option': selectedAnswer === option }"
           >
             <label>
               <input
@@ -24,12 +27,15 @@
             </label>
           </div>
         </div>
+
         <!-- Display options without labels -->
-        <div v-else>
+        <div v-else class="options-container">
           <div
             v-for="(option, index) in getOptions(currentQuestion)"
             :key="index"
             class="option"
+            @click="selectedAnswer = option"
+            :class="{ 'selected-option': selectedAnswer === option }"
           >
             <label>
               <input
@@ -42,9 +48,11 @@
             </label>
           </div>
         </div>
+
         <!-- Submit Answer Button -->
         <button @click="submitAnswer" :disabled="!selectedAnswer">Submit Answer</button>
       </div>
+
       <div v-else>
         <!-- Loading indicator or message while the question is being fetched -->
         <p>Loading question...</p>
@@ -52,12 +60,11 @@
     </div>
 
     <!-- Chat Section -->
-    <div v-else>
+    <div v-else class="chat-section">
       <div class="messages">
         <!-- Display question, options, and user's answer at the top of the chat -->
         <div class="question-summary">
           <p><strong>Question:</strong> <span v-html="formatQuestionText(currentQuestion)"></span></p>
-          <!-- Display options -->
           <div v-if="shouldDisplayLabels(currentQuestion.question_number)">
             <div
               v-for="(option, index) in getOptions(currentQuestion)"
@@ -69,7 +76,6 @@
               </p>
             </div>
           </div>
-          <!-- Display options without labels -->
           <div v-else>
             <div
               v-for="(option, index) in getOptions(currentQuestion)"
@@ -434,214 +440,94 @@ The user's answer was: "${this.selectedAnswer}". The correct answer is: "${corre
 };
 </script>
 
-<style scoped>
-/* General container for the entire component */
+<style>
+/* General container style */
 .chat-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-  background-color: #f4f6f8;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
   overflow: hidden;
 }
 
-/* Style for the question section */
-.question {
-  padding: 20px;
-  background-color: #fff;
-  border-left: 4px solid rgb(29, 29, 184);
-  border-radius: 8px;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-  margin: 20px;
-  margin-bottom: 10px;
+/* Question Section */
+.question-section {
+  padding: 16px;
+  overflow-y: auto;
 }
 
-.question p {
-  color: #333;
-  font-size: 18px;
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .option {
-  padding: 8px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
   display: flex;
   align-items: center;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
 .option:hover {
-  background-color: #eef3fd;
+  background-color: #e6f7ff;
 }
 
-input[type="radio"] {
-  margin-right: 10px;
+.option.selected-option {
+  background-color: #f0f8ff;
+  border-color: #00aaff;
 }
 
-/* Style for the question summary (for displaying previously answered questions) */
-.question-summary {
-  background-color: #ececec;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-  margin: 20px;
+.option input[type="radio"] {
+  margin-right: 8px;
+  pointer-events: none; /* Prevent double-click requirement on radio buttons */
 }
 
-.user-answer {
-  font-weight: bold;
-  background-color: #d1e7dd; /* Light green for user-selected answer */
-  padding: 8px;
-  border-radius: 8px;
+/* Chat Section */
+.chat-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
-/* Styling for submit button */
-.submit-button {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  background-color: rgb(29, 29, 184);
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-top: 20px;
-}
-
-.submit-button:hover {
-  background-color: rgb(23, 23, 250);
-}
-
-/* Chat message section */
 .messages {
   flex: 1;
-  padding: 20px;
   overflow-y: auto;
-  background-color: #f4f6f8;
-  display: flex;
-  flex-direction: column;
+  padding: 16px;
+  min-height: 100px; /* Ensures chat area is stable */
+  max-height: calc(100vh - 200px); /* Adjust to fit within the viewport */
 }
 
-.message {
-  margin-bottom: 10px;
-  max-width: 80%;
-}
-
-.user-message {
-  background-color: #efefef;
-  color: black;
-  padding: 12px;
-  border-radius: 12px;
-  align-self: flex-end;
-}
-
-.assistant-message {
-  background-color: #d9e7ff;
-  color: #333;
-  padding: 12px;
-  border-radius: 12px;
-  align-self: flex-start;
-  display: flex;
-  align-items: center;
-}
-
-.assistant-message img {
-  width: 30px;
-  height: 30px;
-  margin-right: 10px;
-  border-radius: 50%;
-}
-
-/* Input area for chat */
+/* Input Area */
 .input-area {
-  padding: 15px;
-  background-color: #fff;
-  border-top: 1px solid #ccc;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  padding: 8px 16px;
 }
 
 .input-wrapper {
   display: flex;
   align-items: center;
-  width: 100%;
-  max-width: 800px;
+  gap: 8px;
 }
 
-.rounds-indicator {
-  margin-right: 15px;
-  font-size: 14px;
-  color: #666;
+.input-wrapper input {
+  flex: 1;
+  padding: 8px;
+  font-size: 1rem;
 }
 
-input[type="text"] {
-  flex-grow: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  font-size: 16px;
-  margin-right: 10px;
-  background-color: #f0f4f8;
-}
-
-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-/* Loading spinner */
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.loading img {
-  width: 24px;
-  height: 24px;
-  margin-right: 8px;
-}
-
-/* Fixed Next button for navigation */
 .next-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  background-color: rgb(29, 29, 184);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
+  margin-top: 8px;
+  align-self: flex-end;
 }
 
-.next-button:hover {
-  background-color: rgb(23, 23, 250);
+/* Additional Styles for scrolling */
+.chat-container,
+.messages {
+  overflow-y: auto;
 }
 </style>
