@@ -463,7 +463,7 @@ The user's answer was: "${this.selectedAnswer}". The correct answer is: "${corre
 
 .survey-container {
   max-width: 800px;
-  margin: 50px auto;
+  margin: 10px auto;
   padding: 30px;
   background-color: #fff;
   border-radius: 8px;
@@ -658,7 +658,7 @@ button:disabled {
 
 .user-answer {
   font-weight: bold;
-  background-color: #d1e7dd; /* Light green background to highlight the selected answer */
+  background-color: rgb(84, 81, 171); /* Light green background to highlight the selected answer */
   padding: 5px;
   border-radius: 5px;
 }
