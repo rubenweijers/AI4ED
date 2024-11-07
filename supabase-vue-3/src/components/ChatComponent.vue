@@ -60,6 +60,7 @@
             </div>
             <hr>
             <p><strong>Your answer was:</strong> {{ userAnswer }}</p>
+            <p><strong>Your explanation was:</strong> {{ explanation }}</p>
             </div>
             <!-- End of question display -->
             <div v-if="loading && messages.length === 0" class="loading">
