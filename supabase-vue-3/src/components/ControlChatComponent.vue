@@ -96,6 +96,7 @@
             </div>
           </div>
           <p><strong>Your Answer:</strong> {{ selectedAnswer }}</p>
+          <p><strong>Correct Answer:</strong> {{ currentQuestion.correct_answer }}</p>
         </div>
       </div>
 
@@ -687,6 +688,6 @@ button:disabled {
 
 .user-answer {
   font-weight: bold;
-  color: rgb(10, 10, 240);
+  /* color: rgb(10, 10, 240); */
 }
 </style>

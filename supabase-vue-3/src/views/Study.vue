@@ -185,7 +185,7 @@ const fetchUserProfile = async () => {
 
     // Check if the user is in the "treatment" or "control" group and set the route accordingly
     if (profile.value.group === 'control') {
-      profile.value.routePath = '/Chats';
+      profile.value.routePath = '/PostTest';
     } else if (profile.value.group === 'treatment') {
       profile.value.routePath = '/PostTest';
     }
