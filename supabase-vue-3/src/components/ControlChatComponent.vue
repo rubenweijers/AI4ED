@@ -3,8 +3,8 @@
     <!-- Question and Answer Section -->
     <div v-if="!questionAnswered">
       <!-- Ensure currentQuestion is loaded before rendering -->
-      <div class="survey-container" v-if="currentQuestion">
-        <div class="survey-question">
+      <div class="question-container" v-if="currentQuestion">
+        <div class="question-content">
           <!-- Display the current question -->
           <div class="question-text">
             <p v-html="formatQuestionText(currentQuestion)"></p>
@@ -66,10 +66,10 @@
     </div>
 
     <!-- Chat Section -->
-    <div v-else>
-      <div class="messages">
-        <!-- Display question, options, and user's answer at the top of the chat -->
-        <div class="question-summary">
+    <div v-else class="chat-section">
+      <!-- Use the same question container for consistency -->
+      <div class="question-container">
+        <div class="question-content">
           <p><strong>Question:</strong> <span v-html="formatQuestionText(currentQuestion)"></span></p>
           <!-- Display options -->
           <div v-if="shouldDisplayLabels(currentQuestion.question_number)">
@@ -97,14 +97,16 @@
           </div>
           <p><strong>Your Answer:</strong> {{ selectedAnswer }}</p>
         </div>
+      </div>
 
+      <!-- Chat Messages -->
+      <div class="messages" ref="messagesContainer">
         <!-- Loading Indicator -->
         <div v-if="loading && messages.length === 0" class="loading">
           <img src="/loading_spinner.gif" alt="Loading" />
           <p>Thinking...</p>
         </div>
 
-        <!-- Chat Messages -->
         <div
           v-for="(message, index) in messages"
           :key="index"
@@ -125,7 +127,7 @@
       </div>
 
       <!-- Input Area -->
-      <div class="input-area">
+      <div class="input-area" v-if="questionAnswered">
         <div class="input-content">
           <div class="input-wrapper">
             <div class="rounds-indicator">
@@ -170,12 +172,15 @@ export default {
       optionLabels: ["A", "B", "C", "D", "E"],
       questionsWithLabels: [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18],
       timerWatcherInterval: null,
+      answeredQuestions: new Set(), // Added this line
     };
   },
   async mounted() {
     try {
       await this.loadUserData();
       await this.loadQuestions();
+      await this.loadUserAnswers(); // Load user's previous answers
+      this.setNextUnansweredQuestion(); // Set to next unanswered question
       this.startTimer();
     } catch (error) {
       console.error('Error during component mounting:', error);
@@ -231,10 +236,40 @@ export default {
 
       this.questions = questionsData;
       if (this.questions.length > 0) {
-        this.currentQuestion = this.questions[this.currentQuestionIndex];
+        // this.currentQuestion = this.questions[this.currentQuestionIndex];
+        // We will set currentQuestion in setNextUnansweredQuestion()
       } else {
         console.error('No questions found in questions_control table');
       }
+    },
+    // Load user's previous answers
+    async loadUserAnswers() {
+      // Fetch the answers from 'answers_control' table for the current user
+      const { data: answersData, error } = await supabase
+        .from('answers_control')
+        .select('*')
+        .eq('user_id', this.user.username);
+
+      if (error) {
+        console.error('Error fetching user answers:', error);
+        return;
+      }
+
+      // Store the question_numbers of the answered questions
+      this.answeredQuestions = new Set(answersData.map(answer => answer.question_number));
+    },
+    // Determine the next unanswered question
+    setNextUnansweredQuestion(startIndex = 0) {
+      for (let i = startIndex; i < this.questions.length; i++) {
+        if (!this.answeredQuestions.has(this.questions[i].question_number)) {
+          this.currentQuestionIndex = i;
+          this.currentQuestion = this.questions[this.currentQuestionIndex];
+          return;
+        }
+      }
+      // If all questions have been answered
+      // alert('You have completed all the questions.');
+      this.$router.push('/studyoriginalfci');
     },
     // Start the timer
     startTimer() {
@@ -290,6 +325,9 @@ export default {
         alert('There was an error saving your answer. Please try again.');
         return;
       }
+
+      // Add current question to answeredQuestions
+      this.answeredQuestions.add(this.currentQuestion.question_number);
 
       // Include the answer_explanation and correct_answer in the system prompt
       const { answer_explanation, correct_answer } = this.currentQuestion;
@@ -415,19 +453,15 @@ export default {
     },
     // Proceed to the next question
     nextQuestion() {
-      if (this.currentQuestionIndex + 1 < this.questions.length) {
-        this.currentQuestionIndex++;
-        this.currentQuestion = this.questions[this.currentQuestionIndex];
+      this.setNextUnansweredQuestion(this.currentQuestionIndex + 1);
+      if (this.currentQuestion) {
+        // Reset variables
         this.selectedAnswer = '';
         this.questionAnswered = false;
         this.userMessage = '';
         this.messages = [];
         // Scroll to top when moving to the next question
         window.scrollTo(0, 0);
-      } else {
-        // No more questions, redirect to /Study_original_fci
-        alert('You have completed all the questions.');
-        this.$router.push('/Study_original_fci');
       }
     },
     // Format options for displaying in the prompt
@@ -458,26 +492,32 @@ export default {
 .chat-container {
   display: flex;
   flex-direction: column;
+  height: 100vh; /* Full viewport height */
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
   background-color: white;
+  overflow: hidden;
 }
 
-.survey-container {
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.question-container {
   max-width: 800px;
-  margin: 10px auto;
-  padding: 30px;
-  background-color: #fff;
-  border-radius: 8px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  padding-bottom: 100px; /* To prevent content from being hidden behind the fixed input area */
 }
 
-.survey-question {
-  margin-bottom: 60px;
+.question-content {
+  margin-bottom: 20px;
 }
 
 .question-text {
@@ -519,18 +559,24 @@ export default {
   font-size: 16px;
 }
 
-.messages {
-  padding: 20px;
-  background-color: #f9f9f9;
+.chat-section {
   display: flex;
   flex-direction: column;
-  padding-bottom: 120px; /* Adjusted to prevent content being hidden under the fixed input area */
+  flex: 1;
+  overflow: hidden;
+}
+
+.messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
 }
 
 .message {
   width: 100%;
   max-width: 800px;
-  margin: 0 auto 10px;
+  margin: 5px auto 10px;
 }
 
 .user-message {
@@ -566,10 +612,6 @@ export default {
 }
 
 .input-area {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
   padding: 10px 20px;
   background-color: #f9f9f9;
   border-top: 1px solid #ccc;
@@ -613,57 +655,38 @@ button {
   color: white;
   cursor: pointer;
   font-size: 16px;
-  white-space: nowrap;
-}
-
-.next-button {
-  margin-left: 10px;
-  padding: 15px 25px;
-  background-color: #00008B;
-  border: none;
-  border-radius: 25px;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-  white-space: nowrap;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: rgb(23, 23, 250);
 }
 
-.next-button:hover {
-  background-color: #000066;
-}
-
-input:disabled,
 button:disabled {
-  opacity: 0.5;
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
+.next-button {
+  background-color: #28a745;
+}
+
+.next-button:hover {
+  background-color: #218838;
+}
+
 .loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 10px;
+  text-align: center;
+  color: #666;
 }
 
 .loading img {
-  width: 30px;
-  height: 30px;
-}
-
-.question-summary {
-  background-color: #ececec;
-  padding: 10px;
-  margin-bottom: 10px;
+  width: 50px;
+  height: 50px;
+  margin-bottom: 5px;
 }
 
 .user-answer {
   font-weight: bold;
-  background-color: rgb(84, 81, 171); /* Light green background to highlight the selected answer */
-  padding: 5px;
-  border-radius: 5px;
+  color: rgb(10, 10, 240);
 }
 </style>

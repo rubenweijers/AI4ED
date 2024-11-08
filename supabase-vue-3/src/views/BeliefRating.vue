@@ -7,7 +7,8 @@
       <div class="sentence-block">
         "{{ sentence }}"
       </div>
-      <p>How much do you believe in this summarized explanation?</p>
+      <!-- <p>How much do you believe in this summarized explanation?</p> OLD BELIEF RATING -->
+      <p>Is this an accurate summary of your reasoning?</p>
       <div class="rating-scale">
         <label v-for="(label, index) in ratingLabels" :key="index">
           <input
@@ -60,12 +61,21 @@ const cancelSubmit = () => {
   showToast.value = false;
 };
 
+// OLD RATING LABELS
+// const ratingLabels = [
+//   { value: 0, text: 'Definitely False' },
+//   { value: 25, text: 'Probably False' },
+//   { value: 50, text: 'Uncertain' },
+//   { value: 75, text: 'Probably True' },
+//   { value: 100, text: 'Definitely True' },
+// ];
+
 const ratingLabels = [
-  { value: 0, text: 'Definitely False' },
-  { value: 25, text: 'Probably False' },
-  { value: 50, text: 'Uncertain' },
-  { value: 75, text: 'Probably True' },
-  { value: 100, text: 'Definitely True' },
+  { value: 0, text: 'Completely accurate' },
+  { value: 25, text: 'Mostly accurate' },
+  { value: 50, text: 'Part accurate, part inaccurate' },
+  { value: 75, text: 'Mostly inaccurate' },
+  { value: 100, text: 'Completely inaccurate' },
 ];
 
 const checkUser = async () => {

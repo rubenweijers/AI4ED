@@ -157,13 +157,19 @@ router.beforeEach((to, from, next) => {
   
   // 7. Block StudyOriginalFCI to Chat, PostTest, BeliefRating, or BeliefRatingPostChat
   else if (from.name === 'StudyOriginalFCI' && 
-           (to.name === 'Chat' || to.name === 'PostTest' || to.name === 'BeliefRating' || to.name === 'BeliefRatingPostChat')) {
+           (to.name === 'Chats' || to.name === 'Chat' || to.name === 'PostTest' || to.name === 'BeliefRating' || to.name === 'BeliefRatingPostChat')) {
     next(false);
   }
   
   // 8. Block Feedback to StudyOriginalFCI
   else if (from.name === 'Feedback' && to.name === 'StudyOriginalFCI') {
     next(false);
+  }
+
+  // CONTROL GROUP CANT GO ANYWHERE
+  else if (from.name === 'Chats' && 
+    (to.name === 'Chat' || to.name === 'PostTest' || to.name === 'BeliefRating' || to.name === 'BeliefRatingPostChat' || to.name === 'Survey' || to.name === 'Study')) {
+  next(false);
   }
   
   // If none of the above restrictions apply, allow navigation

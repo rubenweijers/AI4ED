@@ -7,7 +7,8 @@
       <div class="sentence-block">
         "{{ sentence }}"
       </div>
-      <p>On a scale of 0% to 100%, please indicate your level of confidence that this statement is true.</p>
+      <!-- <p>On a scale of 0% to 100%, please indicate your level of confidence that this statement is true.</p> -->
+      <p>Did you find talking with the AI helped improve your understanding of this question that you originally answered incorrectly?</p>
       <div class="rating-scale">
         <label v-for="(label, index) in ratingLabels" :key="index">
           <input
@@ -60,9 +61,18 @@ const cancelSubmit = () => {
   showToast.value = false;
 };
 
+// OLD RATINGLABELS
+// const ratingLabels = [
+//   { value: 0, text: 'Definitely False' },
+//   { value: 25, text: 'Probably False' },
+//   { value: 50, text: 'Uncertain' },
+//   { value: 75, text: 'Probably True' },
+//   { value: 100, text: 'Definitely True' },
+// ];
+
 const ratingLabels = [
-  { value: 0, text: 'Definitely False' },
-  { value: 25, text: 'Probably False' },
+  { value: 0, text: 'Very helpful' },
+  { value: 25, text: 'Fairly helpful' },
   { value: 50, text: 'Uncertain' },
   { value: 75, text: 'Probably True' },
   { value: 100, text: 'Definitely True' },
