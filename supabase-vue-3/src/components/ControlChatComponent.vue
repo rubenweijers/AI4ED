@@ -463,12 +463,12 @@ export default {
   margin: 0 auto;
   font-family: Arial, sans-serif;
   background-color: white;
-  margin-top: -30px;
 }
 
 .survey-container {
   max-width: 800px;
   margin: 10px auto;
+  margin-top: -30px;
   padding: 30px;
   background-color: #fff;
   border-radius: 8px;
