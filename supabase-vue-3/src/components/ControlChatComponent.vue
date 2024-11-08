@@ -268,8 +268,8 @@ export default {
         }
       }
       // If all questions have been answered
-      alert('You have completed all the questions.');
-      this.$router.push('/Study_original_fci');
+      // alert('You have completed all the questions.');
+      this.$router.push('/studyoriginalfci');
     },
     // Start the timer
     startTimer() {
@@ -278,7 +278,7 @@ export default {
         if (remainingTime <= 0) {
           clearInterval(this.timerWatcherInterval);
           alert('Your study time has ended. Moving to the next section.');
-          this.$router.push('/Study_original_fci'); // Redirect to the next study phase
+          this.$router.push('/studyoriginalfci'); // Redirect to the next study phase
         }
       }, 1000);
     },
