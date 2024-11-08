@@ -458,17 +458,19 @@ export default {
 .chat-container {
   display: flex;
   flex-direction: column;
+  height: 100vh; /* Occupy full viewport height */
   width: 100%;
   max-width: 1200px;
-  margin: 0; /* Updated margin to bring content to top */
+  margin: 0 auto;
   font-family: Arial, sans-serif;
   background-color: white;
+  overflow: hidden; /* Hide overflow */
 }
 
 .survey-container {
   max-width: 800px;
-  margin: 0 auto 10px; /* Set margin-top to 0 */
-  padding: 30px;
+  margin: 0 auto 10px; /* Remove top margin */
+  padding: 0 30px 30px; /* Remove top padding */
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
@@ -519,17 +521,19 @@ export default {
 }
 
 .messages {
-  padding: 20px 20px 10px; /* Adjusted padding */
-  padding-bottom: 100px; /* Added padding-bottom to allow for the input bar */
+  flex: 1; /* Allow messages area to expand */
+  padding: 20px 20px 10px;
+  padding-bottom: 100px; /* Space for input bar */
   background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
+  overflow-y: auto; /* Allow scrolling */
 }
 
 .message {
   width: 100%;
   max-width: 800px;
-  margin: 5px auto 10px; /* Adjust margin to reduce space */
+  margin: 5px auto 10px;
 }
 
 .user-message {
@@ -644,7 +648,7 @@ button:disabled {
 
 .question-summary {
   max-width: 800px;
-  margin: 5px auto 20px; /* Adjust margin for top placement */
+  margin: 5px auto 20px;
   padding: 20px;
   border-radius: 8px;
   background-color: white;
