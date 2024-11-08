@@ -3,8 +3,8 @@
     <!-- Question and Answer Section -->
     <div v-if="!questionAnswered">
       <!-- Ensure currentQuestion is loaded before rendering -->
-      <div class="survey-container" v-if="currentQuestion">
-        <div class="survey-question">
+      <div class="question-container" v-if="currentQuestion">
+        <div class="question-content">
           <!-- Display the current question -->
           <div class="question-text">
             <p v-html="formatQuestionText(currentQuestion)"></p>
@@ -66,10 +66,10 @@
     </div>
 
     <!-- Chat Section -->
-    <div v-else>
-      <div class="messages">
-        <!-- Display question, options, and user's answer at the top of the chat -->
-        <div class="question-summary">
+    <div v-else class="chat-section">
+      <!-- Use the same question container for consistency -->
+      <div class="question-container">
+        <div class="question-content">
           <p><strong>Question:</strong> <span v-html="formatQuestionText(currentQuestion)"></span></p>
           <!-- Display options -->
           <div v-if="shouldDisplayLabels(currentQuestion.question_number)">
@@ -97,14 +97,16 @@
           </div>
           <p><strong>Your Answer:</strong> {{ selectedAnswer }}</p>
         </div>
+      </div>
 
+      <!-- Chat Messages -->
+      <div class="messages" ref="messagesContainer">
         <!-- Loading Indicator -->
         <div v-if="loading && messages.length === 0" class="loading">
           <img src="/loading_spinner.gif" alt="Loading" />
           <p>Thinking...</p>
         </div>
 
-        <!-- Chat Messages -->
         <div
           v-for="(message, index) in messages"
           :key="index"
@@ -458,12 +460,13 @@ export default {
 .chat-container {
   display: flex;
   flex-direction: column;
+  height: 100vh; /* Full viewport height */
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
   background-color: white;
-  /* Remove height and overflow properties to allow natural scrolling */
+  overflow: hidden;
 }
 
 body, html {
@@ -471,18 +474,17 @@ body, html {
   padding: 0;
 }
 
-.survey-container {
+.question-container {
   max-width: 800px;
-  margin: 0 auto 10px;
-  padding: 0 30px 30px; /* Remove top padding */
-  /* Remove background and box-shadow to eliminate the big white square */
-  background-color: transparent;
-  box-shadow: none;
-  text-align: left;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.survey-question {
-  margin-bottom: 40px;
+.question-content {
+  margin-bottom: 20px;
 }
 
 .question-text {
@@ -524,10 +526,17 @@ body, html {
   font-size: 16px;
 }
 
+.chat-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .messages {
-  padding: 20px 20px 10px;
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
   background-color: #f9f9f9;
-  /* Remove flex properties to allow natural scrolling */
 }
 
 .message {
@@ -569,10 +578,6 @@ body, html {
 }
 
 .input-area {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
   padding: 10px 20px;
   background-color: #f9f9f9;
   border-top: 1px solid #ccc;
@@ -644,15 +649,6 @@ button:disabled {
   width: 50px;
   height: 50px;
   margin-bottom: 5px;
-}
-
-.question-summary {
-  max-width: 800px;
-  margin: 5px auto 20px;
-  padding: 20px;
-  border-radius: 8px;
-  background-color: white;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .user-answer {
