@@ -178,6 +178,7 @@ export default {
     try {
       await this.loadUserData();
       await this.loadQuestions();
+      this.restoreState();
       this.startTimer();
     } catch (error) {
       console.error('Error during component mounting:', error);
@@ -188,6 +189,22 @@ export default {
     if (this.timerWatcherInterval) {
       clearInterval(this.timerWatcherInterval);
     }
+    this.saveState();
+  },
+  watch: {
+    // Watch these properties and save state whenever they change
+    messages() {
+      this.saveState();
+    },
+    selectedAnswer() {
+      this.saveState();
+    },
+    currentQuestionIndex() {
+      this.saveState();
+    },
+    questionAnswered() {
+      this.saveState();
+    },
   },
   methods: {
     // Load user data from localStorage and fetch profile from Supabase
@@ -232,12 +249,28 @@ export default {
       }
 
       this.questions = questionsData;
-      if (this.questions.length > 0) {
-        this.currentQuestion = this.questions[this.currentQuestionIndex];
-      } else {
-        console.error('No questions found in questions_control table');
-      }
-    },
+      this.currentQuestion = this.questions[this.currentQuestionIndex];
+      },
+      // Save state to localStorage
+      saveState() {
+        const state = {
+          messages: this.messages,
+          remainingRounds: this.remainingRounds,
+          currentQuestionIndex: this.currentQuestionIndex,
+          selectedAnswer: this.selectedAnswer,
+          questionAnswered: this.questionAnswered,
+        };
+        localStorage.setItem('chatState', JSON.stringify(state));
+      },
+      // Restore state from localStorage
+      restoreState() {
+        const savedState = localStorage.getItem('chatState');
+        if (savedState) {
+          const parsedState = JSON.parse(savedState);
+          Object.assign(this, parsedState);
+          this.currentQuestion = this.questions[this.currentQuestionIndex];
+        }
+      },
     // Start the timer
     startTimer() {
       this.timerWatcherInterval = setInterval(() => {
@@ -305,7 +338,7 @@ export default {
           correctAnswerText = `${correct_answer}. ${options[correctIndex]}`;
         }
       }
-
+      this.questionAnswered = true;
       // Set up the system prompt including the question and user's answer
       this.systemPrompt = `You are a helpful assistant. Please have a three-round dialogue with the user regarding their answer to the following question:
 
@@ -322,7 +355,6 @@ export default {
 
       this.remainingRounds = 3;
       this.messages = [];
-      this.questionAnswered = true;
 
       // Generate initial AI message
       await this.generateInitialAIMessage();
@@ -365,8 +397,8 @@ export default {
     async sendMessage() {
       if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
 
-      const userMessageContent = this.userMessage;
-
+      // const userMessageContent = this.userMessage;
+      this.userMessage = '';
       this.messages.push({ role: 'user', content: userMessageContent });
       this.remainingRounds--;
 

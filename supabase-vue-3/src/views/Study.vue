@@ -182,6 +182,13 @@ const fetchUserProfile = async () => {
     console.error('Error fetching user profile:', error.message);
   } else {
     profile.value = data;
+
+    // Check if the user is in the "treatment" or "control" group and set the route accordingly
+    if (profile.value.group === 'control') {
+      profile.value.routePath = '/Chats';
+    } else if (profile.value.group === 'treatment') {
+      profile.value.routePath = '/PostTest';
+    }
   }
 };
 
@@ -282,12 +289,12 @@ onUnmounted(() => {
 
 const optionMapping = ["A", "B", "C", "D", "E"];
 
-// Replace showToastNotification with handleFormSubmission
+// Use the routePath in the handleFormSubmission function
 const handleFormSubmission = () => {
   if (formSubmitted.value) {
     console.log('Form has already been submitted.');
     alert('The form has already been submitted.');
-    router.push('/PostTest');
+    router.push(profile.value.routePath);  // Use the determined route
   } else {
     if (areAllQuestionsAnswered()) {
       showToastNotification();
@@ -349,7 +356,7 @@ const submitAnswers = async () => {
     localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 
     submissionSuccess.value = true;
-    router.push('/PostTest');
+    router.push(profile.value.routePath);  // Use the determined route
   } catch (error) {
     console.error('An unexpected error occurred:', error);
     formSubmitted.value = false;
