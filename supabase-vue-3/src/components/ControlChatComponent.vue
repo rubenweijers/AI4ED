@@ -397,8 +397,8 @@ export default {
     async sendMessage() {
       if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
 
-      // const userMessageContent = this.userMessage;
-      this.userMessage = '';
+      const userMessageContent = this.userMessage;
+
       this.messages.push({ role: 'user', content: userMessageContent });
       this.remainingRounds--;
 
