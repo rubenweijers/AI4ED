@@ -460,18 +460,24 @@ export default {
   flex-direction: column;
   width: 100%;
   max-width: 1200px;
-  margin: 0; /* Updated margin to bring content to top */
+  margin: 0 auto;
   font-family: Arial, sans-serif;
   background-color: white;
+  /* Remove height and overflow properties to allow natural scrolling */
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
 }
 
 .survey-container {
   max-width: 800px;
-  margin: 0 auto 10px; /* Set margin-top to 0 */
-  padding: 30px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 0 auto 10px;
+  padding: 0 30px 30px; /* Remove top padding */
+  /* Remove background and box-shadow to eliminate the big white square */
+  background-color: transparent;
+  box-shadow: none;
   text-align: left;
 }
 
@@ -519,17 +525,15 @@ export default {
 }
 
 .messages {
-  padding: 20px 20px 10px; /* Adjusted padding */
-  padding-bottom: 100px; /* Added padding-bottom to allow for the input bar */
+  padding: 20px 20px 10px;
   background-color: #f9f9f9;
-  display: flex;
-  flex-direction: column;
+  /* Remove flex properties to allow natural scrolling */
 }
 
 .message {
   width: 100%;
   max-width: 800px;
-  margin: 5px auto 10px; /* Adjust margin to reduce space */
+  margin: 5px auto 10px;
 }
 
 .user-message {
@@ -644,7 +648,7 @@ button:disabled {
 
 .question-summary {
   max-width: 800px;
-  margin: 5px auto 20px; /* Adjust margin for top placement */
+  margin: 5px auto 20px;
   padding: 20px;
   border-radius: 8px;
   background-color: white;
