@@ -469,11 +469,10 @@ The user's answer was: "${this.selectedAnswer}". The correct answer is: "${corre
   border-radius: 8px;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
   text-align: left;
-  padding-bottom: 100px; /* To prevent content from being hidden behind the fixed input area */
 }
 
 .survey-question {
-  margin-bottom: 60px;
+  margin-bottom: 40px;
 }
 
 .question-text {
@@ -516,17 +515,16 @@ The user's answer was: "${this.selectedAnswer}". The correct answer is: "${corre
 }
 
 .messages {
-  padding: 20px;
+  padding: 20px 20px 10px; /* Reduce padding to bring content closer to top */
   background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
-  padding-bottom: 120px; /* Adjusted to prevent content being hidden under the fixed input area */
 }
 
 .message {
   width: 100%;
   max-width: 800px;
-  margin: 0 auto 10px;
+  margin: 5px auto 10px; /* Adjust margin to reduce space */
 }
 
 .user-message {
@@ -609,57 +607,47 @@ button {
   color: white;
   cursor: pointer;
   font-size: 16px;
-  white-space: nowrap;
-}
-
-.next-button {
-  margin-left: 10px;
-  padding: 15px 25px;
-  background-color: #00008B;
-  border: none;
-  border-radius: 25px;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-  white-space: nowrap;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: rgb(23, 23, 250);
 }
 
-.next-button:hover {
-  background-color: #000066;
-}
-
-input:disabled,
 button:disabled {
-  opacity: 0.5;
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
+.next-button {
+  background-color: #28a745;
+}
+
+.next-button:hover {
+  background-color: #218838;
+}
+
 .loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 10px;
+  text-align: center;
+  color: #666;
 }
 
 .loading img {
-  width: 30px;
-  height: 30px;
+  width: 50px;
+  height: 50px;
+  margin-bottom: 5px;
 }
 
 .question-summary {
-  background-color: #ececec;
-  padding: 10px;
-  margin-bottom: 10px;
+  max-width: 800px;
+  margin: 5px auto 20px; /* Adjust margin for top placement */
+  padding: 20px;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .user-answer {
   font-weight: bold;
-  background-color: rgb(84, 81, 171); /* Light green background to highlight the selected answer */
-  padding: 5px;
-  border-radius: 5px;
+  color: rgb(10, 10, 240);
 }
 </style>
