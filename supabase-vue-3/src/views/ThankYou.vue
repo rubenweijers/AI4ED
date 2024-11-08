@@ -5,7 +5,11 @@
     <p>You have completed the study: <u>Thank you for your time and effort!</u></p><br>
 
     <section>
-      <h2>Principal Investigators</h2>
+      <h2>Duke Investigator</h2>
+      <ul>
+        <li>Dr. Ying Wu</li>
+      </ul>
+      <h2>Principal Investigator</h2>
       <ul>
         <li>Jean-François Godbout - <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></li>
       </ul>
