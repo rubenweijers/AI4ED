@@ -127,7 +127,7 @@
       </div>
 
       <!-- Input Area -->
-      <div class="input-area">
+      <div class="input-area" v-if="questionAnswered">
         <div class="input-content">
           <div class="input-wrapper">
             <div class="rounds-indicator">
@@ -472,6 +472,7 @@ export default {
 body, html {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 .question-container {
@@ -530,6 +531,7 @@ body, html {
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow: hidden;
 }
 
 .messages {
