@@ -172,12 +172,15 @@ export default {
       optionLabels: ["A", "B", "C", "D", "E"],
       questionsWithLabels: [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18],
       timerWatcherInterval: null,
+      answeredQuestions: new Set(), // Added this line
     };
   },
   async mounted() {
     try {
       await this.loadUserData();
       await this.loadQuestions();
+      await this.loadUserAnswers(); // Load user's previous answers
+      this.setNextUnansweredQuestion(); // Set to next unanswered question
       this.startTimer();
     } catch (error) {
       console.error('Error during component mounting:', error);
@@ -233,10 +236,40 @@ export default {
 
       this.questions = questionsData;
       if (this.questions.length > 0) {
-        this.currentQuestion = this.questions[this.currentQuestionIndex];
+        // this.currentQuestion = this.questions[this.currentQuestionIndex];
+        // We will set currentQuestion in setNextUnansweredQuestion()
       } else {
         console.error('No questions found in questions_control table');
       }
+    },
+    // Load user's previous answers
+    async loadUserAnswers() {
+      // Fetch the answers from 'answers_control' table for the current user
+      const { data: answersData, error } = await supabase
+        .from('answers_control')
+        .select('*')
+        .eq('user_id', this.user.username);
+
+      if (error) {
+        console.error('Error fetching user answers:', error);
+        return;
+      }
+
+      // Store the question_numbers of the answered questions
+      this.answeredQuestions = new Set(answersData.map(answer => answer.question_number));
+    },
+    // Determine the next unanswered question
+    setNextUnansweredQuestion(startIndex = 0) {
+      for (let i = startIndex; i < this.questions.length; i++) {
+        if (!this.answeredQuestions.has(this.questions[i].question_number)) {
+          this.currentQuestionIndex = i;
+          this.currentQuestion = this.questions[this.currentQuestionIndex];
+          return;
+        }
+      }
+      // If all questions have been answered
+      alert('You have completed all the questions.');
+      this.$router.push('/Study_original_fci');
     },
     // Start the timer
     startTimer() {
@@ -245,7 +278,7 @@ export default {
         if (remainingTime <= 0) {
           clearInterval(this.timerWatcherInterval);
           alert('Your study time has ended. Moving to the next section.');
-          this.$router.push('/studyoriginalfci'); // Redirect to the next study phase
+          this.$router.push('/Study_original_fci'); // Redirect to the next study phase
         }
       }, 1000);
     },
@@ -292,6 +325,9 @@ export default {
         alert('There was an error saving your answer. Please try again.');
         return;
       }
+
+      // Add current question to answeredQuestions
+      this.answeredQuestions.add(this.currentQuestion.question_number);
 
       // Include the answer_explanation and correct_answer in the system prompt
       const { answer_explanation, correct_answer } = this.currentQuestion;
@@ -417,19 +453,15 @@ export default {
     },
     // Proceed to the next question
     nextQuestion() {
-      if (this.currentQuestionIndex + 1 < this.questions.length) {
-        this.currentQuestionIndex++;
-        this.currentQuestion = this.questions[this.currentQuestionIndex];
+      this.setNextUnansweredQuestion(this.currentQuestionIndex + 1);
+      if (this.currentQuestion) {
+        // Reset variables
         this.selectedAnswer = '';
         this.questionAnswered = false;
         this.userMessage = '';
         this.messages = [];
         // Scroll to top when moving to the next question
         window.scrollTo(0, 0);
-      } else {
-        // No more questions, redirect to /Study_original_fci
-        alert('You have completed all the questions.');
-        this.$router.push('/Study_original_fci');
       }
     },
     // Format options for displaying in the prompt
