@@ -4,7 +4,7 @@
     <div v-if="!questionAnswered">
       <!-- Ensure currentQuestion is loaded before rendering -->
       <div class="survey-container" v-if="currentQuestion">
-        <!-- <div class="survey-question"> -->
+        <div class="survey-question">
           <!-- Display the current question -->
           <div class="question-text">
             <p v-html="formatQuestionText(currentQuestion)"></p>
@@ -54,7 +54,7 @@
                 </span>
               </label>
             </div>
-          <!-- </div> -->
+          </div>
           <!-- Submit Answer Button -->
           <button @click="submitAnswer" :disabled="!selectedAnswer" class="submit-button">Submit Answer</button>
         </div>
@@ -307,16 +307,12 @@ export default {
       // Set up the system prompt including the question and user's answer
       this.systemPrompt = `You are a helpful assistant. Please have a three-round dialogue with the user regarding their answer to the following question:
 
-      "${this.formatQuestionText(this.currentQuestion)}"
+"${this.formatQuestionText(this.currentQuestion)}"
 
-      Options:
-      ${this.getFormattedOptions(this.currentQuestion)}
+Options:
+${this.getFormattedOptions(this.currentQuestion)}
 
-      ------End of Question Statement------
-
-      The user's answer was: "${this.selectedAnswer}". The correct answer is: "${correctAnswerText}". Here is an explanation for the correct answer: "${answer_explanation}". 
-
-      Your goal is to inform the user of the correct answer as well as provide additional relevant information. Ask them their reasoning for choosing that question and discuss their answer. Use simple, clear language that an average person will be able to follow, and structure the conversation so they gain new knowledge on the topic at each step. At the end of each message, provide additional questions on the topic to spur further discussion and increase the knowledge of the topic for the user. `;
+The user's answer was: "${this.selectedAnswer}". The correct answer is: "${correctAnswerText}". Here is an explanation for the correct answer: "${answer_explanation}". Focus on discussing their answer and any reasoning they might have had. Do not mention that you know the correct answer unless the user asks.`;
 
       this.remainingRounds = 3;
       this.messages = [];
@@ -468,7 +464,6 @@ export default {
 .survey-container {
   max-width: 800px;
   margin: 10px auto;
-  margin-top: -30px;
   padding: 30px;
   background-color: #fff;
   border-radius: 8px;
