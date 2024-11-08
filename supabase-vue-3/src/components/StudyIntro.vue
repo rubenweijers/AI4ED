@@ -54,7 +54,7 @@
       </p>
       <p>
         <h2><strong>Contact</strong></h2>
-          For questions, please reach out to Duke investigator <strong>Dr. Ying Wu </strong> or principal investigator:  <strong>Dr. Jean-François Godbout - <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></strong>
+          For questions, please reach out to Duke investigator <strong>Prof. Ying Wu (Duke University)</strong> or principal investigator:  <strong>Prof. Jean-François Godbout (Université de Montréal)- <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></strong>
       </p><br><br>
   </div>
 </template>

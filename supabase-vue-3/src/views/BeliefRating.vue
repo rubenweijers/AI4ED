@@ -23,8 +23,8 @@
       <button @click="showToastNotification" class="submit-button">Submit</button>
       <ToastNotification
         :isVisible="showToast"
-        title="Submit Belief Rating"
-        message="Are you sure you want to confirm your belief rating in the statement? This action cannot be undone."
+        title="Submit Accuracy Rating"
+        message="Are you sure you want to confirm your accuracy rating in the summary? This action cannot be undone."
         @confirm="confirmSubmit"
         @cancel="cancelSubmit"
       />

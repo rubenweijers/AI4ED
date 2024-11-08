@@ -1,9 +1,9 @@
 <template>
   <div class="belief-rating-container">
-    <h2>Re-Check the summary</h2>
+    <h2>Re-Check your statement</h2>
     <p v-if="loading">Loading...</p>
     <template v-else>
-      <p>Now that you've had a chance to converse with the AI, we'd like to revisit your thoughts on the original question: </p>
+      <p>Now that you've had a chance to converse with the AI, we'd like to revisit the original question. Your initial statement was:</p>
       <div class="sentence-block">
         "{{ sentence }}"
       </div>
@@ -23,8 +23,8 @@
       <button @click="showToastNotification" class="submit-button">Submit</button>
       <ToastNotification
         :isVisible="showToast"
-        title="Submit Belief Rating"
-        message="Are you sure you want to confirm your belief rating in the statement? This action cannot be undone."
+        title="Submit Rating"
+        message="Are you sure you want to confirm your rating in the statement? This action cannot be undone."
         @confirm="confirmSubmit"
         @cancel="cancelSubmit"
       />
@@ -136,7 +136,8 @@ const fetchSummary = async () => {
     // Fetch llm_summary from 'answers_posttest_denton' for this question
     const { data, error } = await supabase
       .from('answers_posttest_denton')
-      .select('llm_summary')
+      // .select('llm_summary')
+      .select('explanation') // GET USER EXPLANATION
       .eq('user_id', user.value.username)
       .eq('question_number', questionNumber)
       .maybeSingle(); // Use maybeSingle
@@ -148,7 +149,8 @@ const fetchSummary = async () => {
     }
 
     if (data && data.llm_summary) {
-      sentence.value = data.llm_summary;
+      // sentence.value = data.llm_summary; GET LLM SUMMARY <OLD CODE>
+      sentence.value = data.explanation; // GET LLM SUMMARY
     } else {
       console.error('No summary found for the user');
       alert('No summary found. Please try again.');
