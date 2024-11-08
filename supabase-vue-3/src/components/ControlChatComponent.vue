@@ -460,14 +460,14 @@ export default {
   flex-direction: column;
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0; /* Updated margin to bring content to top */
   font-family: Arial, sans-serif;
   background-color: white;
 }
 
 .survey-container {
   max-width: 800px;
-  margin: 10px auto;
+  margin: 0 auto 10px; /* Set margin-top to 0 */
   padding: 30px;
   background-color: #fff;
   border-radius: 8px;
@@ -519,7 +519,8 @@ export default {
 }
 
 .messages {
-  padding: 20px 20px 10px; /* Reduce padding to bring content closer to top */
+  padding: 20px 20px 10px; /* Adjusted padding */
+  padding-bottom: 100px; /* Added padding-bottom to allow for the input bar */
   background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
