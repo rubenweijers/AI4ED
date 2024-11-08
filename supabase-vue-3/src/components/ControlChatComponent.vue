@@ -4,7 +4,7 @@
     <div v-if="!questionAnswered">
       <!-- Ensure currentQuestion is loaded before rendering -->
       <div class="survey-container" v-if="currentQuestion">
-        <div class="survey-question">
+        <!-- <div class="survey-question"> -->
           <!-- Display the current question -->
           <div class="question-text">
             <p v-html="formatQuestionText(currentQuestion)"></p>
@@ -54,7 +54,7 @@
                 </span>
               </label>
             </div>
-          </div>
+          <!-- </div> -->
           <!-- Submit Answer Button -->
           <button @click="submitAnswer" :disabled="!selectedAnswer" class="submit-button">Submit Answer</button>
         </div>
