@@ -1,6 +1,6 @@
 <template>
   <div class="belief-rating-container">
-    <h2>Rate Your Belief</h2>
+    <h2>Check the Summary</h2>
     <p v-if="loading">Loading...</p>
     <template v-else>
       <p>We summarized your explanation into one sentence:</p>

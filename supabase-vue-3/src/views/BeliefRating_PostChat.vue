@@ -1,9 +1,9 @@
 <template>
   <div class="belief-rating-container">
-    <h2>Re-Rate Your Belief</h2>
+    <h2>Re-Check the summary</h2>
     <p v-if="loading">Loading...</p>
     <template v-else>
-      <p>Now that you've had a chance to converse with the AI, we'd like to revisit your initial statement:</p>
+      <p>Now that you've had a chance to converse with the AI, we'd like to revisit your thoughts on the original question: </p>
       <div class="sentence-block">
         "{{ sentence }}"
       </div>
