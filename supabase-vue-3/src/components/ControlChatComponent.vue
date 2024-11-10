@@ -222,14 +222,18 @@ export default {
   try {
     let controlQIndex = this.profileData.control_q;
 
+    // Check if control_q is null and initialize it to 0 if it is, then increment it
     if (controlQIndex === null || controlQIndex === undefined) {
-      controlQIndex = 1; // Assuming control questions start from question_number 1
+      controlQIndex = 0;
+    }
+      // Update control_q in the profile
+    controlQIndex += 1; // Move to the next question immediately
       // Update control_q in the profile
       await supabase
         .from('profiles_duplicate')
         .update({ control_q: controlQIndex })
         .eq('user_id', this.user.username);
-    }
+    
 
     // Fetch the control question based on controlQIndex
     const { data: questionData, error: questionError } = await supabase
