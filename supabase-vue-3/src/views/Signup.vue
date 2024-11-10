@@ -46,7 +46,9 @@ const generateRandomUser = (group) => {
     username: username,
     password: password,
     displayName: username,
-    group: group,
+    // you can change groups directly here
+    // group: "treatment",
+    group: "group",
   }
 }
 
