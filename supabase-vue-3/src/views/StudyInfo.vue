@@ -2,14 +2,14 @@
   <div v-if="loading">
     <p>Loading...</p>
   </div>
-  <div v-else-if="user">
+  <div v-else-if="user && profile">
     <div class="study-info-container">
       <!-- <h2>Study Information</h2> -->
 
       <button @click="logoutUser" class="logout-button">Logout</button>
 
-      <!-- Existing content -->
-      <StudyIntro />
+      <!-- Pass the profile as a prop -->
+      <StudyIntro :profile="profile" />
       <StudyInfo1 />
 
       <div class="consent-checkbox" :class="{ 'flash-red': isFlashing }">
@@ -47,6 +47,7 @@ import ToastNotification from '../components/ToastNotification.vue';
 const router = useRouter();
 const loading = ref(true);
 const user = ref(null);
+const profile = ref(null); // Define profile here
 const showToast = ref(false);
 const consentChecked = ref(false);
 
@@ -54,11 +55,29 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value", user.value);
+    console.log('user.value', user.value);
+    await fetchUserProfile(); // Fetch profile after getting user
+    loading.value = false; // Move loading to false after profile is fetched
   } else {
     router.push('/login'); // Redirect to login if no user is found
   }
-  loading.value = false;
+};
+
+const fetchUserProfile = async () => {
+  console.log('Fetching profile for user:', user.value);
+  // Adjust the query according to your Supabase setup
+  const { data, error } = await supabase
+    .from('profiles_duplicate')
+    .select('*')
+    .eq('user_id', user.value.username) // Ensure this matches your user data
+    .single();
+
+  if (error) {
+    console.error('Error fetching user profile:', error.message);
+  } else {
+    profile.value = data;
+    console.log('Fetched profile:', profile.value);
+  }
 };
 
 onMounted(() => {
@@ -82,13 +101,13 @@ const proceedToStudy = () => {
   showToast.value = false;
   const startTime = Date.now();
   localStorage.setItem('studyStartTime', startTime.toString());
-  localStorage.setItem('studyTotalDuration', (60 * 60).toString()); // 30 minutes in seconds
+  localStorage.setItem('studyTotalDuration', (60 * 60).toString()); // 60 minutes in seconds
   localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
   localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
   // Clear any previously saved answers before starting the study
   localStorage.removeItem('studyAnswers');
   localStorage.removeItem('studyAnswers2');
-  localStorage.setItem('controlChatData' , JSON.stringify([]));
+  localStorage.setItem('controlChatData', JSON.stringify([]));
   router.push('/survey');
 };
 
@@ -100,7 +119,7 @@ const cancelProceed = () => {
 const logoutUser = async () => {
   // Clear user data from localStorage
   localStorage.clear();
-  
+
   // Sign out from Supabase auth (if you're using Supabase authentication)
   const { error } = await supabase.auth.signOut();
   if (error) {

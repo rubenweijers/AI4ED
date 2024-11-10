@@ -1,6 +1,5 @@
 <template>
-  <div v-if="loading" class="loading-screen">Loading...</div>
-  <div v-else class="consent-info">
+  <div class="consent-info">
       <h1>Welcome to the AI4ED Project Study!</h1>
       <p>
           Thank you for considering participation in a research study on the use of artificial intelligence (AI) for 
@@ -36,12 +35,11 @@
         </div>
         <div v-else-if="profile && profile.group === 'control'">
           <!-- CONTROL GROUP -->
-          In the next part of the study, we ask you to explain your reasoning for a question you got wrong in the modified FCI.
-          After that, you will be quizzed a question on physics history. Following this is an interaction with an AI companion in a three-round dialogue about the history question. In each message,
-          the AI reviews your responses from the recent history question you just answered, and offers
-          explanations for those questions, similar to a peer study group.
-          This part lasts for 40 minutes, or until all wrongly answered questions from the FCI have been covered. 
-          Note that in each dialogue, you must complete the 3 rounds to advance - the AI may prompt you with a question directly, but if it doesn't, please ask it any followup questions you have or anything else you feel will be helpful for improving your understanding of the question at hand.
+          For the next 40 minutes, the AI companion will alternate between asking you to explain your reasoning for a question you answered incorrectly on the modified FCI and presenting you with a question on physics history. 
+          Each time you receive a physics history question, you will engage in three rounds of dialogue about that topic with the AI companion. 
+          In each message, the AI reviews your responses from the recent history question you just answered, and offers explanations for those questions, similar to a peer study group. 
+          The AI may prompt you with a question directly, but if it doesn't, please ask it any follow up questions you have or anything else you feel will be helpful for improving your understanding of the question at hand. 
+          Please do not discuss topics other than physics history with the AI.
         </div>
           <h3><strong>3. Post-Test and Feedback:</strong></h3> After the AI interactions, you will complete another FCI test
           to evaluate the AI’s impact on your understanding of Newtonian Mechanics. You will also be asked provide feedback to the study.
@@ -73,58 +71,15 @@
   </div>
 </template>
   
-<script>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { supabase } from '../supabase';
+<script setup>
+import { defineProps } from 'vue';
 
-const user = ref(null);
-const profile = ref(null);
-const loading = ref(true);
-const router = useRouter();
-
-// Function to check if the user is logged in and fetch profile
-const checkUser = async () => {
-  const userData = localStorage.getItem('user');
-  if (userData) {
-    user.value = JSON.parse(userData);
-    console.log("user.value", user.value);
-    await fetchUserProfile();
-  } else {
-    router.push('/login');
-  }
-};
-
-// Function to fetch the user's profile from Supabase
-const fetchUserProfile = async () => {
-  const { data, error } = await supabase
-    .from('profiles_duplicate')
-    .select('*')
-    .eq('user_id', user.value.username)
-    .single();
-
-  if (error) {
-    console.error('Error fetching user profile:', error.message);
-  } else {
-    profile.value = data;
-  }
-};
-
-// Fetch the user and profile on component mount
-onMounted(async () => {
-  await checkUser();
-  loading.value = false; // Set loading to false once data is fetched
-});
-
-export default {
-  setup() {
-    return {
-      user,
-      profile,
-      loading,
-    };
+const props = defineProps({
+  profile: {
+    type: Object,
+    required: true,
   },
-};
+});
 </script>
   
 <style scoped>
