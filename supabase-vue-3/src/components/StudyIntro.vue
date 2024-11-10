@@ -1,5 +1,6 @@
 <template>
-  <div class="consent-info">
+  <div v-if="loading" class="loading-screen">Loading...</div>
+  <div v-else class="consent-info">
       <h1>Welcome to the AI4ED Project Study!</h1>
       <p>
           Thank you for considering participation in a research study on the use of artificial intelligence (AI) for 
@@ -30,7 +31,7 @@
           After that, you will interact with an AI companion in a three-round dialogue. In each message,
           the AI reviews your responses from the modified FCI questionnaire you took, and offers
           explanations for those questions, similar to a peer study group. The AI companion will only talk to you about questions you got wrong. 
-          This part lasts for 30 minutes, or until all wrongly answered questions have been discussed. 
+          This part lasts for 40 minutes, or until all wrongly answered questions have been discussed. 
           Note that in each dialogue, you must complete the 3 rounds to advance - the AI may prompt you with a question directly, but if it doesn't, please ask it any followup questions you have or anything else you feel will be helpful for improving your understanding of the question at hand.
         </div>
         <div v-else-if="profile && profile.group === 'control'">
@@ -39,7 +40,7 @@
           After that, you will be quizzed a question on physics history. Following this is an interaction with an AI companion in a three-round dialogue about the history question. In each message,
           the AI reviews your responses from the recent history question you just answered, and offers
           explanations for those questions, similar to a peer study group.
-          This part lasts for 30 minutes, or until all wrongly answered questions from the FCI have been covered. 
+          This part lasts for 40 minutes, or until all wrongly answered questions from the FCI have been covered. 
           Note that in each dialogue, you must complete the 3 rounds to advance - the AI may prompt you with a question directly, but if it doesn't, please ask it any followup questions you have or anything else you feel will be helpful for improving your understanding of the question at hand.
         </div>
           <h3><strong>3. Post-Test and Feedback:</strong></h3> After the AI interactions, you will complete another FCI test
@@ -79,6 +80,7 @@ import { supabase } from '../supabase';
 
 const user = ref(null);
 const profile = ref(null);
+const loading = ref(true);
 const router = useRouter();
 
 // Function to check if the user is logged in and fetch profile
@@ -111,7 +113,18 @@ const fetchUserProfile = async () => {
 // Fetch the user and profile on component mount
 onMounted(async () => {
   await checkUser();
+  loading.value = false; // Set loading to false once data is fetched
 });
+
+export default {
+  setup() {
+    return {
+      user,
+      profile,
+      loading,
+    };
+  },
+};
 </script>
   
 <style scoped>
