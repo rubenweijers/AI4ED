@@ -278,7 +278,7 @@ const submitExplanation = async () => {
     submissionSuccess.value = true;
 
     // Navigate to ControlChatComponent.vue
-    await router.push('/controlchatcomponent');
+    await router.push('/chats');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
