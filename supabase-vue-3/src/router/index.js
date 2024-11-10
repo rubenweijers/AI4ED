@@ -17,6 +17,7 @@ import FCI_Answers from '../views/FCI_Answers.vue'
 import Study from '../views/Study.vue'
 import Feedback from '../views/Feedback.vue'
 import Chats from '../views/Chats.vue'
+import TestPost from '../views/TestPost.vue'
 
 const routes = [
   {
@@ -68,6 +69,11 @@ const routes = [
     path: '/posttest',
     name: 'PostTest',
     component: PostTest
+  },
+  {
+    path: '/testpost',
+    name: 'TestPost',
+    component: TestPost
   },
   {
     path: '/beliefrating',

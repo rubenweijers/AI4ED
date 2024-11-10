@@ -185,7 +185,7 @@ const fetchUserProfile = async () => {
 
     // Check if the user is in the "treatment" or "control" group and set the route accordingly
     if (profile.value.group === 'control') {
-      profile.value.routePath = '/PostTest';
+      profile.value.routePath = '/TestPost';
     } else if (profile.value.group === 'treatment') {
       profile.value.routePath = '/PostTest';
     }
@@ -351,7 +351,7 @@ const submitAnswers = async () => {
     // Reset the timer to 30 minutes
     const newStartTime = Date.now();
     localStorage.setItem('studyStartTime', newStartTime);
-    localStorage.setItem('studyTotalDuration', (240 * 60).toString()); // Set total duration to 30 minutes in seconds
+    localStorage.setItem('studyTotalDuration', (40 * 60).toString()); // Set total duration to 35 minutes in seconds
     localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
     localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 

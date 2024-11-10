@@ -174,8 +174,8 @@ export default {
                 const remainingTime = this.getRemainingTime();
                 if (remainingTime <= 0) {
                     clearInterval(this.timerWatcherInterval);
-                    // alert('Your study time has ended. Moving to the next section.');
-                    // this.$router.push('/studyoriginalfci'); // Redirect to the next study phase
+                    alert('Your study time has ended. Moving to the next section.');
+                    this.$router.push('/studyoriginalfci'); // Redirect to the next study phase
                 }
             }, 1000);
         },

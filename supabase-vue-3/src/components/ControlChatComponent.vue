@@ -165,23 +165,18 @@ export default {
       remainingRounds: 3,
       user: null,
       profileData: null,
-      questions: [],
-      currentQuestionIndex: 0,
       currentQuestion: null,
       selectedAnswer: '',
       questionAnswered: false,
       optionLabels: ["A", "B", "C", "D", "E"],
-      questionsWithLabels: [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18],
       timerWatcherInterval: null,
-      answeredQuestions: new Set(), // Added this line
     };
   },
   async mounted() {
     try {
       await this.loadUserData();
-      await this.loadQuestions();
-      await this.loadUserAnswers(); // Load user's previous answers
-      this.setNextUnansweredQuestion(); // Set to next unanswered question
+      // Load the control question (history question)
+      await this.loadCurrentQuestion();
       this.startTimer();
     } catch (error) {
       console.error('Error during component mounting:', error);
@@ -205,12 +200,12 @@ export default {
       this.user = JSON.parse(userData);
       console.log('User data:', this.user);
 
-      // Fetch user profile from profiles_duplicate using display_name
+      // Fetch user profile from profiles_duplicate
       const { data: profileData, error: profileError } = await supabase
         .from('profiles_duplicate')
         .select('*')
-        .eq('display_name', this.user.username)
-        .maybeSingle();
+        .eq('user_id', this.user.username)
+        .single();
 
       if (profileError) {
         console.error(`Error fetching profile data: ${profileError.message}`);
@@ -223,54 +218,21 @@ export default {
       console.log('Fetched profileData:', profileData);
       this.profileData = profileData;
     },
-    // Load questions from Supabase
-    async loadQuestions() {
-      const { data: questionsData, error } = await supabase
-        .from('questions_control')
-        .select('*')
-        .order('question_number', { ascending: true });
+    // Load the current control question
+    async loadCurrentQuestion() {
+      // For control questions, you can use a fixed set or generate them dynamically
+      // For simplicity, we'll use a single control question here
 
-      if (error) {
-        console.error('Error fetching questions:', error);
-        return;
-      }
-
-      this.questions = questionsData;
-      if (this.questions.length > 0) {
-        // this.currentQuestion = this.questions[this.currentQuestionIndex];
-        // We will set currentQuestion in setNextUnansweredQuestion()
-      } else {
-        console.error('No questions found in questions_control table');
-      }
-    },
-    // Load user's previous answers
-    async loadUserAnswers() {
-      // Fetch the answers from 'answers_control' table for the current user
-      const { data: answersData, error } = await supabase
-        .from('answers_control')
-        .select('*')
-        .eq('user_id', this.user.username);
-
-      if (error) {
-        console.error('Error fetching user answers:', error);
-        return;
-      }
-
-      // Store the question_numbers of the answered questions
-      this.answeredQuestions = new Set(answersData.map(answer => answer.question_number));
-    },
-    // Determine the next unanswered question
-    setNextUnansweredQuestion(startIndex = 0) {
-      for (let i = startIndex; i < this.questions.length; i++) {
-        if (!this.answeredQuestions.has(this.questions[i].question_number)) {
-          this.currentQuestionIndex = i;
-          this.currentQuestion = this.questions[this.currentQuestionIndex];
-          return;
-        }
-      }
-      // If all questions have been answered
-      // alert('You have completed all the questions.');
-      this.$router.push('/studyoriginalfci');
+      // Set your control question here
+      this.currentQuestion = {
+        question_text: 'What is the capital of France?',
+        option_1: 'Berlin',
+        option_2: 'Madrid',
+        option_3: 'Paris',
+        option_4: 'Rome',
+        correct_answer: 'Paris',
+        question_number: 1,
+      };
     },
     // Start the timer
     startTimer() {
@@ -278,7 +240,8 @@ export default {
         const remainingTime = this.getRemainingTime();
         if (remainingTime <= 0) {
           clearInterval(this.timerWatcherInterval);
-          alert('Your study time has ended. Moving to the next section.');
+          // Optionally, show an alert or notification
+          // alert('Your study time has ended. Moving to the next section.');
           this.$router.push('/studyoriginalfci'); // Redirect to the next study phase
         }
       }, 1000);
@@ -310,10 +273,16 @@ export default {
     },
     // Determine if labels should be displayed for a question
     shouldDisplayLabels(questionNumber) {
-      return this.questionsWithLabels.includes(questionNumber);
+      // Adjust as needed
+      return true;
     },
     // Submit the selected answer
     async submitAnswer() {
+      if (!this.selectedAnswer) {
+        alert('Please select an answer before submitting.');
+        return;
+      }
+
       // Save the answer to answers_control table
       const { error } = await supabase.from('answers_control').insert({
         user_id: this.user.username,
@@ -327,35 +296,23 @@ export default {
         return;
       }
 
-      // Add current question to answeredQuestions
-      this.answeredQuestions.add(this.currentQuestion.question_number);
-
       // Include the answer_explanation and correct_answer in the system prompt
-      const { answer_explanation, correct_answer } = this.currentQuestion;
+      const answer_explanation = 'Paris is the capital of France.';
+      const { correct_answer } = this.currentQuestion;
 
-      // Format the correct answer with label if labels are used
-      let correctAnswerText = correct_answer;
-      if (this.shouldDisplayLabels(this.currentQuestion.question_number)) {
-        const correctIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(correct_answer);
-        const options = this.getOptions(this.currentQuestion);
-        if (correctIndex >= 0 && correctIndex < options.length) {
-          correctAnswerText = `${correct_answer}. ${options[correctIndex]}`;
-        }
-      }
-
-      // Set up the system prompt including the question and user's answer
+      // Set up the system prompt
       this.systemPrompt = `You are a helpful assistant. Please have a three-round dialogue with the user regarding their answer to the following question:
 
-      "${this.formatQuestionText(this.currentQuestion)}"
+"${this.formatQuestionText(this.currentQuestion)}"
 
-      Options:
-      ${this.getFormattedOptions(this.currentQuestion)}
+Options:
+${this.getFormattedOptions(this.currentQuestion)}
 
-      ------End of Question Statement------
+------End of Question Statement------
 
-      The user's answer was: "${this.selectedAnswer}". The correct answer is: "${correctAnswerText}". Here is an explanation for the correct answer: "${answer_explanation}". 
+The user's answer was: "${this.selectedAnswer}". The correct answer is: "${correct_answer}". Here is an explanation for the correct answer: "${answer_explanation}". 
 
-      Your goal is to inform the user of the correct answer as well as provide additional relevant information. Ask them their reasoning for choosing that question and discuss their answer. Use simple, clear language that an average person will be able to follow, and structure the conversation so they gain new knowledge on the topic at each step. At the end of each message, provide additional questions on the topic to spur further discussion and increase the knowledge of the topic for the user. `;
+Your goal is to inform the user of the correct answer as well as provide additional relevant information. Ask them their reasoning for choosing that option and discuss their answer. Use simple, clear language that an average person will be able to follow, and structure the conversation so they gain new knowledge on the topic at each step. At the end of each message, provide additional questions on the topic to spur further discussion and increase the knowledge of the topic for the user. `;
 
       this.remainingRounds = 3;
       this.messages = [];
@@ -368,7 +325,7 @@ export default {
     async generateInitialAIMessage() {
       this.loading = true;
       const apiData = {
-        model: 'gpt-4o',
+        model: 'gpt-3.5-turbo',
         messages: [
           { role: 'system', content: this.systemPrompt },
           {
@@ -408,7 +365,7 @@ export default {
       this.remainingRounds--;
 
       const apiData = {
-        model: 'gpt-4o',
+        model: 'gpt-3.5-turbo',
         messages: [{ role: 'system', content: this.systemPrompt }, ...this.messages],
         max_tokens: 2000,
         temperature: 0.7,
@@ -452,17 +409,51 @@ export default {
     isChatFinished() {
       return this.remainingRounds <= 0;
     },
-    // Proceed to the next question
-    nextQuestion() {
-      this.setNextUnansweredQuestion(this.currentQuestionIndex + 1);
-      if (this.currentQuestion) {
-        // Reset variables
-        this.selectedAnswer = '';
-        this.questionAnswered = false;
-        this.userMessage = '';
-        this.messages = [];
-        // Scroll to top when moving to the next question
-        window.scrollTo(0, 0);
+    // Proceed to the next question or next phase
+    nextQuestion: async function() {
+      try {
+        // Fetch profile data to get question queue and current index
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles_duplicate')
+          .select('*')
+          .eq('user_id', this.user.username)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching user profile:', profileError.message);
+          alert('An error occurred while fetching your data. Please try again.');
+          return;
+        }
+
+        const questionQueue = profileData.question_queue;
+        const currentQuestionIndex = profileData.current_question_index || 0;
+
+        // Increment current_question_index
+        const updatedIndex = currentQuestionIndex + 1;
+
+        // Update current_question_index in profiles_duplicate
+        const { error: updateError } = await supabase
+          .from('profiles_duplicate')
+          .update({ current_question_index: updatedIndex })
+          .eq('user_id', this.user.username);
+
+        if (updateError) {
+          console.error('Error updating current_question_index:', updateError.message);
+          alert('An error occurred while updating your progress. Please try again.');
+          return;
+        }
+
+        // Check if there are more questions
+        if (updatedIndex < questionQueue.length) {
+          // More questions to process
+          this.$router.push('/testpost');
+        } else {
+          // All questions completed
+          this.$router.push('/studyoriginalfci'); // Redirect to next phase
+        }
+      } catch (error) {
+        console.error('An unexpected error occurred:', error);
+        alert('An unexpected error occurred. Please try again.');
       }
     },
     // Format options for displaying in the prompt
