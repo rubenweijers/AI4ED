@@ -218,21 +218,51 @@ export default {
       console.log('Fetched profileData:', profileData);
       this.profileData = profileData;
     },
-    // Load the current control question
+    // Load the current control question from 'questions_control' table
     async loadCurrentQuestion() {
-      // For control questions, you can use a fixed set or generate them dynamically
-      // For simplicity, we'll use a single control question here
+      try {
+        let controlQIndex = this.profileData.control_q;
 
-      // Set your control question here
-      this.currentQuestion = {
-        question_text: 'What is the capital of France?',
-        option_1: 'Berlin',
-        option_2: 'Madrid',
-        option_3: 'Paris',
-        option_4: 'Rome',
-        correct_answer: 'Paris',
-        question_number: 1,
-      };
+        if (controlQIndex === null || controlQIndex === undefined) {
+          controlQIndex = 0; // Start from 0 if control_q is null or undefined
+        }
+
+        // Fetch the total number of questions in 'questions_control'
+        const { data: totalQuestionsData, error: countError } = await supabase
+          .from('questions_control')
+          .select('question_number');
+
+        if (countError) {
+          console.error('Error fetching total questions:', countError.message);
+          throw new Error('Error fetching total questions');
+        }
+
+        const totalQuestions = totalQuestionsData.length;
+
+        if (controlQIndex >= totalQuestions) {
+          // No more control questions, proceed to next phase
+          this.$router.push('/testpost');
+          return;
+        }
+
+        // Fetch the control question based on controlQIndex
+        const { data: questionData, error: questionError } = await supabase
+          .from('questions_control')
+          .select('*')
+          .eq('question_number', controlQIndex + 1) // Assuming question_number starts from 1
+          .single();
+
+        if (questionError) {
+          console.error('Error fetching control question:', questionError.message);
+          throw new Error('Error fetching control question');
+        }
+
+        this.currentQuestion = questionData;
+        console.log('Loaded control question:', this.currentQuestion);
+      } catch (error) {
+        console.error('Error loading current control question:', error);
+        alert('An error occurred while loading the control question. Please try again.');
+      }
     },
     // Start the timer
     startTimer() {
@@ -297,8 +327,7 @@ export default {
       }
 
       // Include the answer_explanation and correct_answer in the system prompt
-      const answer_explanation = 'Paris is the capital of France.';
-      const { correct_answer } = this.currentQuestion;
+      const { correct_answer, answer_explanation } = this.currentQuestion;
 
       // Set up the system prompt
       this.systemPrompt = `You are a helpful assistant. Please have a three-round dialogue with the user regarding their answer to the following question:
@@ -412,44 +441,99 @@ Your goal is to inform the user of the correct answer as well as provide additio
     // Proceed to the next question or next phase
     nextQuestion: async function() {
       try {
-        // Fetch profile data to get question queue and current index
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles_duplicate')
-          .select('*')
-          .eq('user_id', this.user.username)
-          .single();
+        // Increment control_q
+        let controlQIndex = this.profileData.control_q;
 
-        if (profileError) {
-          console.error('Error fetching user profile:', profileError.message);
-          alert('An error occurred while fetching your data. Please try again.');
-          return;
+        if (controlQIndex === null || controlQIndex === undefined) {
+          controlQIndex = 0;
         }
 
-        const questionQueue = profileData.question_queue;
-        const currentQuestionIndex = profileData.current_question_index || 0;
+        const updatedControlQIndex = controlQIndex + 1;
 
-        // Increment current_question_index
-        const updatedIndex = currentQuestionIndex + 1;
-
-        // Update current_question_index in profiles_duplicate
+        // Update control_q in profiles_duplicate
         const { error: updateError } = await supabase
           .from('profiles_duplicate')
-          .update({ current_question_index: updatedIndex })
+          .update({ control_q: updatedControlQIndex })
           .eq('user_id', this.user.username);
 
         if (updateError) {
-          console.error('Error updating current_question_index:', updateError.message);
+          console.error('Error updating control_q:', updateError.message);
           alert('An error occurred while updating your progress. Please try again.');
           return;
         }
 
-        // Check if there are more questions
-        if (updatedIndex < questionQueue.length) {
-          // More questions to process
-          this.$router.push('/testpost');
+        // Fetch the total number of questions in 'questions_control'
+        const { data: totalQuestionsData, error: countError } = await supabase
+          .from('questions_control')
+          .select('question_number');
+
+        if (countError) {
+          console.error('Error fetching total questions:', countError.message);
+          throw new Error('Error fetching total questions');
+        }
+
+        const totalQuestions = totalQuestionsData.length;
+
+        // Check if there are more control questions
+        if (updatedControlQIndex < totalQuestions) {
+          // Update profileData
+          this.profileData.control_q = updatedControlQIndex;
+
+          // Load the next control question
+          await this.loadCurrentQuestion();
+
+          // Reset variables for the new question
+          this.selectedAnswer = '';
+          this.questionAnswered = false;
+          this.userMessage = '';
+          this.messages = [];
+          this.remainingRounds = 3;
+
+          // Scroll to top when moving to the next question
+          window.scrollTo(0, 0);
         } else {
-          // All questions completed
-          this.$router.push('/studyoriginalfci'); // Redirect to next phase
+          // All control questions completed
+          // Now proceed to increment current_question_index
+
+          // Fetch profile data again to get the latest current_question_index
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles_duplicate')
+            .select('*')
+            .eq('user_id', this.user.username)
+            .single();
+
+          if (profileError) {
+            console.error('Error fetching user profile:', profileError.message);
+            alert('An error occurred while fetching your data. Please try again.');
+            return;
+          }
+
+          const questionQueue = profileData.question_queue;
+          const currentQuestionIndex = profileData.current_question_index || 0;
+
+          // Increment current_question_index
+          const updatedIndex = currentQuestionIndex + 1;
+
+          // Update current_question_index in profiles_duplicate and reset control_q to 0 or null
+          const { error: updateError2 } = await supabase
+            .from('profiles_duplicate')
+            .update({ current_question_index: updatedIndex, control_q: null }) // Reset control_q
+            .eq('user_id', this.user.username);
+
+          if (updateError2) {
+            console.error('Error updating current_question_index:', updateError2.message);
+            alert('An error occurred while updating your progress. Please try again.');
+            return;
+          }
+
+          // Check if there are more FCI questions
+          if (updatedIndex < questionQueue.length) {
+            // More FCI questions to process
+            this.$router.push('/testpost');
+          } else {
+            // All FCI questions completed
+            this.$router.push('/studyoriginalfci'); // Redirect to next phase
+          }
         }
       } catch (error) {
         console.error('An unexpected error occurred:', error);
