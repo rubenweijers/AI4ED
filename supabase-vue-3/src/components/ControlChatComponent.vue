@@ -423,80 +423,66 @@ Your goal is to inform the user of the correct answer as well as provide additio
     },
     // Proceed to the next question or next phase
     nextQuestion: async function() {
-      try {
-        // Fetch total number of control questions
-        const { data: totalQuestionsData, error: countError } = await supabase
-          .from('questions_control')
-          .select('question_number');
+  try {
+    // Reset control_q to null
+    const { error: resetError } = await supabase
+      .from('profiles_duplicate')
+      .update({ control_q: null })
+      .eq('user_id', this.user.username);
 
-        if (countError) {
-          console.error('Error fetching total questions:', countError.message);
-          throw new Error('Error fetching total questions');
-        }
+    if (resetError) {
+      console.error('Error resetting control_q:', resetError.message);
+      alert('An error occurred while updating your progress. Please try again.');
+      return;
+    }
 
-        const totalQuestions = totalQuestionsData.length;
+    // Fetch profile data to get the latest current_question_index
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles_duplicate')
+      .select('*')
+      .eq('user_id', this.user.username)
+      .single();
 
-        // Get current control_q index
-        let controlQIndex = this.profileData.control_q;
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError.message);
+      alert('An error occurred while fetching your data. Please try again.');
+      return;
+    }
 
-        if (controlQIndex === null || controlQIndex === undefined) {
-          controlQIndex = 0; // Start from question number 0
-        }
+    const questionQueue = profileData.question_queue;
+    const currentQuestionIndex = profileData.current_question_index || 0;
 
-        // **Increment control_q before updating**
-        controlQIndex += 1;
+    // Increment current_question_index
+    const updatedIndex = currentQuestionIndex + 1;
 
-        // **Check if there are more control questions**
-        if (controlQIndex < totalQuestions) {
-          // **Update control_q in profiles_duplicate**
-          const { error: updateError } = await supabase
-            .from('profiles_duplicate')
-            .update({ control_q: controlQIndex })
-            .eq('user_id', this.user.username);
+    // Update current_question_index in profiles_duplicate
+    const { error: updateError } = await supabase
+      .from('profiles_duplicate')
+      .update({ current_question_index: updatedIndex })
+      .eq('user_id', this.user.username);
 
-          if (updateError) {
-            console.error('Error updating control_q:', updateError.message);
-            alert('An error occurred while updating your progress. Please try again.');
-            return;
-          }
+    if (updateError) {
+      console.error('Error updating current_question_index:', updateError.message);
+      alert('An error occurred while updating your progress. Please try again.');
+      return;
+    }
 
-          // **Update local profileData**
-          this.profileData.control_q = controlQIndex;
+    // Fetch updated profile data
+    this.profileData.current_question_index = updatedIndex;
 
-          // **Load the next control question**
-          await this.loadCurrentQuestion();
-
-          // **Reset variables for the new question**
-          this.selectedAnswer = '';
-          this.questionAnswered = false;
-          this.userMessage = '';
-          this.messages = [];
-          this.remainingRounds = 3;
-
-          // **Scroll to top when moving to the next question**
-          window.scrollTo(0, 0);
-        } else {
-          // **All control questions completed**
-          // **Reset control_q to null**
-          const { error: resetError } = await supabase
-            .from('profiles_duplicate')
-            .update({ control_q: null })
-            .eq('user_id', this.user.username);
-
-          if (resetError) {
-            console.error('Error resetting control_q:', resetError.message);
-            alert('An error occurred while updating your progress. Please try again.');
-            return;
-          }
-
-          // **Route back to TestPost.vue**
-          this.$router.push('/testpost');
-        }
-      } catch (error) {
-        console.error('An unexpected error occurred:', error);
-        alert('An unexpected error occurred. Please try again.');
-      }
-    },
+    // Check if there are more FCI questions
+    if (updatedIndex < questionQueue.length) {
+      // More FCI questions to process
+      this.$router.push('/testpost');
+    } else {
+      // All FCI questions completed
+      this.$router.push('/studyoriginalfci'); // Redirect to the next phase
+    }
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+    alert('An unexpected error occurred. Please try again.');
+  }
+},
 
     // Method to reset chat state
     resetChat() {
