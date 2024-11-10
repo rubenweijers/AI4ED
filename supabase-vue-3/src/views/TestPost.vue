@@ -254,12 +254,14 @@ const checkValid = () => {
 
 const submitExplanation = async () => {
   try {
+    // Prepare the data to upsert
     const upsertData = {
       user_id: user.value.username,
       question_number: incorrectQuestion.value.question_number,
       explanation: explanation.value,
     };
 
+    // Perform the upsert operation
     const { error } = await supabase
       .from('answers_posttest_denton')
       .upsert(upsertData, { onConflict: 'user_id,question_number', returning: 'minimal' });
@@ -269,30 +271,12 @@ const submitExplanation = async () => {
       return;
     }
 
-    // Update the current_question_index in profiles_duplicate
-    const updatedIndex = (profile.value.current_question_index || 0) + 1;
-
-    const { error: profileUpdateError } = await supabase
-      .from('profiles_duplicate')
-      .update({ current_question_index: updatedIndex })
-      .eq('user_id', user.value.username);
-
-    if (profileUpdateError) {
-      console.error('Error updating current_question_index:', profileUpdateError.message);
-    } else {
-      profile.value.current_question_index = updatedIndex;
-    }
+    // Do not increment current_question_index here
 
     submissionSuccess.value = true;
 
-    // Check if there are more questions left
-    if (updatedIndex < profile.value.question_queue.length) {
-      // Route back to /chats for the next incorrect question
-      await router.push('/chats');
-    } else {
-      // All questions answered, route to /studyoriginalfci
-      await router.push('/studyoriginalfci');
-    }
+    // Always route to ControlChatComponent.vue
+    await router.push('/chats'); // Adjust the route as necessary
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
