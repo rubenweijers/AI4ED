@@ -219,21 +219,25 @@ export default {
     },
     // Load the current control question from 'questions_control' table
     async loadCurrentQuestion() {
-  try {
-    let controlQIndex = this.profileData.control_q;
+      try {
+        let controlQIndex = this.profileData.control_q;
 
-    // Check if control_q is null and initialize it to 0 if it is, then increment it
-    if (controlQIndex === null || controlQIndex === undefined) {
-      controlQIndex = 0;
-    }
-      // Update control_q in the profile
-    controlQIndex += 1; // Move to the next question immediately
-      // Update control_q in the profile
-      await supabase
-        .from('profiles_duplicate')
-        .update({ control_q: controlQIndex })
-        .eq('user_id', this.user.username);
-    
+        if (controlQIndex === null || controlQIndex === undefined) {
+          // If control_q is null or undefined, set to 1 and update by 2 (to move past the first question)
+          controlQIndex = 1;
+          await supabase
+            .from('profiles_duplicate')
+            .update({ control_q: controlQIndex + 1 })
+            .eq('user_id', this.user.username);
+          controlQIndex += 2; // So that we start at question 2
+        } else {
+          // If control_q already has a value, increment by 1 to move to the next question
+          controlQIndex += 1;
+          await supabase
+            .from('profiles_duplicate')
+            .update({ control_q: controlQIndex })
+            .eq('user_id', this.user.username);
+        }
 
     // Fetch the control question based on controlQIndex
     const { data: questionData, error: questionError } = await supabase
