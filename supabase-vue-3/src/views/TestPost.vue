@@ -274,6 +274,23 @@ const submitExplanation = async () => {
       return;
     }
 
+    // Increment current_question_index
+    const updatedIndex = (profile.value.current_question_index || 0) + 1;
+
+    // Update current_question_index in profiles_duplicate
+    const { error: profileUpdateError } = await supabase
+      .from('profiles_duplicate')
+      .update({
+        current_question_index: updatedIndex,
+      })
+      .eq('user_id', user.value.username);
+
+    if (profileUpdateError) {
+      console.error('Error updating current_question_index:', profileUpdateError.message);
+    } else {
+      profile.value.current_question_index = updatedIndex;
+    }
+
     // Display submission success notification
     submissionSuccess.value = true;
 
