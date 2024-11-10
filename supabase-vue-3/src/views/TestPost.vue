@@ -167,17 +167,17 @@ const fetchIncorrectQuestion = async () => {
     const currentIndex = profile.value.current_question_index || 0;
     const questionQueue = profile.value.question_queue;
 
+    // Ensure currentIndex is within bounds of the question queue
     if (currentIndex >= questionQueue.length) {
-      // No more questions to display
+      // No more questions to display, route to final section
       incorrectQuestion.value = null;
-      // Route to the next section
       router.push('/studyoriginalfci');
       return;
     }
 
     const nextQuestionNumber = questionQueue[currentIndex];
 
-    // Fetch the question from 'questions_denton' table
+    // Fetch the question data
     const { data: questionData, error: questionError } = await supabase
       .from('questions_denton')
       .select('*')
@@ -191,7 +191,7 @@ const fetchIncorrectQuestion = async () => {
 
     incorrectQuestion.value = questionData;
 
-    // Fetch user's answer from 'answers_denton' table
+    // Fetch user's previous answer
     const { data: userAnswerData, error: userAnswerError } = await supabase
       .from('answers_denton')
       .select('answer')
@@ -204,7 +204,7 @@ const fetchIncorrectQuestion = async () => {
       return;
     }
 
-    userAnswer.value = userAnswerData.answer || '';
+    userAnswer.value = userAnswerData ? userAnswerData.answer : '';
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
@@ -254,35 +254,27 @@ const checkValid = () => {
 
 const submitExplanation = async () => {
   try {
-    // Prepare the data to upsert
     const upsertData = {
       user_id: user.value.username,
       question_number: incorrectQuestion.value.question_number,
       explanation: explanation.value,
     };
 
-    // Perform the upsert operation
     const { error } = await supabase
       .from('answers_posttest_denton')
-      .upsert(upsertData, { 
-        onConflict: 'user_id,question_number',
-        returning: 'minimal' 
-      });
+      .upsert(upsertData, { onConflict: 'user_id,question_number', returning: 'minimal' });
 
     if (error) {
       console.error('Error submitting explanation:', error.message);
       return;
     }
 
-    // Increment current_question_index
+    // Update the current_question_index in profiles_duplicate
     const updatedIndex = (profile.value.current_question_index || 0) + 1;
 
-    // Update current_question_index in profiles_duplicate
     const { error: profileUpdateError } = await supabase
       .from('profiles_duplicate')
-      .update({
-        current_question_index: updatedIndex,
-      })
+      .update({ current_question_index: updatedIndex })
       .eq('user_id', user.value.username);
 
     if (profileUpdateError) {
@@ -291,11 +283,16 @@ const submitExplanation = async () => {
       profile.value.current_question_index = updatedIndex;
     }
 
-    // Display submission success notification
     submissionSuccess.value = true;
 
-    // Navigate to ControlChatComponent.vue
-    await router.push('/chats');
+    // Check if there are more questions left
+    if (updatedIndex < profile.value.question_queue.length) {
+      // Route back to /chats for the next incorrect question
+      await router.push('/chats');
+    } else {
+      // All questions answered, route to /studyoriginalfci
+      await router.push('/studyoriginalfci');
+    }
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
