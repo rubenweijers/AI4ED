@@ -175,7 +175,6 @@ export default {
   async mounted() {
     try {
       await this.loadUserData();
-      // Load the control question (history question)
       await this.loadCurrentQuestion();
       this.startTimer();
     } catch (error) {
@@ -224,32 +223,14 @@ export default {
         let controlQIndex = this.profileData.control_q;
 
         if (controlQIndex === null || controlQIndex === undefined) {
-          controlQIndex = 0; // Start from 0 if control_q is null or undefined
-        }
-
-        // Fetch the total number of questions in 'questions_control'
-        const { data: totalQuestionsData, error: countError } = await supabase
-          .from('questions_control')
-          .select('question_number');
-
-        if (countError) {
-          console.error('Error fetching total questions:', countError.message);
-          throw new Error('Error fetching total questions');
-        }
-
-        const totalQuestions = totalQuestionsData.length;
-
-        if (controlQIndex >= totalQuestions) {
-          // No more control questions, proceed to next phase
-          this.$router.push('/testpost');
-          return;
+          controlQIndex = 1; // Start from question number 1 if control_q is null or undefined
         }
 
         // Fetch the control question based on controlQIndex
         const { data: questionData, error: questionError } = await supabase
           .from('questions_control')
           .select('*')
-          .eq('question_number', controlQIndex + 1) // Assuming question_number starts from 1
+          .eq('question_number', controlQIndex)
           .single();
 
         if (questionError) {
@@ -270,9 +251,7 @@ export default {
         const remainingTime = this.getRemainingTime();
         if (remainingTime <= 0) {
           clearInterval(this.timerWatcherInterval);
-          // Optionally, show an alert or notification
-          // alert('Your study time has ended. Moving to the next section.');
-          this.$router.push('/studyoriginalfci'); // Redirect to the next study phase
+          this.$router.push('/studyoriginalfci');
         }
       }, 1000);
     },
@@ -303,7 +282,6 @@ export default {
     },
     // Determine if labels should be displayed for a question
     shouldDisplayLabels(questionNumber) {
-      // Adjust as needed
       return true;
     },
     // Submit the selected answer
@@ -354,7 +332,7 @@ Your goal is to inform the user of the correct answer as well as provide additio
     async generateInitialAIMessage() {
       this.loading = true;
       const apiData = {
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: this.systemPrompt },
           {
@@ -394,7 +372,7 @@ Your goal is to inform the user of the correct answer as well as provide additio
       this.remainingRounds--;
 
       const apiData = {
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o',
         messages: [{ role: 'system', content: this.systemPrompt }, ...this.messages],
         max_tokens: 2000,
         temperature: 0.7,
@@ -441,28 +419,7 @@ Your goal is to inform the user of the correct answer as well as provide additio
     // Proceed to the next question or next phase
     nextQuestion: async function() {
       try {
-        // Increment control_q
-        let controlQIndex = this.profileData.control_q;
-
-        if (controlQIndex === null || controlQIndex === undefined) {
-          controlQIndex = 0;
-        }
-
-        const updatedControlQIndex = controlQIndex + 1;
-
-        // Update control_q in profiles_duplicate
-        const { error: updateError } = await supabase
-          .from('profiles_duplicate')
-          .update({ control_q: updatedControlQIndex })
-          .eq('user_id', this.user.username);
-
-        if (updateError) {
-          console.error('Error updating control_q:', updateError.message);
-          alert('An error occurred while updating your progress. Please try again.');
-          return;
-        }
-
-        // Fetch the total number of questions in 'questions_control'
+        // Fetch total number of control questions
         const { data: totalQuestionsData, error: countError } = await supabase
           .from('questions_control')
           .select('question_number');
@@ -474,10 +431,34 @@ Your goal is to inform the user of the correct answer as well as provide additio
 
         const totalQuestions = totalQuestionsData.length;
 
+        // Get current control_q index
+        let controlQIndex = this.profileData.control_q;
+
+        if (controlQIndex === null || controlQIndex === undefined) {
+          controlQIndex = 1; // Start from question number 1 if control_q is null or undefined
+        } else {
+          controlQIndex += 1; // Increment control_q
+        }
+
+        console.log('Next controlQIndex:', controlQIndex);
+        console.log('Total control questions:', totalQuestions);
+
         // Check if there are more control questions
-        if (updatedControlQIndex < totalQuestions) {
-          // Update profileData
-          this.profileData.control_q = updatedControlQIndex;
+        if (controlQIndex <= totalQuestions) {
+          // Update control_q in profiles_duplicate
+          const { error: updateError } = await supabase
+            .from('profiles_duplicate')
+            .update({ control_q: controlQIndex })
+            .eq('user_id', this.user.username);
+
+          if (updateError) {
+            console.error('Error updating control_q:', updateError.message);
+            alert('An error occurred while updating your progress. Please try again.');
+            return;
+          }
+
+          // Update local profileData
+          this.profileData.control_q = controlQIndex;
 
           // Load the next control question
           await this.loadCurrentQuestion();
@@ -493,40 +474,40 @@ Your goal is to inform the user of the correct answer as well as provide additio
           window.scrollTo(0, 0);
         } else {
           // All control questions completed
-          // Now proceed to increment current_question_index
-
-          // Fetch profile data again to get the latest current_question_index
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles_duplicate')
-            .select('*')
-            .eq('user_id', this.user.username)
-            .single();
-
-          if (profileError) {
-            console.error('Error fetching user profile:', profileError.message);
-            alert('An error occurred while fetching your data. Please try again.');
-            return;
-          }
-
-          const questionQueue = profileData.question_queue;
-          const currentQuestionIndex = profileData.current_question_index || 0;
-
-          // Increment current_question_index
-          const updatedIndex = currentQuestionIndex + 1;
-
-          // Update current_question_index in profiles_duplicate and reset control_q to 0 or null
+          // Reset control_q to null
           const { error: updateError2 } = await supabase
             .from('profiles_duplicate')
-            .update({ current_question_index: updatedIndex, control_q: null }) // Reset control_q
+            .update({ control_q: null })
             .eq('user_id', this.user.username);
 
           if (updateError2) {
-            console.error('Error updating current_question_index:', updateError2.message);
+            console.error('Error resetting control_q:', updateError2.message);
             alert('An error occurred while updating your progress. Please try again.');
             return;
           }
 
-          // Check if there are more FCI questions
+          // Increment current_question_index
+          const currentQuestionIndex = this.profileData.current_question_index || 0;
+          const updatedIndex = currentQuestionIndex + 1;
+
+          // Update current_question_index in profiles_duplicate
+          const { error: updateError3 } = await supabase
+            .from('profiles_duplicate')
+            .update({ current_question_index: updatedIndex })
+            .eq('user_id', this.user.username);
+
+          if (updateError3) {
+            console.error('Error updating current_question_index:', updateError3.message);
+            alert('An error occurred while updating your progress. Please try again.');
+            return;
+          }
+
+          // Update local profileData
+          this.profileData.current_question_index = updatedIndex;
+
+          // Fetch question queue
+          const questionQueue = this.profileData.question_queue;
+
           if (updatedIndex < questionQueue.length) {
             // More FCI questions to process
             this.$router.push('/testpost');
