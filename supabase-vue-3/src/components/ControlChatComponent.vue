@@ -245,15 +245,15 @@ export default {
           .select('question_number');
 
         if (countError) {
-          console.error('Error fetching total questions:', countError.message);
-          throw new Error('Error fetching total questions');
+          console.error('Error fetching total control questions:', countError.message);
+          throw new Error('Error fetching total control questions');
         }
 
         const totalQuestions = totalQuestionsData.length;
 
         if (controlQIndex >= totalQuestions) {
-          // No more control questions, route to TestPost.vue
-          this.$router.push('/testpost');
+          // No more control questions, route to TestPost.vue or next phase
+          await this.handleRoutingAfterControlQuestions();
           return;
         }
 
@@ -451,13 +451,8 @@ Your goal is to inform the user of the correct answer as well as provide additio
     nextQuestion: async function() {
       try {
         // Increment control_q
-        let controlQIndex = this.profileData.control_q;
-
-        if (controlQIndex === null || controlQIndex === undefined) {
-          controlQIndex = 0;
-        } else {
-          controlQIndex += 1;
-        }
+        let controlQIndex = this.profileData.control_q || 0;
+        controlQIndex += 1;
 
         // Update control_q in profiles_duplicate
         const { error: updateControlQError } = await supabase
@@ -474,19 +469,84 @@ Your goal is to inform the user of the correct answer as well as provide additio
         // Update local profileData
         this.profileData.control_q = controlQIndex;
 
-        // Check if there are more FCI questions
-        const currentQuestionIndex = this.profileData.current_question_index || 0;
-        const questionQueue = this.profileData.question_queue;
+        // Fetch updated profile data
+        const { data: updatedProfileData, error: profileFetchError } = await supabase
+          .from('profiles_duplicate')
+          .select('current_question_index, question_queue')
+          .eq('user_id', this.user.username)
+          .single();
 
+        if (profileFetchError) {
+          console.error('Error fetching updated profile data:', profileFetchError.message);
+          alert('An error occurred while fetching your data. Please try again.');
+          return;
+        }
+
+        const currentQuestionIndex = updatedProfileData.current_question_index || 0;
+        const questionQueue = updatedProfileData.question_queue || [];
+
+        // Check if there are more FCI questions
         if (currentQuestionIndex < questionQueue.length) {
-          // There are more FCI questions to process
+          // More FCI questions to process
           this.$router.push('/testpost');
         } else {
-          // All FCI questions completed
-          this.$router.push('/studyoriginalfci'); // Redirect to the next phase
+          // No more FCI questions, check if there are more control questions
+          const { data: totalQuestionsData, error: countError } = await supabase
+            .from('questions_control')
+            .select('question_number');
+
+          if (countError) {
+            console.error('Error fetching total control questions:', countError.message);
+            throw new Error('Error fetching total control questions');
+          }
+
+          const totalQuestions = totalQuestionsData.length;
+
+          if (controlQIndex < totalQuestions) {
+            // There are more control questions
+            // Load the next control question
+            await this.loadCurrentQuestion();
+            // Reset variables for the new question
+            this.resetChat();
+          } else {
+            // No more control questions or FCI questions
+            this.$router.push('/studyoriginalfci');
+          }
         }
       } catch (error) {
         console.error('An unexpected error occurred:', error);
+        alert('An unexpected error occurred. Please try again.');
+      }
+    },
+    // Handle routing after control questions are completed
+    async handleRoutingAfterControlQuestions() {
+      try {
+        // Fetch updated profile data
+        const { data: updatedProfileData, error: profileFetchError } = await supabase
+          .from('profiles_duplicate')
+          .select('current_question_index, question_queue')
+          .eq('user_id', this.user.username)
+          .single();
+
+        if (profileFetchError) {
+          console.error('Error fetching updated profile data:', profileFetchError.message);
+          alert('An error occurred while fetching your data. Please try again.');
+          return;
+        }
+
+        const currentQuestionIndex = updatedProfileData.current_question_index || 0;
+        const questionQueue = updatedProfileData.question_queue || [];
+
+        // Check if there are more FCI questions
+        if (currentQuestionIndex < questionQueue.length) {
+          // More FCI questions to process
+          this.$router.push('/testpost');
+        } else {
+          // No more FCI questions
+          this.$router.push('/studyoriginalfci');
+        }
+      } catch (error) {
+        console.error('Error during routing after control questions:', error);
         alert('An unexpected error occurred. Please try again.');
       }
     },
