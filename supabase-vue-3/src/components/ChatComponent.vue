@@ -104,7 +104,7 @@
                 </div>
                 <input 
                     v-model="userMessage" 
-                    @keyup.enter="handleEnterKey"
+                    @keydown.enter.prevent="handleEnterKey"
                     placeholder="Type a message..." 
                     :disabled="isChatFinished() || loading"
                 />
@@ -185,10 +185,12 @@ export default {
         },
 
         handleEnterKey() {
-        if (!this.loading && !this.isChatFinished()) {
-            this.sendMessage();
-            }
-        },
+        if (this.loading || this.isChatFinished()) {
+            // Do nothing if the model is generating a response or the chat is finished
+            return;
+        }
+        this.sendMessage();
+    },
 
         // Timer setup method
         setupTimerWatcher() {
