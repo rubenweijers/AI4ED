@@ -292,8 +292,8 @@ const optionMapping = ["A", "B", "C", "D", "E"];
 // Use the routePath in the handleFormSubmission function
 const handleFormSubmission = () => {
   if (formSubmitted.value) {
-    console.log('Form has already been submitted.');
-    alert('The form has already been submitted.');
+    // console.log('Form has already been submitted.');
+    // alert('The form has already been submitted.');
     router.push(profile.value.routePath);  // Use the determined route
   } else {
     if (areAllQuestionsAnswered()) {
