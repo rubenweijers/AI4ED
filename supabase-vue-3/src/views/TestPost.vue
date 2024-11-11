@@ -46,6 +46,12 @@
           </p>  
           </div>
 
+          <div v-if="incorrectQuestion.question_number === 9" class="additional-text">
+          <p>
+            A boat is in a river trying to go upstream. The river water flows at a constant speed. The motor is running hard enough that it is able to move upstream at a constant velocity as viewed from a person on shore.
+          </p>  
+          </div>
+
           <!-- Question 21 text as reminder for q22 -->
           <div v-if="incorrectQuestion.question_number === 22" class="additional-text">
           <p><i>Reminder: you used this statement to answer the question.</i><br>
