@@ -22,13 +22,13 @@
           <!-- Question 21 text as reminder for q22 -->
           <div v-if="incorrectQuestion.question_number === 6" class="additional-text">
           <p>
-            Two preceding questions about what happens when the rocket turns off for two seconds.
+            Two preceding questions asked about what happens when the rocket turns off for two seconds.
           </p>  
           </div>
 
           <div v-if="incorrectQuestion.question_number === 7" class="additional-text">
           <p>
-            Two preceding questions about what happens when the rocket turns off for two seconds.
+            Two preceding questions asked about what happens when the rocket turns off for two seconds.
           </p>  
           </div>
 
