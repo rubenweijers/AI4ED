@@ -22,6 +22,7 @@
       </div>
       <button @click="showToastNotification" class="submit-button">Submit</button>
       <ToastNotification
+        v-if="profile?.current_question_index === 0" 
         :isVisible="showToast"
         title="Submit Accuracy Rating"
         message="Are you sure you want to confirm your accuracy rating in the summary? This action cannot be undone."
