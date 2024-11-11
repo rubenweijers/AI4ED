@@ -46,6 +46,13 @@
           </p>  
           </div>
 
+
+          <div v-if="incorrectQuestion.question_number === 10" class="additional-text">
+          <p>
+            A boat is in a river trying to go upstream. The river water flows at a constant speed. The motor is running hard enough that it is able to move upstream at a constant velocity as viewed from a person on shore. The boat turns off its engine and begins to slow down as observed from the shore.
+          </p>  
+          </div>
+
           <div v-if="incorrectQuestion.question_number === 5" class="additional-text">
           <p>
             The rocket shuts off for 2 seconds.
