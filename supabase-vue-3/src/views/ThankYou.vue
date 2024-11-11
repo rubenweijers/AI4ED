@@ -48,9 +48,9 @@
       </p>
     </section>
 
-  <section>
+  <!-- <section>
     <button @click="clearLocalStorage" class="clear-storage-button">Clear Login Data</button>
-  </section>
+  </section> -->
   </div>
 </template>
 

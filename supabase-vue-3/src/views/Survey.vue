@@ -6,7 +6,7 @@
     <div class="survey-container">
       <h2>Short Survey on your AI-related opinions.</h2>
       <!-- need to be removed before the final release -->
-      <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
+      <!-- <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button> -->
       <form @submit.prevent="confirmSubmission">
         <div class="question" v-for="(question, index) in surveyQuestions" :key="index">
           <!-- Render question text with line breaks -->
