@@ -562,7 +562,7 @@ export default {
             const formattedText = question.question_text.replace(/\\n/g, '<br>');
             return numberText + formattedText;
         },
-        formatOptionText = (option) => {
+        formatOptionText(option) {
             const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
             return formattedOption;
         },
