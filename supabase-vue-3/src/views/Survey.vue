@@ -4,7 +4,7 @@
   </div>
   <div v-else-if="user">
     <div class="survey-container">
-      <h2>5 Question Survey on your AI-related opinions.</h2>
+      <h2>Short Survey on your AI-related opinions.</h2>
       <!-- need to be removed before the final release -->
       <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
       <form @submit.prevent="confirmSubmission">
