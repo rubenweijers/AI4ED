@@ -34,10 +34,11 @@
         </div>
         <div v-else-if="profile && profile.group === 'control'">
           <!-- CONTROL GROUP -->
-          For the next 40 minutes, the AI companion will alternate between asking you to explain your reasoning for a question you answered incorrectly on the modified FCI and presenting you with a question on physics history. 
-          Each time you receive a physics history question, you will engage in three rounds of dialogue about that topic with the AI companion. 
-          In each message, the AI reviews your responses from the recent history question you just answered, and offers explanations for those questions, similar to a peer study group. 
-          The AI may prompt you with a question directly, but if it doesn't, please ask it any follow up questions you have or anything else you feel will be helpful for improving your understanding of the question at hand. 
+          In the next part of the study, we will ask you to explain your reasoning for a question you got wrong in the modified FCI. 
+          After that, you will answer a question about physics history and interact about that history with an AI companion in a three-round dialogue. 
+          In each message, the AI offers explanations and discussion, similar to a peer study group. 
+          This part lasts for 40 minutes, or until you have explained your reasoning for all questions which were wrong on the modified FCI. 
+          Note that in each dialogue, you must complete the 3 rounds to advance - the AI may prompt you with a question directly, but if it doesn't, please ask it any followup questions you have or anything else you feel will be helpful for improving your understanding of the physics history. 
           Please do not discuss topics other than physics history with the AI.
         </div>
           <h3><strong>3. Post-Test and Feedback:</strong></h3> After the AI interactions, you will complete another FCI test
