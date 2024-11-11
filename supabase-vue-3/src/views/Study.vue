@@ -258,6 +258,31 @@ const formatOptionText = (option) => {
   return formattedOption;
 };
 
+const correctAnswers = {
+    1: 'C',  2: 'D',  3: 'E',  4: 'A',  5: 'B',
+    6: 'C',  7: 'A',  8: 'A',  9: 'A', 10: 'A',
+   11: 'B', 12: 'C', 13: 'B', 14: 'A', 15: 'E',
+   16: 'D', 17: 'B', 18: 'C', 19: 'C', 20: 'A',
+   21: 'C', 22: 'A', 23: 'D', 24: 'D', 25: 'C',
+   26: 'B', 27: 'D', 28: 'A', 29: 'E', 30: 'D'
+};
+
+const calculateScore = () => {
+  let correctCount = 0;
+  
+  for (const question of questions.value) {
+    const userAnswer = answers.value[question.id];
+    const correctAnswer = correctAnswers[question.id];
+
+    // Only count the answer as correct if it matches the expected correct answer
+    if (userAnswer !== null && optionMapping[userAnswer] === correctAnswer) {
+      correctCount += 1;
+    }
+  }
+
+  return correctCount;
+};
+
 // TIMER WATCHER
 let timerWatcherInterval;
 
@@ -309,6 +334,8 @@ const handleFormSubmission = () => {
 const submitAnswers = async () => {
   try {
     formSubmitted.value = true;
+
+    // Prepare answer entries
     const answerEntries = questions.value.map(question => {
       const answerIndex = answers.value[question.id];
       let answer = '';
@@ -325,6 +352,7 @@ const submitAnswers = async () => {
       };
     });
 
+    // Submit answers to the database
     const { data: answerData, error: answerError } = await supabase
       .from('answers_denton')
       .upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
@@ -335,28 +363,65 @@ const submitAnswers = async () => {
       return;
     }
 
-    // If you need to generate a question queue, ensure it uses the correct tables
-    await generateQuestionQueue(); // Adjust if necessary
+    // Calculate the user's score
+    let correctCount = 0;
 
-    const { error: updateError } = await supabase
-      .from('profiles_duplicate')
-      .update({ has_submitted_study_one: true })
-      .eq('user_id', user.value.username);
+    for (const question of questions.value) {
+      const userAnswerIndex = answers.value[question.id];
+      const userAnswer = optionMapping[userAnswerIndex];
+      const correctAnswer = correctAnswers[question.question_number]; // Use question_number instead of question.id
 
-    if (updateError) {
-      console.error('Error updating submission status:', updateError.message);
-      return;
+      // Only count the answer as correct if it matches the expected correct answer
+      if (userAnswer && userAnswer === correctAnswer) {
+        correctCount += 1;
+      }
     }
 
-    // Reset the timer to 30 minutes
-    const newStartTime = Date.now();
-    localStorage.setItem('studyStartTime', newStartTime);
-    localStorage.setItem('studyTotalDuration', (40 * 60).toString()); // Set total duration to 35 minutes in seconds
-    localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
-    localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+    // Check if the user got all 30 answers correct
+    if (correctCount === 30) {
+      // User answered all questions correctly, route to /studyoriginalfci
+      // Update has_submitted_study_one and other necessary fields in profiles_duplicate
+      const { error: updateError } = await supabase
+        .from('profiles_duplicate')
+        .update({ has_submitted_study_one: true })
+        .eq('user_id', user.value.username);
 
-    submissionSuccess.value = true;
-    router.push(profile.value.routePath);  // Use the determined route
+      if (updateError) {
+        console.error('Error updating submission status:', updateError.message);
+        formSubmitted.value = false;
+        return;
+      }
+
+      // Redirect to /studyoriginalfci
+      submissionSuccess.value = true;
+      router.push('/studyoriginalfci');
+    } else {
+      // User did not get all answers correct, proceed as usual
+
+      // If you need to generate a question queue, ensure it uses the correct tables
+      await generateQuestionQueue(); // Adjust if necessary
+
+      const { error: updateError } = await supabase
+        .from('profiles_duplicate')
+        .update({ has_submitted_study_one: true })
+        .eq('user_id', user.value.username);
+
+      if (updateError) {
+        console.error('Error updating submission status:', updateError.message);
+        formSubmitted.value = false;
+        return;
+      }
+
+      // Reset the timer to 40 minutes
+      const newStartTime = Date.now();
+      localStorage.setItem('studyStartTime', newStartTime.toString());
+      localStorage.setItem('studyTotalDuration', (40 * 60).toString()); // Set total duration to 40 minutes in seconds
+      localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+      localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+
+      submissionSuccess.value = true;
+      router.push(profile.value.routePath);  // Use the determined route
+    }
   } catch (error) {
     console.error('An unexpected error occurred:', error);
     formSubmitted.value = false;
