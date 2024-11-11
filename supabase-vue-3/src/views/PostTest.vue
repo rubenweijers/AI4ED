@@ -29,8 +29,20 @@
 
           <!-- Question 21 text as reminder for q22 -->
           <div v-if="incorrectQuestion.question_number === 6" class="additional-text">
-          <p><i>Reminder: you used this statement to answer the question.</i><br>
+          <p>
             Two preceding questions about what happens when the rocket turns off for two seconds.
+          </p>  
+          </div>
+
+          <div v-if="incorrectQuestion.question_number === 7" class="additional-text">
+          <p>
+            Two preceding questions about what happens when the rocket turns off for two seconds.
+          </p>  
+          </div>
+
+          <div v-if="incorrectQuestion.question_number === 5" class="additional-text">
+          <p>
+            The rocket shuts off for 2 seconds.
           </p>  
           </div>
 
@@ -64,6 +76,12 @@
               <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
             </p>
         </div>
+
+        <div v-if="incorrectQuestion.question_number === 29" class="additional-text">
+          <p>
+            A preceding question asked about the path of the sled after the cannon is fired.
+          </p>  
+          </div>
 
          <!-- Questions 28 to 30 -->
          <div v-else-if="incorrectQuestion.question_number === 30" class="additional-text">
