@@ -104,9 +104,9 @@
                 </div>
                 <input 
                     v-model="userMessage" 
-                    @keyup.enter="sendMessage" 
+                    @keyup.enter="handleEnterKey"
                     placeholder="Type a message..." 
-                    :disabled="isChatFinished()"
+                    :disabled="isChatFinished() || loading"
                 />
                 <button @click="sendMessage" :disabled="isChatFinished() || loading">Send</button>
             </div>
@@ -182,6 +182,12 @@ export default {
             this.firstMsgTime = null;
             this.incorrectQuestion = null;
             this.userAnswer = '';
+        },
+
+        handleEnterKey() {
+        if (!this.loading && !this.isChatFinished()) {
+            this.sendMessage();
+            }
         },
 
         // Timer setup method
@@ -415,7 +421,7 @@ export default {
         },
 
         async sendMessage() {
-            if (this.userMessage.trim() === '' || this.remainingRounds <= 0) return;
+            if (this.userMessage.trim() === '' || this.isChatFinished() || this.loading) return;
 
             const currentTime = new Date();
             const userMessageContent = this.userMessage;
