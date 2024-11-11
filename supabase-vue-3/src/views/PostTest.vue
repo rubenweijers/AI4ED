@@ -28,11 +28,49 @@
           </div>
 
           <!-- Question 21 text as reminder for q22 -->
+          <div v-if="incorrectQuestion.question_number === 6" class="additional-text">
+          <p>
+            Two preceding questions asked about what happens when the rocket turns off for two seconds.
+          </p>  
+          </div>
+
+          <div v-if="incorrectQuestion.question_number === 7" class="additional-text">
+          <p>
+            Two preceding questions asked about what happens when the rocket turns off for two seconds.
+          </p>  
+          </div>
+
+          <div v-if="incorrectQuestion.question_number === 9" class="additional-text">
+          <p>
+            A boat is in a river trying to go upstream. The river water flows at a constant speed. The motor is running hard enough that it is able to move upstream at a constant velocity as viewed from a person on shore.
+          </p>  
+          </div>
+
+
+          <div v-if="incorrectQuestion.question_number === 10" class="additional-text">
+          <p>
+            A boat is in a river trying to go upstream. The river water flows at a constant speed. The motor is running hard enough that it is able to move upstream at a constant velocity as viewed from a person on shore. The boat turns off its engine and begins to slow down as observed from the shore.
+          </p>  
+          </div>
+
+          <div v-if="incorrectQuestion.question_number === 5" class="additional-text">
+          <p>
+            The rocket shuts off for 2 seconds.
+          </p>  
+          </div>
+
+          <!-- Question 21 text as reminder for q22 -->
           <div v-if="incorrectQuestion.question_number === 22" class="additional-text">
           <p><i>Reminder: you used this statement to answer the question.</i><br>
             There is a flag on a flagpole marking 30 m above ground. Two cannonballs, one four times heavier than the other, are simultaneously fired straight up from the ground with identical initial velocities. What can you say about the time each cannonball takes to reach the flag’s height? Ignore air resistance.
           </p>  
           </div>
+
+          <div v-else-if="incorrectQuestion.question_number === 24" class="additional-text">
+          <p><i><i>Reminder: you used this statement to answer the question.</i><br> 
+          A car rounds a circular bend in the road. As it rounds the bend, it is also slowing down. A preceding question asked about the forces on the car.</i> <br>
+            </p>
+        </div>
 
           <!-- Question 26 text as reminder for q27 -->
           <div v-if="incorrectQuestion.question_number === 27" class="additional-text">
@@ -49,6 +87,18 @@
               <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
 
               <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
+            </p>
+        </div>
+
+        <div v-if="incorrectQuestion.question_number === 29" class="additional-text">
+          <p>
+            A preceding question asked about the path of the sled after the cannon is fired.
+          </p>  
+          </div>
+
+         <!-- Questions 28 to 30 -->
+         <div v-else-if="incorrectQuestion.question_number === 30" class="additional-text">
+          <p><i>The person on the sled fires the cannon, and it moves along one of the paths given in a preceding question..</i> <br>
             </p>
         </div>
 

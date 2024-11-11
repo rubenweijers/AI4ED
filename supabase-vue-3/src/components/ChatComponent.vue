@@ -5,44 +5,93 @@
             <!-- Start of question display -->
             <div v-if="incorrectQuestion">
             <!-- Add reminder text for specific question numbers -->
-            <!-- Q2 -->
-            <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
-            <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
-            </div>
+        <!-- Q2 -->
+        <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
+          <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
+        </div>
 
-            <!-- Questions 3 to 7 -->
-            <div v-if="incorrectQuestion.question_number >= 4 && incorrectQuestion.question_number <= 7" class="additional-text">
-            <p><i>Reminder: you used this statement to answer the question.</i><br>
-                A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+        <!-- Questions 3 to 7 -->
+        <div v-if="incorrectQuestion.question_number >= 4 && incorrectQuestion.question_number <= 7" class="additional-text">
+          <p><i>Reminder: you used this statement to answer the question.</i><br>
+            A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
 
-                <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-            </p>  
-            </div>
+              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+          </p>  
+          </div>
 
-            <!-- Question 21 text as reminder for q22 -->
-            <div v-if="incorrectQuestion.question_number === 22" class="additional-text">
-            <p><i>Reminder: you used this statement to answer the question.</i><br>
-                There is a flag on a flagpole marking 30 m above ground. Two cannonballs, one four times heavier than the other, are simultaneously fired straight up from the ground with identical initial velocities. What can you say about the time each cannonball takes to reach the flag’s height? Ignore air resistance.
-            </p>  
-            </div>
+          <!-- Question 21 text as reminder for q22 -->
+          <div v-if="incorrectQuestion.question_number === 6" class="additional-text">
+          <p>
+            Two preceding questions asked about what happens when the rocket turns off for two seconds.
+          </p>  
+          </div>
 
-            <!-- Question 26 text as reminder for q27 -->
-            <div v-if="incorrectQuestion.question_number === 27" class="additional-text">
-            <p><i>Reminder: you used this statement to answer the question.</i><br>
-                A basketball player is standing on a court, dribbling a ball.
-            </p>  
-            </div>
+          <div v-if="incorrectQuestion.question_number === 7" class="additional-text">
+          <p>
+            Two preceding questions asked about what happens when the rocket turns off for two seconds.
+          </p>  
+          </div>
 
-            <!-- Questions 28 to 30 -->
-            <div v-else-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
-            <p><i>Reminder: you used this statement to answer the question.</i> <br>
-                A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+          <div v-if="incorrectQuestion.question_number === 5" class="additional-text">
+          <p>
+            The rocket shuts off for 2 seconds.
+          </p>  
+          </div>
 
-                <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+          <div v-if="incorrectQuestion.question_number === 9" class="additional-text">
+          <p>
+            A boat is in a river trying to go upstream. The river water flows at a constant speed. The motor is running hard enough that it is able to move upstream at a constant velocity as viewed from a person on shore.
+          </p>  
+          </div>
 
-                <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
-                </p>
-            </div>
+          <div v-if="incorrectQuestion.question_number === 10" class="additional-text">
+          <p>
+            A boat is in a river trying to go upstream. The river water flows at a constant speed. The motor is running hard enough that it is able to move upstream at a constant velocity as viewed from a person on shore. The boat turns off its engine and begins to slow down as observed from the shore.
+          </p>  
+          </div>
+
+          <!-- Question 21 text as reminder for q22 -->
+          <div v-if="incorrectQuestion.question_number === 22" class="additional-text">
+          <p><i>Reminder: you used this statement to answer the question.</i><br>
+            There is a flag on a flagpole marking 30 m above ground. Two cannonballs, one four times heavier than the other, are simultaneously fired straight up from the ground with identical initial velocities. What can you say about the time each cannonball takes to reach the flag’s height? Ignore air resistance.
+          </p>  
+          </div>
+
+          <div v-else-if="incorrectQuestion.question_number === 24" class="additional-text">
+          <p><i><i>Reminder: you used this statement to answer the question.</i><br> 
+          A car rounds a circular bend in the road. As it rounds the bend, it is also slowing down. A preceding question asked about the forces on the car.</i> <br>
+            </p>
+        </div>
+
+          <!-- Question 26 text as reminder for q27 -->
+          <div v-if="incorrectQuestion.question_number === 27" class="additional-text">
+          <p><i>Reminder: you used this statement to answer the question.</i><br>
+            A basketball player is standing on a court, dribbling a ball.
+          </p>  
+          </div>
+
+        <!-- Questions 28 to 30 -->
+        <div v-else-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
+          <p><i>Reminder: you used this statement to answer the question.</i> <br>
+            A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+
+              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+
+              <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
+            </p>
+        </div>
+
+        <div v-if="incorrectQuestion.question_number === 29" class="additional-text">
+          <p>
+            A preceding question asked about the path of the sled after the cannon is fired.
+          </p>  
+          </div>
+
+         <!-- Questions 28 to 30 -->
+         <div v-else-if="incorrectQuestion.question_number === 30" class="additional-text">
+          <p><i>The person on the sled fires the cannon, and it moves along one of the paths given in a preceding question..</i> <br>
+            </p>
+        </div>
 
             <!-- Add images before the corresponding questions -->
             <img v-if="incorrectQuestion.question_number === 1 || incorrectQuestion.question_number === 2" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image">
@@ -404,39 +453,22 @@ export default {
                 temperature: 0.7,
             };
 
-            const maxRetries = 2; // Maximum number of retries
-            const retryDelay = 2000; // Delay in milliseconds between retries
-            let attempts = 0;
-            let success = false;
+            try {
+                const response = await axios.post('/api/openai', apiData);
 
-            while (attempts < maxRetries && !success) {
-                try {
-                    const response = await axios.post('/api/openai', apiData);
-
-                    const initialMessage = response.data.choices[0].message.content.trim();
-                    this.initialSystemMessage = initialMessage;
-                    this.messages.push({ role: 'assistant', content: initialMessage });
-                    this.firstMsgTime = new Date();
-                    success = true; // Exit the loop if the request is successful
-                } catch (error) {
-                    console.error(`Error generating initial AI message on attempt ${attempts + 1}:`, error);
-                    
-                    // Check the type of error and decide if it is worth retrying
-                    if (attempts < maxRetries - 1) { // If it is not the last attempt
-                        console.log(`Retrying in ${retryDelay / 1000} seconds...`);
-                        await new Promise(resolve => setTimeout(resolve, retryDelay)); // Wait before retrying
-                    } else { // After the last attempt
-                        this.messages.push({
-                            role: 'assistant',
-                            content: "I apologize, but I'm having trouble starting our conversation. Could you please share your thoughts on the physics question you answered?",
-                        });
-                    }
-                } finally {
-                    attempts++;
-                }
+                const initialMessage = response.data.choices[0].message.content.trim();
+                this.initialSystemMessage = initialMessage;
+                this.messages.push({ role: 'assistant', content: initialMessage });
+                this.firstMsgTime = new Date();
+            } catch (error) {
+                console.error('Error generating initial AI message:', error);
+                this.messages.push({
+                    role: 'assistant',
+                    content: "I apologize, but I'm having trouble starting our conversation. Could you please share your thoughts on the physics question you answered?",
+                });
+            } finally {
+                this.loading = false;
             }
-
-            this.loading = false;
         },
 
         async sendMessage() {
@@ -475,63 +507,48 @@ export default {
 
             this.userMessage = '';
             this.loading = true;
-            const maxRetries = 2; // Maximum number of retries
-            const retryDelay = 2000; // Delay in milliseconds between retries
-            let attempts = 0;
-            let success = false;
 
-            while (attempts < maxRetries && !success) {
+            try {
+                const response = await axios.post('/api/openai', apiData);
+                const aiMessage = response.data.choices[0].message.content.trim();
+                this.messages.push({ role: 'assistant', content: aiMessage });
 
-                try {
-                    const response = await axios.post('/api/openai', apiData);
-                    const aiMessage = response.data.choices[0].message.content.trim();
-                    this.messages.push({ role: 'assistant', content: aiMessage });
+                const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
 
-                    const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
+                // Get user information from Supabase
+                const userId = this.user.username;
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles_duplicate')
+                    .select('display_name, group')
+                    .eq('user_id', userId)
+                    .single();
 
-                    // Get user information from Supabase
-                    const userId = this.user.username;
-                    const { data: profileData, error: profileError } = await supabase
-                        .from('profiles_duplicate')
-                        .select('display_name, group')
-                        .eq('user_id', userId)
-                        .single();
+                if (profileError) throw profileError;
 
-                    if (profileError) throw profileError;
+                const displayName = profileData.display_name;
+                const llmType = profileData.group;
 
-                    const displayName = profileData.display_name;
-                    const llmType = profileData.group;
+                // Save chat history
+                await supabase.from('chat_history_duplicate').insert({
+                    user_id: userId,
+                    system_message: this.systemPrompt,
+                    conversation: this.messages,
+                    round: Math.ceil(this.messages.length / 2 - 1),
+                    user_chat: userMessageContent,
+                    model_reply: aiMessage,
+                    llm_type: llmType,
+                    time_spent: timeSpentFormatted,
+                    timestamp: new Date().toISOString(),
+                    initial_message: this.initialSystemMessage,
+                    question_number: this.profileData.question_queue[this.profileData.current_question_index || 0],
+                });
 
-                    // Save chat history
-                    await supabase.from('chat_history_duplicate').insert({
-                        user_id: userId,
-                        system_message: this.systemPrompt,
-                        conversation: this.messages,
-                        round: Math.ceil(this.messages.length / 2 - 1),
-                        user_chat: userMessageContent,
-                        model_reply: aiMessage,
-                        llm_type: llmType,
-                        time_spent: timeSpentFormatted,
-                        timestamp: new Date().toISOString(),
-                        initial_message: this.initialSystemMessage,
-                        question_number: this.profileData.question_queue[this.profileData.current_question_index || 0],
-                    });
-
-                    this.$nextTick(() => {
-                        this.scrollToBottom();
-                    });
-                    success=true;
-                } catch (error) {
-                    console.error(`Error generating initial AI message on attempt ${attempts + 1}:`, error);
-                        
-                        // Check the type of error and decide if it is worth retrying
-                        if (attempts < maxRetries - 1) { // If it is not the last attempt
-                            console.log(`Retrying in ${retryDelay / 1000} seconds...`);
-                            await new Promise(resolve => setTimeout(resolve, retryDelay)); // Wait before retrying
-                        } 
-                } finally {
-                    attempts++;
-                }
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+            } catch (error) {
+                console.error('Error communicating with the OpenAI API', error);
+            } finally {
                 this.loading = false;
             }
 
@@ -547,7 +564,6 @@ export default {
             }
 
             this.saveChatData();
-        
         },
         marked(content) {
             return marked(content);
