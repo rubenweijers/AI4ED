@@ -161,7 +161,7 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value", user.value);
+    // console.log("user.value", user.value);
     await fetchUserProfile();
     await checkSubmissionStatus();
     await fetchQuestions();
@@ -406,11 +406,152 @@ const loadSavedAnswers = () => {
 
 watch(answers, saveAnswersToLocalStorage, { deep: true });
 
+// const generateQuestionQueue = async () => {
+//   try {
+//     // console.log('Starting queue generation');
+    
+//     // Fetch all user's answers
+//     const { data: userAnswers, error: userAnswersError } = await supabase
+//       .from('answers_denton')
+//       .select('question_number, answer')
+//       .eq('user_id', user.value.username);
+
+//     if (userAnswersError) {
+//       console.error('Error fetching user answers:', userAnswersError.message);
+//       return;
+//     }
+
+//     // console.log('User answers:', userAnswers);
+
+//     if (!userAnswers || userAnswers.length === 0) {
+//       console.log('No user answers found');
+//       return;
+//     }
+
+//     // Filter out unanswered questions
+//     const answeredUserAnswers = userAnswers.filter(answer => answer.answer !== 'unanswered');
+
+//     if (answeredUserAnswers.length === 0) {
+//       console.log('No answered questions to process.');
+//       return;
+//     }
+
+//     // Fetch correct answers for the answered questions from 'questions_denton'
+//     const answeredQuestionNumbers = answeredUserAnswers.map(a => a.question_number);
+
+//     const { data: questionsData, error: questionsError } = await supabase
+//       .from('questions_denton')
+//       .select('*')
+//       .in('question_number', answeredQuestionNumbers);
+
+//     if (questionsError) {
+//       console.error('Error fetching questions:', questionsError.message);
+//       return;
+//     }
+
+//     // console.log('Questions data:', questionsData);
+
+//     if (!questionsData || questionsData.length === 0) {
+//       console.log('No questions data found for answered questions.');
+//       return;
+//     }
+
+//     // Determine incorrect answers by comparing user's answer with correct answer
+//     const incorrectQuestionNumbers = [];
+
+//     for (const userAnswer of answeredUserAnswers) {
+//       const question = questionsData.find(q => q.question_number === userAnswer.question_number);
+//       if (question && question.correct_answer !== userAnswer.answer) {
+//         incorrectQuestionNumbers.push(userAnswer.question_number);
+//       }
+//     }
+
+//     // console.log('Incorrect question numbers:', incorrectQuestionNumbers);
+
+//     if (incorrectQuestionNumbers.length === 0) {
+//       // console.log('User got all answers correct, no question queue to generate.');
+//       return;
+//     }
+
+//     // Fetch incorrect questions' data
+//     const { data: incorrectQuestions, error: incorrectQuestionsError } = await supabase
+//       .from('questions_denton')
+//       .select('*')
+//       .in('question_number', incorrectQuestionNumbers);
+
+//     if (incorrectQuestionsError) {
+//       console.error('Error fetching incorrect questions:', incorrectQuestionsError.message);
+//       return;
+//     }
+
+//     const questionsByNumberInCategory = {};
+
+//     for (const question of incorrectQuestions) {
+//       const n = question.question_number_in_category;
+//       if (!questionsByNumberInCategory[n]) {
+//         questionsByNumberInCategory[n] = [];
+//       }
+//       questionsByNumberInCategory[n].push(question);
+//     }
+
+//     const questionQueue = [];
+
+//     const nValues = Object.keys(questionsByNumberInCategory).map(Number).sort((a, b) => a - b);
+
+//     for (const n of nValues) {
+//       const questionsAtN = questionsByNumberInCategory[n];
+//       questionsAtN.sort(() => Math.random() - 0.5);
+
+//       for (const question of questionsAtN) {
+//         questionQueue.push(question.question_number);
+//       }
+//     }
+
+//     // Attempting to update profile with the new question queue
+//     const { data: updateData, error: updateError } = await supabase
+//       .from('profiles_duplicate')
+//       .update({
+//         question_queue: questionQueue,
+//         current_question_index: 0,
+//       })
+//       .eq('user_id', user.value.username);
+
+//     if (updateError) {
+//       console.error('Error updating user profile:', updateError.message);
+//       return;
+//     }
+
+//     console.log('Profile updated with new question queue.');
+
+//     // Update profile.value
+//     if (profile.value) {
+//       profile.value.question_queue = questionQueue;
+//       profile.value.current_question_index = 0;
+//     }
+
+//     // Optional: Verify the update after a short delay
+//     await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay
+//     const { data: updatedProfile, error: checkError } = await supabase
+//       .from('profiles_duplicate')
+//       .select('question_queue')
+//       .eq('user_id', user.value.username)
+//       .single();
+
+//     if (checkError) {
+//       console.error('Error checking updated profile:', checkError);
+//     } else {
+//       // console.log('Updated question_queue after delay:', updatedProfile.question_queue);
+//     }
+
+//   } catch (error) {
+//     console.error('An unexpected error occurred:', error);
+//   }
+// };
+
+// NEW WAY TO GENERATE QUESTION QUEUE
 const generateQuestionQueue = async () => {
   try {
-    // console.log('Starting queue generation');
-    
-    // Fetch all user's answers
+    // Step 1: Fetch all user's answers
     const { data: userAnswers, error: userAnswersError } = await supabase
       .from('answers_denton')
       .select('question_number, answer')
@@ -420,8 +561,6 @@ const generateQuestionQueue = async () => {
       console.error('Error fetching user answers:', userAnswersError.message);
       return;
     }
-
-    // console.log('User answers:', userAnswers);
 
     if (!userAnswers || userAnswers.length === 0) {
       console.log('No user answers found');
@@ -436,12 +575,12 @@ const generateQuestionQueue = async () => {
       return;
     }
 
-    // Fetch correct answers for the answered questions from 'questions_denton'
+    // Fetch correct answers for answered questions
     const answeredQuestionNumbers = answeredUserAnswers.map(a => a.question_number);
 
     const { data: questionsData, error: questionsError } = await supabase
       .from('questions_denton')
-      .select('*')
+      .select('question_number, correct_answer, misconception_category')
       .in('question_number', answeredQuestionNumbers);
 
     if (questionsError) {
@@ -449,65 +588,69 @@ const generateQuestionQueue = async () => {
       return;
     }
 
-    // console.log('Questions data:', questionsData);
-
     if (!questionsData || questionsData.length === 0) {
       console.log('No questions data found for answered questions.');
       return;
     }
 
-    // Determine incorrect answers by comparing user's answer with correct answer
-    const incorrectQuestionNumbers = [];
+    // Determine incorrect answers
+    const incorrectQuestions = [];
 
     for (const userAnswer of answeredUserAnswers) {
       const question = questionsData.find(q => q.question_number === userAnswer.question_number);
       if (question && question.correct_answer !== userAnswer.answer) {
-        incorrectQuestionNumbers.push(userAnswer.question_number);
+        incorrectQuestions.push(question);
       }
     }
 
-    // console.log('Incorrect question numbers:', incorrectQuestionNumbers);
-
-    if (incorrectQuestionNumbers.length === 0) {
-      // console.log('User got all answers correct, no question queue to generate.');
+    if (incorrectQuestions.length === 0) {
+      console.log('User got all answers correct, no question queue to generate.');
       return;
     }
 
-    // Fetch incorrect questions' data
-    const { data: incorrectQuestions, error: incorrectQuestionsError } = await supabase
-      .from('questions_denton')
-      .select('*')
-      .in('question_number', incorrectQuestionNumbers);
-
-    if (incorrectQuestionsError) {
-      console.error('Error fetching incorrect questions:', incorrectQuestionsError.message);
-      return;
-    }
-
-    const questionsByNumberInCategory = {};
+    // Step 2: Prepare a dictionary of questions by misconception category
+    const questionsByCategory = {};
 
     for (const question of incorrectQuestions) {
-      const n = question.question_number_in_category;
-      if (!questionsByNumberInCategory[n]) {
-        questionsByNumberInCategory[n] = [];
+      const categories = question.misconception_category.replace(/[\[\]\s]/g, '').split(',');
+      for (const category of categories) {
+        if (!questionsByCategory[category]) {
+          questionsByCategory[category] = [];
+        }
+        questionsByCategory[category].push(question);
       }
-      questionsByNumberInCategory[n].push(question);
     }
 
+    // Step 3: Generate question queue by sampling categories with replacement
     const questionQueue = [];
+    const usedQuestions = new Set();
 
-    const nValues = Object.keys(questionsByNumberInCategory).map(Number).sort((a, b) => a - b);
+    // We will loop until we reach a desired length for our question queue
+    while (Object.keys(questionsByCategory).some(category => questionsByCategory[category].length > 0)) {
+      // Sample a category with replacement
+      const availableCategories = Object.keys(questionsByCategory).filter(category => questionsByCategory[category].length > 0);
+      const sampledCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
 
-    for (const n of nValues) {
-      const questionsAtN = questionsByNumberInCategory[n];
-      questionsAtN.sort(() => Math.random() - 0.5);
+      // Filter questions within the sampled category that haven't been used
+      const eligibleQuestions = questionsByCategory[sampledCategory].filter(q => !usedQuestions.has(q.question_number));
 
-      for (const question of questionsAtN) {
-        questionQueue.push(question.question_number);
+      if (eligibleQuestions.length > 0) {
+        // Randomly select one question from the eligible questions
+        const sampledQuestion = eligibleQuestions[Math.floor(Math.random() * eligibleQuestions.length)];
+        
+        // Add the question to the queue
+        questionQueue.push(sampledQuestion.question_number);
+        usedQuestions.add(sampledQuestion.question_number);
+        
+        // Remove the question from all categories it belongs to
+        const questionCategories = sampledQuestion.misconception_category.replace(/[\[\]\s]/g, '').split(',');
+        for (const cat of questionCategories) {
+          questionsByCategory[cat] = questionsByCategory[cat].filter(q => q.question_number !== sampledQuestion.question_number);
+        }
       }
     }
 
-    // Attempting to update profile with the new question queue
+    // Step 4: Update user profile with the generated question queue
     const { data: updateData, error: updateError } = await supabase
       .from('profiles_duplicate')
       .update({
@@ -529,24 +672,12 @@ const generateQuestionQueue = async () => {
       profile.value.current_question_index = 0;
     }
 
-    // Optional: Verify the update after a short delay
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay
-    const { data: updatedProfile, error: checkError } = await supabase
-      .from('profiles_duplicate')
-      .select('question_queue')
-      .eq('user_id', user.value.username)
-      .single();
-
-    if (checkError) {
-      console.error('Error checking updated profile:', checkError);
-    } else {
-      // console.log('Updated question_queue after delay:', updatedProfile.question_queue);
-    }
-
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
 };
+
+
 onMounted(() => {
   checkUser();
   setupTimerWatcher();

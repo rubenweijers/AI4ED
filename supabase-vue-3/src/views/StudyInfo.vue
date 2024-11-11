@@ -55,7 +55,7 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log('user.value', user.value);
+    // console.log('user.value', user.value);
     await fetchUserProfile(); // Fetch profile after getting user
     loading.value = false; // Move loading to false after profile is fetched
   } else {
@@ -64,7 +64,7 @@ const checkUser = async () => {
 };
 
 const fetchUserProfile = async () => {
-  console.log('Fetching profile for user:', user.value);
+  // console.log('Fetching profile for user:', user.value);
   // Adjust the query according to your Supabase setup
   const { data, error } = await supabase
     .from('profiles_duplicate')
@@ -76,7 +76,7 @@ const fetchUserProfile = async () => {
     console.error('Error fetching user profile:', error.message);
   } else {
     profile.value = data;
-    console.log('Fetched profile:', profile.value);
+    // console.log('Fetched profile:', profile.value);
   }
 };
 

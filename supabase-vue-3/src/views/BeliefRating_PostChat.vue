@@ -82,7 +82,7 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value", user.value);
+    // console.log("user.value", user.value);
     await fetchUserProfile();
   } else {
     router.push('/login');
@@ -110,7 +110,7 @@ const fetchSummary = async () => {
     if (userData) {
       user.value = JSON.parse(userData);
     } else {
-      console.log('User not authenticated');
+      // console.log('User not authenticated');
       router.push('/login');
       return;
     }
@@ -148,12 +148,12 @@ const fetchSummary = async () => {
       return;
     }
 
-    if (data && data.llm_summary) {
+    if (data && data.explanation) {
       // sentence.value = data.llm_summary; GET LLM SUMMARY <OLD CODE>
       sentence.value = data.explanation; // GET LLM SUMMARY
     } else {
-      console.error('No summary found for the user');
-      alert('No summary found. Please try again.');
+      console.error('No explanation found for the user');
+      alert('No explanation found. Please try again.');
     }
   } catch (error) {
     console.error('An unexpected error occurred:', error);
@@ -174,7 +174,7 @@ const submitAnswers = async () => {
     if (userData) {
       user.value = JSON.parse(userData);
     } else {
-      console.log('User not authenticated');
+      // console.log('User not authenticated');
       router.push('/login');
       return;
     }

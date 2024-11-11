@@ -87,7 +87,7 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value", user.value);
+    // console.log("user.value", user.value);
     await checkSubmissionStatus();
   } else {
     router.push('/login'); // Redirect to login if no user is found
