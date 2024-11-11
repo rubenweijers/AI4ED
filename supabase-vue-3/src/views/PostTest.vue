@@ -129,7 +129,12 @@ const shouldDisplayLabels = (questionNumber) => questionsWithLabels.includes(que
 
 // Toast notifications
 const showToastNotification = () => {
-  showToast.value = true;
+  if (profile.value.current_question_index > 0) {
+    // Directly proceed without showing the toast
+    checkValid();
+  } else {
+    showToast.value = true;
+  }
 };
 const confirmSubmit = async () => {
   showToast.value = false;
