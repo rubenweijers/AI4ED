@@ -11,7 +11,7 @@
         <br> Avoid guessing. Your answers should reflect what you personally think.
       </p>
       <p>
-        Plan to finish this questionnaire in 15 minutes. <br>
+        Plan to finish this questionnaire in 35 minutes. <br>
         Thank you for your cooperation.
       </p>
       <p>Click Next to proceed to the study.</p>

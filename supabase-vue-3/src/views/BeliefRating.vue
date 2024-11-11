@@ -87,7 +87,7 @@ const checkUser = async () => {
   const userData = localStorage.getItem('user');
   if (userData) {
     user.value = JSON.parse(userData);
-    console.log("user.value", user.value);
+    // console.log("user.value", user.value);
     await fetchUserProfile();
   } else {
     router.push('/login');
@@ -143,7 +143,7 @@ const fetchSummary = async () => {
     // data.llm_summary = "I love physics"
     if (data && data.llm_summary) {
       sentence.value = data.llm_summary;
-      console.log('Summary fetched, created at:', data.created_at);
+      // console.log('Summary fetched, created at:', data.created_at);
     } else {
       console.error('No summary found for the user');
       alert('No summary found. Please try again.');

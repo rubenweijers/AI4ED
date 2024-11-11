@@ -5,48 +5,63 @@
     <p>You have completed the study: <u>Thank you for your time and effort!</u></p><br>
 
     <section>
-      <h2>Principal Investigator</h2>
+      <h2>Senior Investigators</h2>
       <ul>
-        <li>Prof. Jean-François Godbout (Université de Montréal)- <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></li>
-      </ul>
-      <h2>Co-Investigator</h2>
-      <ul>
-        <li>Prof. Ying Wu (Duke University)</li>
+        <li>Principal Investigator Prof. Jean-François Godbout (Université de Montréal)</li>
+        <li>Duke Investigator Prof. Ying Wu (Duke University)</li>
       </ul>
     </section>
 
     <section>
-      <h2>Study Purpose and Aim</h2>
-      <p>
-        This study aimed to assess how AI could enhance learning in physics by addressing common misconceptions. <br><br>Participants were divided into two groups: one group received support from an AI companion across three sessions to identify and address specific misunderstandings in Newtonian mechanics. The other group, serving as the control group, was given a series of questions on physics history unrelated to the concepts assessed by the Force Concept Inventory (FCI) test. This setup allowed us to evaluate the AI's impact on learning outcomes compared to traditional question-based learning.
-      </p>
-      <p>
-        If you would like a summary of the study's findings once the analysis is complete, we would be happy to provide this. Please contact <strong>Jean-François Godbout: <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></strong>, the principal investigator, to request the results.<br><br>
-      </p>
-    </section>
+  <h2>Study Purpose and Aim</h2>
+  <p>
+    This study aimed to assess how AI could enhance learning in physics by addressing common misconceptions. 
+    Participants were divided into two groups: one group discussed with an AI companion to identify and address specific misunderstandings in Newtonian mechanics, 
+    while the other group, serving as the control group, discussed physics history with the AI, not directly related to the concepts assessed by the Force Concept Inventory (FCI) test. 
+    This setup allowed us to evaluate the AI's impact on learning outcomes compared to traditional question-based learning.
+  </p>
+  <p>
+    If you would like a summary of the study's findings once the analysis is complete, we would be happy to provide this. Please contact the senior investigators at 
+    <strong><a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></strong> to request the results.
+  </p>
+</section>
 
-    <section>
-      <h2>Deception and Its Purpose</h2>
-      <p>
-        To maintain the study's integrity, participants were not initially informed of the different group assignments (study and control group). This element was necessary to prevent bias and to evaluate the AI's effectiveness in comparison to an alternative learning approach.
-      </p>
-      <p>
-        The responses provided by both groups, along with post-test data, will help us analyze how the AI-assisted interventions compared to the control approach in correcting physics misconceptions. This information will guide the future development of personalized AI educational tools.
-      </p>
-      <p>
-        <b>As a reminder, it is important to note that the results of the FCI tests do <u>not</u> affect your grade.</b><br><br>
-      </p>
-    </section>
+<section>
+  <h2>Study Design</h2>
+  <p>
+    To maintain the study's integrity, participants were not initially informed of the different group assignments (study and control group). This element was necessary 
+    to prevent bias and to evaluate the AI's effectiveness in comparison to an alternative learning approach.
+  </p>
+  <p>
+    The responses provided by both groups, along with post-test data, will help us analyze how the AI-assisted interventions compared to the control approach in correcting physics misconceptions. 
+    This information will guide the future development of personalized AI educational tools.
+  </p>
+  <p>
+    <strong>As a reminder, it is important to note that the results of the FCI tests do <u>not</u> affect your grade.</strong>
+  </p>
+</section>
 
-    <section>
-      <h2>AI Companion Accuracy</h2>
-      <p>
-        While the AI companion effectively identified your incorrect answers on the first FCI questionnaire, some explanations it provided may not have been entirely precise. To support your learning, we recommend reviewing these concepts with your TA and professors, who can offer more thorough explanations and address any lingering questions. Additionally, the university provides various resources—such as tutoring centers, study groups, and office hours—that can further aid your understanding.
-      </p>
-      <p>
-        To assist with targeted review, we will also send you the results of your pre-test evaluation. This will indicate which concepts you struggled with, allowing you to focus on revising these areas with the support available to you. <br><br> Thank you again for engaging critically with the explanations provided; your insights are invaluable to our research.
-      </p>
-    </section>
+<section>
+  <h2>AI Companion Accuracy</h2>
+  <p>
+    While the system identified your incorrect answers on the first FCI questionnaire, some explanations the AI companion provided may not have been entirely correct. 
+    We suggest viewing the interactions similarly to ones with a non-expert peer, which can be valuable for learning but are not authoritative like a TA or professor. 
+    To support your learning, we recommend reviewing these concepts with your TA and professors, who can offer more definitive explanations and address any lingering questions. 
+    Additionally, the university provides various resources—such as tutoring centers, study groups, and office hours—that can further aid your understanding.
+  </p>
+  <p>
+    Thank you again for engaging critically with the explanations provided; your insights are invaluable to our research.
+  </p>
+</section>
+
+<section>
+  <h2>Discussion with Peers</h2>
+  <p>
+    At the time you complete this study, some of your peers may not yet have participated in their lab sections. We ask you to please refrain from discussing the content 
+    here with other students until Thursday, November 14th (2024).
+  </p>
+</section>
+
 
   <!-- <section>
     <button @click="clearLocalStorage" class="clear-storage-button">Clear Login Data</button>

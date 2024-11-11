@@ -194,12 +194,12 @@ export default {
     async loadUserData() {
       const userData = localStorage.getItem('user');
       if (!userData) {
-        console.log('User not authenticated');
+        // console.log('User not authenticated');
         this.$router.push('/login');
         return;
       }
       this.user = JSON.parse(userData);
-      console.log('User data:', this.user);
+      // console.log('User data:', this.user);
 
       // Fetch user profile from profiles_duplicate
       const { data: profileData, error: profileError } = await supabase
@@ -216,7 +216,7 @@ export default {
         console.error(`No profile data found for user: ${this.user.username}`);
         throw new Error(`No profile data found for user: ${this.user.username}`);
       }
-      console.log('Fetched profileData:', profileData);
+      // console.log('Fetched profileData:', profileData);
       this.profileData = profileData;
     },
 
@@ -280,7 +280,7 @@ export default {
         }
 
         this.currentQuestion = questionData;
-        console.log('Loaded control question:', this.currentQuestion);
+        // console.log('Loaded control question:', this.currentQuestion);
       } catch (error) {
         console.error('Error loading current control question:', error);
         alert('An error occurred while loading the control question. Please try again.');

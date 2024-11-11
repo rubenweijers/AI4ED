@@ -23,7 +23,7 @@
         </ul>
       </p>
       <p>
-        Pressing the button below will set a 30 minute timer for you to finish the survey and the FCI test <br>
+        Pressing the button below will set a 35 minute timer for you to finish the survey and the FCI test <br>
       </p>
     </div>
 </template>

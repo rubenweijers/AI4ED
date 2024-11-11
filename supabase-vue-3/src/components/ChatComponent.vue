@@ -217,7 +217,7 @@ export default {
         try {
             const userData = localStorage.getItem('user');
             if (!userData) {
-            console.log('User not authenticated');
+            // console.log('User not authenticated');
             this.$router.push('/login');
             return;
             }
@@ -240,16 +240,16 @@ export default {
 
         async fetchDataAndSetSystemPrompt() {
             try {
-                console.log('Starting fetchDataAndSetSystemPrompt...');
+                // console.log('Starting fetchDataAndSetSystemPrompt...');
 
                 const userData = localStorage.getItem('user');
                 if (!userData) {
-                    console.log('User not authenticated. Redirecting to login.');
+                    // console.log('User not authenticated. Redirecting to login.');
                     this.$router.push('/login');
                     return;
                 }
                 this.user = JSON.parse(userData);
-                console.log('User data loaded:', this.user);
+                // console.log('User data loaded:', this.user);
 
                 const { data: profileData, error: profileError } = await supabase
                     .from('profiles_duplicate')
@@ -265,13 +265,13 @@ export default {
                     console.error(`No profile data found for user: ${this.user.username}`);
                     throw new Error(`No profile data found for user: ${this.user.username}`);
                 }
-                console.log('Fetched profileData:', profileData);
+                // console.log('Fetched profileData:', profileData);
                 this.profileData = profileData;
 
                 const questionQueue = this.profileData.question_queue;
                 const currentQuestionIndex = parseInt(this.profileData.current_question_index, 10) || 0;
-                console.log('Question queue:', questionQueue);
-                console.log('Current question index:', currentQuestionIndex);
+                // console.log('Question queue:', questionQueue);
+                // console.log('Current question index:', currentQuestionIndex);
 
                 if (!questionQueue || !Array.isArray(questionQueue) || questionQueue.length === 0) {
                     throw new Error('Question queue is empty or invalid.');
@@ -281,13 +281,13 @@ export default {
                 }
 
                 const questionNumber = questionQueue[currentQuestionIndex];
-                console.log('Question number:', questionNumber);
+                // console.log('Question number:', questionNumber);
 
                 if (typeof questionNumber !== 'number' || isNaN(questionNumber)) {
                     throw new Error(`Invalid question number: ${questionNumber}`);
                 }
 
-                console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
+                // console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
                 const { data: answerData, error: answerError } = await supabase
                     .from('answers_posttest_denton')
                     .select('belief_rating_1, llm_summary')
@@ -303,12 +303,12 @@ export default {
                     console.error('No answer data found for this user and question number.');
                     throw new Error('No answer data found for this user and question number.');
                 }
-                console.log('Fetched answerData:', answerData);
+                // console.log('Fetched answerData:', answerData);
 
                 this.userBeliefLevel = answerData.belief_rating_1;
                 this.explanation = answerData.llm_summary;
 
-                console.log('Fetching question data for question number:', questionNumber);
+                // console.log('Fetching question data for question number:', questionNumber);
                 const { data: questionData, error: questionError } = await supabase
                     .from('questions_denton')
                     .select('*')
@@ -323,7 +323,7 @@ export default {
                     console.error(`No question data found for question number: ${questionNumber}`);
                     throw new Error(`No question data found for question number: ${questionNumber}`);
                 }
-                console.log('Fetched questionData:', questionData);
+                // console.log('Fetched questionData:', questionData);
 
                 if (!questionData.question_text_with_images_descriptions || !questionData.question_number) {
                     console.error('Incomplete question data:', questionData);
@@ -332,9 +332,9 @@ export default {
 
                 this.questionText = questionData.question_text_with_images_descriptions;
                 this.incorrectQuestion = questionData;
-                console.log('incorrectQuestion set:', this.incorrectQuestion);
+                // console.log('incorrectQuestion set:', this.incorrectQuestion);
 
-                console.log('Fetching user answer for question number:', questionNumber);
+                // console.log('Fetching user answer for question number:', questionNumber);
                 const { data: userAnswerData, error: userAnswerError } = await supabase
                     .from('answers_denton')
                     .select('answer')
@@ -346,10 +346,10 @@ export default {
                     console.error(`Error fetching user answer: ${userAnswerError.message}`);
                     throw new Error(`Error fetching user answer: ${userAnswerError.message}`);
                 }
-                console.log('Fetched userAnswerData:', userAnswerData);
+                // console.log('Fetched userAnswerData:', userAnswerData);
 
                 this.userAnswer = userAnswerData.answer || '';
-                console.log('User answer set:', this.userAnswer);
+                // console.log('User answer set:', this.userAnswer);
 
                 const { data: correctAnswerData, error: correctAnswerError } = await supabase
                     .from('questions_denton')
@@ -357,14 +357,14 @@ export default {
                     .eq('question_number', questionNumber)
                     .single();
 
-                console.log('Fetched correctAnswerData:', correctAnswerData);
+                // console.log('Fetched correctAnswerData:', correctAnswerData);
 
                 if (correctAnswerError) {
                     console.error(`Error fetching correct answer: ${correctAnswerError.message}`);
                     throw new Error(`Error fetching correct answer: ${correctAnswerError.message}`);
                 }
 
-                console.log('Fetched correctAnswerData:', correctAnswerData);
+                // console.log('Fetched correctAnswerData:', correctAnswerData);
 
                 this.correctAnswer = correctAnswerData.correct_answer || '';
                 // console.log('Correct answer set:', this.correctAnswer);
@@ -550,7 +550,7 @@ export default {
                 incorrectQuestion: this.incorrectQuestion, // Ensure this is included
                 userAnswer: this.userAnswer, // Ensure this is included
             };
-            console.log('Saving chatData:', chatData);
+            // console.log('Saving chatData:', chatData);
             localStorage.setItem('chatData', JSON.stringify(chatData));
         },
         shouldDisplayLabels(questionNumber) {

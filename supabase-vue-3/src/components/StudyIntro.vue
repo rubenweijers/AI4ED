@@ -22,16 +22,15 @@
               <li>Do not leave any question unanswered.</li>
               <li>Avoid guessing; answer based on your understanding.</li>
           </ul>
-          Once you start the study, a timer of 30 minutes will start. Plan to complete this FCI within 30 minutes.
+          Once you start the study, a timer of 35 minutes will start. Plan to complete this FCI within 35 minutes.
           <h3><strong>2. AI Interaction:</strong></h3> 
           <!-- TREATMENT GROUP -->
           <div v-if="profile && profile.group === 'treatment'">
-          In the next part of the study, we ask you to explain your reasoning for a question you got wrong in the modified FCI.
-          After that, you will interact with an AI companion in a three-round dialogue. In each message,
-          the AI reviews your responses from the modified FCI questionnaire you took, and offers
-          explanations for those questions, similar to a peer study group. The AI companion will only talk to you about questions you got wrong. 
-          This part lasts for 40 minutes, or until all wrongly answered questions have been discussed. 
-          Note that in each dialogue, you must complete the 3 rounds to advance - the AI may prompt you with a question directly, but if it doesn't, please ask it any followup questions you have or anything else you feel will be helpful for improving your understanding of the question at hand.
+            In the next part of the study, we ask you to explain your reasoning for a question you got wrong in the modified FCI. 
+            After that, you will interact with an AI companion in a three-round dialogue. 
+            In each message, the AI reviews the summary of your reasoning and the question, and offers explanations and discussion, similar to a peer study group. 
+            The AI companion will only talk to you about questions you got wrong. This part lasts for 40 minutes, or until all wrongly answered questions have been discussed.
+            Note that in each dialogue, you must complete the 3 rounds to advance - the AI may prompt you with a question directly, but if it doesn't, please ask it any followup questions you have or anything else you feel will be helpful for improving your understanding of the question at hand.
         </div>
         <div v-else-if="profile && profile.group === 'control'">
           <!-- CONTROL GROUP -->
@@ -42,16 +41,27 @@
           Please do not discuss topics other than physics history with the AI.
         </div>
           <h3><strong>3. Post-Test and Feedback:</strong></h3> After the AI interactions, you will complete another FCI test
-          to evaluate the AI’s impact on your understanding of Newtonian Mechanics. You will also be asked provide feedback to the study.
+          to evaluate the AI’s impact on your understanding of Newtonian Mechanics. You will also be asked to provide feedback to the study.
           We kindly ask that you answer all questions honestly and to the best of your ability. Your responses are anonymous 
           and will not be shared outside of the research team. This is an <strong>ungraded</strong> test, and your answers 
           will not affect your grades or standing in any way.
           <h2><strong>Accuracy of the AI Companion</strong></h2>
-          The AI system used in this study has been thoroughly tested and is accurate in identifying incorrect responses on 
-          the modified FCI questionnaire. Any questions selected by the AI for discussion are indeed ones where your 
-          initial answer was incorrect. However, similar to a peer in a study group, the AI companion may not always provide 
-          accurate explanations for every question. The AI model can only answer 64.23% of the questions correctly on its 1st try. It’s essential to review the explanations critically for a more 
-          effective learning experience.
+          <!-- TREATMENT GROUP -->
+          <div v-if="profile && profile.group === 'treatment'">
+          After taking the first FCI test, your answers will be automatically compared to the correct ones marked by expert physics researchers. 
+          When you are asked to explain your reasoning for some of them in the second part of the study, you will only be asked to explain reasoning for questions where your initial answer was incorrect. 
+          However, when you talk to the AI, note that it is not an expert physics researcher. Similar to a peer in a study group, the AI companion may not always provide accurate explanations for every question. 
+          It can answer up to 40% of the questions incorrectly. 
+          It’s essential to review the explanations critically for a more effective learning experience.
+          </div>
+          <!-- CONTROL GROUP -->
+          <div v-else-if="profile && profile.group === 'control'">
+            After taking the first FCI test, your answers will be automatically compared to the correct ones marked by expert physics researchers. 
+            When you are asked to explain your reasoning for some of them in the second part of the study, you will only be asked to explain reasoning for questions where your initial answer was incorrect. 
+            However, when you talk to the AI, note that it is not a guaranteed expert on physics history. 
+            Similar to a peer in a study group, the AI companion may not always provide accurate knowledge or explanations. 
+            It’s essential to review the explanations critically for a more effective learning experience.
+          </div>
           <h2><strong>Voluntary Participation</strong></h2>
           Participation is entirely voluntary, and you may withdraw at any point by closing your browser.
           <h2><strong>Risks</strong></h2>

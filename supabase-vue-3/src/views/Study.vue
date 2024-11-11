@@ -5,7 +5,7 @@
   <div v-else-if="user">
     <div class="study-container">
       <h2>Force Concept Inventory Test #1</h2>
-      <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
+      <!-- <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button> -->
       <form @submit.prevent="confirmSubmission">
         <div v-for="(question, index) in questions" :key="question.id">
           <!-- Add images before the corresponding questions -->
@@ -381,7 +381,7 @@ const submitAnswer = async (question, optionIndex) => {
       return;
     }
 
-    console.log(`Answer for question ${question.question_number} submitted successfully.`);
+    // console.log(`Answer for question ${question.question_number} submitted successfully.`);
   } catch (error) {
     console.error('An unexpected error occurred:', error);
   }
@@ -563,7 +563,7 @@ const generateQuestionQueue = async () => {
     }
 
     if (!userAnswers || userAnswers.length === 0) {
-      console.log('No user answers found');
+      // console.log('No user answers found');
       return;
     }
 
@@ -571,7 +571,7 @@ const generateQuestionQueue = async () => {
     const answeredUserAnswers = userAnswers.filter(answer => answer.answer !== 'unanswered');
 
     if (answeredUserAnswers.length === 0) {
-      console.log('No answered questions to process.');
+      // console.log('No answered questions to process.');
       return;
     }
 
@@ -589,7 +589,7 @@ const generateQuestionQueue = async () => {
     }
 
     if (!questionsData || questionsData.length === 0) {
-      console.log('No questions data found for answered questions.');
+      // console.log('No questions data found for answered questions.');
       return;
     }
 
@@ -604,7 +604,7 @@ const generateQuestionQueue = async () => {
     }
 
     if (incorrectQuestions.length === 0) {
-      console.log('User got all answers correct, no question queue to generate.');
+      // console.log('User got all answers correct, no question queue to generate.');
       return;
     }
 
@@ -664,7 +664,7 @@ const generateQuestionQueue = async () => {
       return;
     }
 
-    console.log('Profile updated with new question queue.');
+    // console.log('Profile updated with new question queue.');
 
     // Update profile.value
     if (profile.value) {
