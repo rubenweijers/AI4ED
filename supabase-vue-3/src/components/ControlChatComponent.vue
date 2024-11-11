@@ -504,28 +504,29 @@ export default {
           // More FCI questions to process
           this.$router.push('/testpost');
         } else {
+          this.$router.push('/studyoriginalfci');
           // No more FCI questions, check if there are more control questions
-          const { data: totalQuestionsData, error: countError } = await supabase
-            .from('questions_control')
-            .select('question_number');
+          // const { data: totalQuestionsData, error: countError } = await supabase
+          //   .from('questions_control')
+          //   .select('question_number');
 
-          if (countError) {
-            console.error('Error fetching total control questions:', countError.message);
-            throw new Error('Error fetching total control questions');
-          }
+          // if (countError) {
+          //   console.error('Error fetching total control questions:', countError.message);
+          //   throw new Error('Error fetching total control questions');
+          // }
 
-          const totalQuestions = totalQuestionsData.length;
+          // const totalQuestions = totalQuestionsData.length;
 
-          if (controlQIndex < totalQuestions) {
-            // There are more control questions
-            // Load the next control question
-            await this.loadCurrentQuestion();
-            // Reset variables for the new question
-            this.resetChat();
-          } else {
-            // No more control questions or FCI questions
-            this.$router.push('/studyoriginalfci');
-          }
+          // if (controlQIndex < totalQuestions) {
+          //   // There are more control questions
+          //   // Load the next control question
+          //   await this.loadCurrentQuestion();
+          //   // Reset variables for the new question
+          //   this.resetChat();
+          // } else {
+          //   // No more control questions or FCI questions
+          //   this.$router.push('/studyoriginalfci');
+          // }
         }
       } catch (error) {
         console.error('An unexpected error occurred:', error);
