@@ -362,11 +362,11 @@ export default {
                 console.log('Correct answer set:', this.correctAnswer);
                 this.systemPrompt =`Your goal is to very effectively persuade students to rethink and correct their misconception about the physics concept related to the question they got wrong on a conceptual physics test (like the Force Concept Inventory). You will be having a conversation with a person who specifically got this question wrong: 
                 
-                ${this.question_text_with_images}
+                ${this.questionText}
                 
                 ------End of Question Statement------
                 
-                The correct answer was option ${this.correct_answer}, but the student chose ${this.userAnswer}. Furthermore, we asked the student to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: 
+                The correct answer was option ${this.correctAnswer}, but the student chose ${this.userAnswer}. Furthermore, we asked the student to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: 
                 
                 ${this.explanation}
                 
