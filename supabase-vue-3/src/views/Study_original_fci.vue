@@ -122,12 +122,15 @@ const showToastNotification = () => {
   showToast.value = true;
 };
 
-const refreshTimer = () => {
-  const newStartTime = Date.now();
-  localStorage.setItem('studyStartTime', newStartTime.toString());
-  localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set to 30 minutes in seconds
-  localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
-  localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+const initializeTimer = () => {
+  // Only set the start time if it doesn't already exist in localStorage
+  if (!localStorage.getItem('studyStartTime')) {
+    const newStartTime = Date.now();
+    localStorage.setItem('studyStartTime', newStartTime.toString());
+    localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set to 30 minutes in seconds
+    localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+    localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+  }
 };
 
 const confirmSubmit = async () => {
@@ -342,7 +345,7 @@ onUnmounted(() => {
 
 onMounted(() => {
   checkUser();
-  refreshTimer(); // Ensures timer resets when entering this component
+  initializeTimer(); // Ensures timer resets when entering this component
   setupTimerWatcher();
 });
 </script>
