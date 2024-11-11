@@ -50,7 +50,7 @@
           The AI system used in this study has been thoroughly tested and is accurate in identifying incorrect responses on 
           the modified FCI questionnaire. Any questions selected by the AI for discussion are indeed ones where your 
           initial answer was incorrect. However, similar to a peer in a study group, the AI companion may not always provide 
-          accurate explanations for every question. (INSERT % QUESTIONS WRONG HERE) It’s essential to review the explanations critically for a more 
+          accurate explanations for every question. The AI model can only answer 64.23% of the questions correctly on its 1st try. It’s essential to review the explanations critically for a more 
           effective learning experience.
           <h2><strong>Voluntary Participation</strong></h2>
           Participation is entirely voluntary, and you may withdraw at any point by closing your browser.
