@@ -185,6 +185,9 @@ const fetchIncorrectQuestion = async () => {
     // Check if question_queue exists and has a length of 0
     if (!profile.value.question_queue) {
       alert('Congratulations! You answered all questions correctly. You can skip the middle part of the study. After you click to continue, a 30-minute timer will start, and you will take the original FCI test.');
+      const newStartTime = Date.now();
+      localStorage.setItem('studyStartTime', newStartTime.toString());
+      localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set to 30 minutes in seconds
       // Redirect to the original FCI test
       router.push('/studyoriginalfci');
       return;
