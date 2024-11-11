@@ -238,6 +238,9 @@ const submitAnswers = async () => {
       router.push('/posttest');
     } else {
       // All questions completed
+      const newStartTime = Date.now();
+      localStorage.setItem('studyStartTime', newStartTime.toString());
+      localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set to 30 minutes in seconds
       router.push('/studyoriginalfci'); // Ensure you have a ThankYou.vue component or appropriate route
     }
   } catch (error) {
