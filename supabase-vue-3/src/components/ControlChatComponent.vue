@@ -224,7 +224,7 @@ export default {
 
         if (controlQIndex === null || controlQIndex === undefined) {
           // Initialize control_q to 0 and update the profile
-          controlQIndex = 0;
+          controlQIndex = 1;
           const { error: updateError } = await supabase
             .from('profiles_duplicate')
             .update({ control_q: controlQIndex })
@@ -435,9 +435,9 @@ Your goal is to inform the user of the correct answer as well as provide additio
         // Increment control_q
         let controlQIndex = this.profileData.control_q;
 
-        if (controlQIndex === null || controlQIndex === undefined) {
-          controlQIndex = 0;
-        }
+        // if (controlQIndex === null || controlQIndex === undefined) {
+        //   controlQIndex = 1;
+        // }
 
         controlQIndex += 1;
 
