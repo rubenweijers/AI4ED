@@ -452,8 +452,9 @@ export default {
             'Thank you for participating in this conversation. You have used all your available inputs.',
         });
         this.$nextTick(() => {
-        this.scrollToBottom();
+          this.scrollToBottom();
         }); 
+        this.chatComplete = true;
       }
     },
     // Check if the chat is finished
