@@ -140,7 +140,7 @@
               placeholder="Type a message..."
               :disabled="isChatFinished()"
             />
-            <button @click="sendMessage" :disabled="isChatFinished()">Send</button>
+            <button @click="sendMessage" :disabled="isChatFinished() || loading">Send</button>
           </div>
           <button v-if="isChatFinished()" @click="nextQuestion" class="next-button">Next Question</button>
         </div>
@@ -163,6 +163,7 @@ export default {
       loading: false,
       systemPrompt: '',
       remainingRounds: 3,
+      chatComplete: false,
       user: null,
       profileData: null,
       currentQuestion: null,
@@ -441,11 +442,14 @@ export default {
           content:
             'Thank you for participating in this conversation. You have used all your available inputs.',
         });
+        this.$nextTick(() => {
+        this.scrollToBottom();
+        }); 
       }
     },
     // Check if the chat is finished
     isChatFinished() {
-      return this.remainingRounds <= 0;
+        return this.chatComplete;
     },
     // Proceed to the next question or next phase
     nextQuestion: async function() {
