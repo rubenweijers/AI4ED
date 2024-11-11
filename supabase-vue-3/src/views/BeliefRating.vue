@@ -51,7 +51,7 @@ const user = ref(null);
 const showToastNotification = () => {
   if (profile.value.current_question_index > 0) {
     // Directly proceed without showing the toast
-    checkValid();
+    confirmSubmit();
   } else {
     showToast.value = true;
   }
