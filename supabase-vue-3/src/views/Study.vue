@@ -360,7 +360,7 @@ const submitAnswers = async () => {
     // Reset the timer to 30 minutes
     const newStartTime = Date.now();
     localStorage.setItem('studyStartTime', newStartTime);
-    localStorage.setItem('studyTotalDuration', (0.5 * 60).toString()); // Set total duration to 35 minutes in seconds
+    localStorage.setItem('studyTotalDuration', (40 * 60).toString()); // Set total duration to 35 minutes in seconds
     localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
     localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 
