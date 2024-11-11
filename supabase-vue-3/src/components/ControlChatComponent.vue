@@ -363,7 +363,7 @@ Your goal is to inform the user of the correct answer as well as provide additio
     async generateInitialAIMessage() {
       this.loading = true;
       const apiData = {
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: this.systemPrompt },
           {
@@ -403,7 +403,7 @@ Your goal is to inform the user of the correct answer as well as provide additio
       this.remainingRounds--;
 
       const apiData = {
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o',
         messages: [{ role: 'system', content: this.systemPrompt }, ...this.messages],
         max_tokens: 2000,
         temperature: 0.7,
