@@ -125,7 +125,7 @@ const showToastNotification = () => {
 const refreshTimer = () => {
   const newStartTime = Date.now();
   localStorage.setItem('studyStartTime', newStartTime.toString());
-  localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set to 30 minutes in seconds
+  localStorage.setItem('studyTotalDuration', (3 * 60).toString()); // Set to 30 minutes in seconds
   localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
   localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 };
