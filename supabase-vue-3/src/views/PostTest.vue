@@ -37,7 +37,7 @@
           <!-- Question 26 text as reminder for q27 -->
           <div v-if="incorrectQuestion.question_number === 27" class="additional-text">
           <p><i>Reminder: you used this statement to answer the question.</i><br>
-            A basketball player is standing on a court, dribbling a ball. What can be said about the force(s) on the ball during the periods of time when it is traveling from the ground to the player’s hand?
+            A basketball player is standing on a court, dribbling a ball.
           </p>  
           </div>
 

@@ -5,7 +5,7 @@
   <div v-else-if="user">
     <div class="study-container">
       <h2>Force Concept Inventory Test #2</h2>
-      <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button>
+      <!-- <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button> -->
       <form @submit.prevent="confirmSubmission">
         <div v-for="(question, index) in questions" :key="question.id">
           <!-- Add images before the corresponding questions -->

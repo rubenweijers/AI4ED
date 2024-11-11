@@ -7,7 +7,7 @@
           <h2><strong>Information</strong></h2>
           This study involves three key steps:
           <img src="/studypipeline.svg" alt="Studypipeline" class="welcome-image">
-          <h3><strong> 1. Pre-Test:</strong></h3> You will start by completing a <u>modified</u> version of the Force Concept Inventory (FCI), 
+          <h3><strong> 1. Pre-Test:</strong></h3> After a brief survey, you will start by completing a <u>modified</u> version of the Force Concept Inventory (FCI), 
           a 30-item multiple-choice questionnaire designed to assess your understanding of fundamental concepts 
           in Newtonian mechanics, including:
           <ul>
@@ -22,7 +22,7 @@
               <li>Do not leave any question unanswered.</li>
               <li>Avoid guessing; answer based on your understanding.</li>
           </ul>
-          Once you start the study, a timer of 35 minutes will start. Plan to complete this FCI within 35 minutes.
+          Once you start the study, a timer of 35 minutes will start. Plan to complete this FCI within that time.
           <h3><strong>2. AI Interaction:</strong></h3> 
           <!-- TREATMENT GROUP -->
           <div v-if="profile && profile.group === 'treatment'">
@@ -62,6 +62,9 @@
             Similar to a peer in a study group, the AI companion may not always provide accurate knowledge or explanations. 
             It’s essential to review the explanations critically for a more effective learning experience.
           </div>
+          <h2><strong>Discussion with Peers</strong></h2>
+          At the time you complete this study, some of your peers may not yet have participated in their lab sections. 
+          We ask you to please refrain from discussing the content here with other students until Thursday, November 14th (2024).
           <h2><strong>Voluntary Participation</strong></h2>
           Participation is entirely voluntary, and you may withdraw at any point by closing your browser.
           <h2><strong>Risks</strong></h2>
@@ -76,7 +79,7 @@
       </p>
       <p>
         <h2><strong>Contact</strong></h2>
-          For questions, please reach out to Duke investigator <strong>Prof. Ying Wu (Duke University)</strong> or principal investigator:  <strong>Prof. Jean-François Godbout (Université de Montréal)- <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></strong>
+          For questions, please reach out to investigator <strong>Prof. Ying Wu (Duke University)</strong> or principal investigator:  <strong>Prof. Jean-François Godbout (Université de Montréal)- <a href="mailto:ai4phys@gmail.com">ai4phys@gmail.com</a></strong>
       </p><br><br>
   </div>
 </template>
