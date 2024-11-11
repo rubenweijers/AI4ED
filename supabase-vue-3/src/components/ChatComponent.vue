@@ -108,7 +108,7 @@
                     placeholder="Type a message..." 
                     :disabled="isChatFinished()"
                 />
-                <button @click="sendMessage" :disabled="isChatFinished()">Send</button>
+                <button @click="sendMessage" :disabled="isChatFinished() || loading">Send</button>
             </div>
             <button v-if="isChatFinished()" @click="confirmNextPage" class="next-button">Next</button>
         </div>
