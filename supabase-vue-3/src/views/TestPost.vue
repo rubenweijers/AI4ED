@@ -176,10 +176,19 @@ const fetchUserProfile = async () => {
 
 const fetchIncorrectQuestion = async () => {
   try {
-    if (!profile.value.question_queue || profile.value.question_queue.length === 0) {
-      console.error('No question queue found. Please complete the FCI test first.');
-      alert('No question queue found. Please complete the FCI test first.');
-      router.push('/study'); // Redirect to the study page
+    // if (!profile.value.question_queue || profile.value.question_queue.length === 0) {
+    //   console.error('No question queue found. Please complete the FCI test first.');
+    //   alert('No question queue found. Please complete the FCI test first.');
+    //   router.push('/study'); // Redirect to the study page
+    //   return;
+    // }
+    if (!profile.value.question_queue) {
+      alert('Congratulations! You answered all questions correctly. You can skip the middle part of the study. After you click to continue, a 30-minute timer will start, and you will take the original FCI test.');
+      const newStartTime = Date.now();
+      localStorage.setItem('studyStartTime', newStartTime.toString());
+      localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set to 30 minutes in seconds
+      // Redirect to the original FCI test
+      router.push('/studyoriginalfci');
       return;
     }
 
