@@ -74,8 +74,8 @@ const ratingLabels = [
   { value: 0, text: 'Very helpful' },
   { value: 25, text: 'Fairly helpful' },
   { value: 50, text: 'Uncertain' },
-  { value: 75, text: 'Probably True' },
-  { value: 100, text: 'Definitely True' },
+  { value: 75, text: 'Fairly unhelpful' },
+  { value: 100, text: 'Very unhelpful' },
 ];
 
 const checkUser = async () => {

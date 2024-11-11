@@ -5,47 +5,61 @@
             <!-- Start of question display -->
             <div v-if="incorrectQuestion">
             <!-- Add reminder text for specific question numbers -->
-            <!-- Example for Q 2 -->
+            <!-- Q2 -->
             <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
-                <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
+            <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
             </div>
 
-            <!-- Example for Questions 3 to 7 -->
-            <div v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" class="additional-text">
-                <p><i>Reminder: you used this statement to answer the question.</i><br>
-                    A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+            <!-- Questions 3 to 7 -->
+            <div v-if="incorrectQuestion.question_number >= 4 && incorrectQuestion.question_number <= 7" class="additional-text">
+            <p><i>Reminder: you used this statement to answer the question.</i><br>
+                A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
 
-                    <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-                </p>  
+                <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+            </p>  
             </div>
 
-            <!-- Example for Questions 28 to 30 -->
-            <div v-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
-                <p><i>Reminder: you used this statement to answer the question.</i><br>
-                    A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+            <!-- Question 21 text as reminder for q22 -->
+            <div v-if="incorrectQuestion.question_number === 22" class="additional-text">
+            <p><i>Reminder: you used this statement to answer the question.</i><br>
+                There is a flag on a flagpole marking 30 m above ground. Two cannonballs, one four times heavier than the other, are simultaneously fired straight up from the ground with identical initial velocities. What can you say about the time each cannonball takes to reach the flag’s height? Ignore air resistance.
+            </p>  
+            </div>
 
-                    <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+            <!-- Question 26 text as reminder for q27 -->
+            <div v-if="incorrectQuestion.question_number === 27" class="additional-text">
+            <p><i>Reminder: you used this statement to answer the question.</i><br>
+                A basketball player is standing on a court, dribbling a ball. What can be said about the force(s) on the ball during the periods of time when it is traveling from the ground to the player’s hand?
+            </p>  
+            </div>
 
-                    <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
+            <!-- Questions 28 to 30 -->
+            <div v-else-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
+            <p><i>Reminder: you used this statement to answer the question.</i> <br>
+                A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+
+                <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+
+                <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
                 </p>
             </div>
 
             <!-- Add images before the corresponding questions -->
             <img v-if="incorrectQuestion.question_number === 1 || incorrectQuestion.question_number === 2" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" src="/fci_2/fci_q4-7.png" alt="Question related image" class="question-image">
+            <img v-if="incorrectQuestion.question_number >= 4 && incorrectQuestion.question_number <= 7" src="/fci_2/fci_q4-7.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 4" src="/fci_2/fci_q4.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 6" src="/fci_2/fci_q6.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 11" src="/fci_2/fci_q11.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 12" src="/fci_2/fci_q12.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 13" src="/fci_2/fci_q13.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number === 14" src="/fci_q14.png" alt="Question related image" class="question-image">
+            <img v-if="incorrectQuestion.question_number === 14" src="/fci_2/fci_q14.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 16" src="/fci_2/fci_q16.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 19" src="/fci_2/fci_q19.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 23" src="/fci_2/fci_q23.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 24" src="/fci_2/fci_q24.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" src="/fci_2/fci_q28-30.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 28" src="/fci_2/fci_q28.png" alt="Question related image" class="question-image">
-
+            <br>
             <!-- Display the question text -->
             <label v-html="formatQuestionText(incorrectQuestion)"></label>
 
@@ -55,11 +69,11 @@
                     <template v-if="shouldDisplayLabels(incorrectQuestion.question_number)">
                         <strong>{{ optionLabels[index] }}. </strong>
                     </template>
-                    {{ option }}
+                    <span v-html="formatOptionText(option)"></span>
                 </p>
             </div>
             <hr>
-            <p><strong>Your answer was:</strong> {{ userAnswer }}</p>
+            <p><strong>Your answer was:</strong> <span v-html="formatOptionText(userAnswer)"></span></p>
             <p><strong>Your explanation was:</strong> <i>"{{ explanation }}"</i></p>
             </div>
             <!-- End of question display -->
@@ -78,6 +92,7 @@
             </div>
             <div v-if="loading && messages.length > 0" class="loading">
                 <img src="/loading_spinner.gif" alt="Loading" />
+                <p>Thinking...</p>
             </div>
         </div>
 
@@ -119,6 +134,7 @@ export default {
             explanation: '',
             initialSystemMessage: '',
             remainingRounds: 3,
+            chatComplete: false,
             lastMessageTime: null,
             firstMsgTime: null,
             user: null,
@@ -419,6 +435,7 @@ export default {
             this.lastMessageTime = currentTime;
 
             this.messages.push({ role: 'user', content: userMessageContent });
+            this.scrollToBottom();
             this.remainingRounds--;
 
             const apiData = {
@@ -483,6 +500,10 @@ export default {
                     role: 'system',
                     content: "Thank you for participating in this conversation. You have used all your available inputs.",
                 });
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+                this.chatComplete = true;
             }
 
             this.saveChatData();
@@ -495,7 +516,8 @@ export default {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         },
         isChatFinished() {
-            return this.remainingRounds <= 0;
+            // return this.remainingRounds <= 0;
+            return this.chatComplete;
         },
         confirmNextPage() {
             if (confirm('Are you sure you want to proceed to the next page?')) {
@@ -539,6 +561,10 @@ export default {
             const numberText = question.question_number + '. ';
             const formattedText = question.question_text.replace(/\\n/g, '<br>');
             return numberText + formattedText;
+        },
+        formatOptionText = (option) => {
+            const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
+            return formattedOption;
         },
     }
 }

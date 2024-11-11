@@ -13,30 +13,44 @@
         <div class="question">
   
           <!-- Add reminder text for specific question numbers -->
-          <!-- Q2 -->
-          <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
+            <!-- Q2 -->
+            <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
             <p><i>Reminder Q2: Two children are playing tug of war. There is a flag marking the middle of the rope as shown in the diagram. Currently, the children are pulling in opposite directions at magnitudes such that the flag translates to the left with a constant speed <i>v<sub>o</sub></i>.</i></p>
-          </div>
-  
-          <!-- Questions 3 to 7 -->
-          <div v-if="incorrectQuestion.question_number >= 4 && incorrectQuestion.question_number <= 7" class="additional-text">
+            </div>
+
+            <!-- Questions 3 to 7 -->
+            <div v-if="incorrectQuestion.question_number >= 4 && incorrectQuestion.question_number <= 7" class="additional-text">
             <p><i>Reminder: you used this statement to answer the question.</i><br>
-              A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
-  
-                <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+                A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+
+                <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
             </p>  
             </div>
-  
-          <!-- Questions 28 to 30 -->
-          <div v-else-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
+
+            <!-- Question 21 text as reminder for q22 -->
+            <div v-if="incorrectQuestion.question_number === 22" class="additional-text">
+            <p><i>Reminder: you used this statement to answer the question.</i><br>
+                There is a flag on a flagpole marking 30 m above ground. Two cannonballs, one four times heavier than the other, are simultaneously fired straight up from the ground with identical initial velocities. What can you say about the time each cannonball takes to reach the flag’s height? Ignore air resistance.
+            </p>  
+            </div>
+
+            <!-- Question 26 text as reminder for q27 -->
+            <div v-if="incorrectQuestion.question_number === 27" class="additional-text">
+            <p><i>Reminder: you used this statement to answer the question.</i><br>
+                A basketball player is standing on a court, dribbling a ball. What can be said about the force(s) on the ball during the periods of time when it is traveling from the ground to the player’s hand?
+            </p>  
+            </div>
+
+            <!-- Questions 28 to 30 -->
+            <div v-else-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" class="additional-text">
             <p><i>Reminder: you used this statement to answer the question.</i> <br>
-              A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
-  
-                <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-  
+                A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+
+                <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+
                 <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
-              </p>
-          </div>
+                </p>
+            </div>
   
              <!-- Add images before the corresponding questions -->
             <img v-if="incorrectQuestion.question_number === 1 || incorrectQuestion.question_number === 2" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image">
@@ -53,7 +67,7 @@
             <img v-if="incorrectQuestion.question_number === 24" src="/fci_2/fci_q24.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number >= 28 && incorrectQuestion.question_number <= 30" src="/fci_2/fci_q28-30.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 28" src="/fci_2/fci_q28.png" alt="Question related image" class="question-image">
-
+            <br>
   
           <label v-html="formatQuestionText(incorrectQuestion)"></label>
   
