@@ -19,7 +19,7 @@
           </div>
   
           <!-- Questions 3 to 7 -->
-          <div v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" class="additional-text">
+          <div v-if="incorrectQuestion.question_number >= 4 && incorrectQuestion.question_number <= 7" class="additional-text">
             <p><i>Reminder: you used this statement to answer the question.</i><br>
               A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
   
@@ -40,7 +40,7 @@
   
              <!-- Add images before the corresponding questions -->
             <img v-if="incorrectQuestion.question_number === 1 || incorrectQuestion.question_number === 2" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image">
-            <img v-if="incorrectQuestion.question_number >= 3 && incorrectQuestion.question_number <= 7" src="/fci_2/fci_q4-7.png" alt="Question related image" class="question-image">
+            <img v-if="incorrectQuestion.question_number >= 4 && incorrectQuestion.question_number <= 7" src="/fci_2/fci_q4-7.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 4" src="/fci_2/fci_q4.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 6" src="/fci_2/fci_q6.png" alt="Question related image" class="question-image">
             <img v-if="incorrectQuestion.question_number === 11" src="/fci_2/fci_q11.png" alt="Question related image" class="question-image">
@@ -271,7 +271,12 @@ const submitExplanation = async () => {
       return;
     }
 
-    // Do not increment current_question_index here
+    // Increment the current_question_index in the profile
+    const updatedIndex = (profile.value.current_question_index || 0) + 1;
+    const { error: profileError } = await supabase
+      .from('profiles_duplicate')
+      .update({ current_question_index: updatedIndex })
+      .eq('user_id', user.value.username);
 
     submissionSuccess.value = true;
 
