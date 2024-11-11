@@ -174,11 +174,29 @@ const fetchUserProfile = async () => {
 };
 
 const fetchIncorrectQuestion = async () => {
+  // try {
+    // if (!profile.value.question_queue || profile.value.question_queue.length === 0) {
+    //   console.error('No question queue found. Please complete the FCI test first.');
+    //   alert('No question queue found. Please complete the FCI test first.');
+    //   router.push('/study'); // Redirect to the study page
+    //   return;
+    // }
   try {
-    if (!profile.value.question_queue || profile.value.question_queue.length === 0) {
+    // Check if question_queue exists and has a length of 0
+    if (profile.value.question_queue && profile.value.question_queue.length === 0) {
+      alert('Congratulations! You answered all questions correctly. You can skip the middle part of the study. After you click to continue, a 30-minute timer will start, and you will take the original FCI test.');
+      // Redirect to the original FCI test
+      router.push('/studyoriginalfci');
+      return;
+    }
+
+    // Check if question_queue is missing (null or undefined)
+    if (!profile.value.question_queue) {
       console.error('No question queue found. Please complete the FCI test first.');
       alert('No question queue found. Please complete the FCI test first.');
-      router.push('/study'); // Redirect to the study page
+      
+      // Redirect to the study page
+      router.push('/study');
       return;
     }
 
