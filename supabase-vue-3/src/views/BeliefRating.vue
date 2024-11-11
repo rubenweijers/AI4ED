@@ -22,7 +22,6 @@
       </div>
       <button @click="showToastNotification" class="submit-button">Submit</button>
       <ToastNotification
-        v-if="profile?.current_question_index === 0" 
         :isVisible="showToast"
         title="Submit Accuracy Rating"
         message="Are you sure you want to confirm your accuracy rating in the summary? This action cannot be undone."
@@ -50,7 +49,12 @@ const user = ref(null);
 
 // Toast notifications
 const showToastNotification = () => {
-  showToast.value = true;
+  if (profile.value.current_question_index > 0) {
+    // Directly proceed without showing the toast
+    checkValid();
+  } else {
+    showToast.value = true;
+  }
 };
 
 const confirmSubmit = async () => {
