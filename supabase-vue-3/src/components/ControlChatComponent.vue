@@ -124,6 +124,7 @@
 
         <div v-if="loading && messages.length > 0" class="loading">
           <img src="/loading_spinner.gif" alt="Loading" />
+          <p>Thinking...</p>
         </div>
       </div>
 
@@ -135,10 +136,10 @@
               Inputs remaining: {{ remainingRounds }}
             </div>
             <input
-              v-model="userMessage"
-              @keyup.enter="sendMessage"
-              placeholder="Type a message..."
-              :disabled="isChatFinished()"
+              v-model="userMessage" 
+              @keydown.enter.prevent="handleEnterKey"
+              placeholder="Type a message..." 
+              :disabled="isChatFinished() || loading"
             />
             <button @click="sendMessage" :disabled="isChatFinished() || loading">Send</button>
           </div>
@@ -217,6 +218,14 @@ export default {
       }
       console.log('Fetched profileData:', profileData);
       this.profileData = profileData;
+    },
+
+    handleEnterKey() {
+        if (this.loading || this.isChatFinished()) {
+            // Do nothing if the model is generating a response or the chat is finished
+            return;
+        }
+        this.sendMessage();
     },
     // Load the current control question from 'questions_control' table
     async loadCurrentQuestion() {
