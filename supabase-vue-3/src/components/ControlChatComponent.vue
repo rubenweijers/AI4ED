@@ -224,7 +224,7 @@ export default {
 
         if (controlQIndex === null || controlQIndex === undefined) {
           // Initialize control_q to 0 and update the profile
-          controlQIndex = 0;
+          controlQIndex = 1;
           const { error: updateError } = await supabase
             .from('profiles_duplicate')
             .update({ control_q: controlQIndex })
@@ -341,16 +341,16 @@ export default {
       // Set up the system prompt
       this.systemPrompt = `You are a helpful assistant. Please have a three-round dialogue with the user regarding their answer to the following question:
 
-"${this.formatQuestionText(this.currentQuestion)}"
+      "${this.formatQuestionText(this.currentQuestion)}"
 
-Options:
-${this.getFormattedOptions(this.currentQuestion)}
+      Options:
+      ${this.getFormattedOptions(this.currentQuestion)}
 
-------End of Question Statement------
+      ------End of Question Statement------
 
-The user's answer was: "${this.selectedAnswer}". The correct answer is: "${correct_answer}". Here is an explanation for the correct answer: "${answer_explanation}". 
+      The user's answer was: "${this.selectedAnswer}". The correct answer is: "${correct_answer}". Here is an explanation for the correct answer: "${answer_explanation}". 
 
-Your goal is to inform the user of the correct answer as well as provide additional relevant information. Ask them their reasoning for choosing that option and discuss their answer. Use simple, clear language that an average person will be able to follow, and structure the conversation so they gain new knowledge on the topic at each step. At the end of each message, provide additional questions on the topic to spur further discussion and increase the knowledge of the topic for the user. `;
+      Your goal is to inform the user of the correct answer as well as provide additional relevant information. Ask them their reasoning for choosing that option and discuss their answer. Use simple, clear language that an average person will be able to follow, and structure the conversation so they gain new knowledge on the topic at each step. At the end of each message, provide additional questions on the topic to spur further discussion and increase the knowledge of the topic for the user. `;
 
       this.remainingRounds = 3;
       this.messages = [];
