@@ -1,7 +1,7 @@
 <template>
     <div class="feedback-container">
       <h2>We would really appreciate your feedback!</h2>
-      <p>Before going to the final page, please help us improve our system by leaving comments or suggestions about your experience.:</p>
+      <p>Before going to the final page, please help us improve by leaving comments or suggestions about your experience:</p>
       <textarea
         v-model="feedbackText"
         placeholder="Enter your feedback here..."
