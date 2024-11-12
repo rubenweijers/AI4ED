@@ -140,7 +140,7 @@ const fetchSummary = async () => {
       return;
     }
     // The following line is for Luke's testing purpose:
-    // data.llm_summary = "I love physics"
+    data.llm_summary = "I love physics"
     if (data && data.llm_summary) {
       sentence.value = data.llm_summary;
       // console.log('Summary fetched, created at:', data.created_at);
