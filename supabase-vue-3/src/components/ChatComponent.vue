@@ -453,22 +453,39 @@ export default {
                 temperature: 0.7,
             };
 
-            try {
-                const response = await axios.post('/api/openai', apiData);
+            const maxRetries = 3; // Maximum number of retries
+            const retryDelay = 5000; // Delay in milliseconds between retries
+            let attempts = 0;
+            let success = false;
 
-                const initialMessage = response.data.choices[0].message.content.trim();
-                this.initialSystemMessage = initialMessage;
-                this.messages.push({ role: 'assistant', content: initialMessage });
-                this.firstMsgTime = new Date();
-            } catch (error) {
-                console.error('Error generating initial AI message:', error);
-                this.messages.push({
-                    role: 'assistant',
-                    content: "I apologize, but I'm having trouble starting our conversation. Could you please share your thoughts on the physics question you answered?",
-                });
-            } finally {
-                this.loading = false;
+            while (attempts < maxRetries && !success) {
+                try {
+                    const response = await axios.post('http://localhost:3000/api/openai', apiData);
+
+                    const initialMessage = response.data.choices[0].message.content.trim();
+                    this.initialSystemMessage = initialMessage;
+                    this.messages.push({ role: 'assistant', content: initialMessage });
+                    this.firstMsgTime = new Date();
+                    success = true; // Exit the loop if the request is successful
+                } catch (error) {
+                    console.error(`Error generating initial AI message on attempt ${attempts + 1}:`, error);
+                    
+                    // Check the type of error and decide if it is worth retrying
+                    if (attempts < maxRetries - 1) { // If it is not the last attempt
+                        console.log(`Retrying in ${retryDelay / 1000} seconds...`);
+                        await new Promise(resolve => setTimeout(resolve, retryDelay)); // Wait before retrying
+                    } else { // After the last attempt
+                        this.messages.push({
+                            role: 'assistant',
+                            content: "I apologize, but I'm having trouble starting our conversation. Could you please share your thoughts on the physics question you answered?",
+                        });
+                    }
+                } finally {
+                    attempts++;
+                }
             }
+
+            this.loading = false;
         },
 
         async sendMessage() {
@@ -508,49 +525,70 @@ export default {
             this.userMessage = '';
             this.loading = true;
 
-            try {
-                const response = await axios.post('/api/openai', apiData);
-                const aiMessage = response.data.choices[0].message.content.trim();
-                this.messages.push({ role: 'assistant', content: aiMessage });
+            const maxRetries = 3; // Maximum number of retries
+            const retryDelay = 5000; // Delay in milliseconds between retries
+            let attempts = 0;
+            let success = false;
 
-                const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
+            while (attempts < maxRetries && !success) {
+                try {
+                    const response = await axios.post('/api/openai', apiData);
+                    const aiMessage = response.data.choices[0].message.content.trim();
+                    this.messages.push({ role: 'assistant', content: aiMessage });
 
-                // Get user information from Supabase
-                const userId = this.user.username;
-                const { data: profileData, error: profileError } = await supabase
-                    .from('profiles_duplicate')
-                    .select('display_name, group')
-                    .eq('user_id', userId)
-                    .single();
+                    const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
 
-                if (profileError) throw profileError;
+                    // Get user information from Supabase
+                    const userId = this.user.username;
+                    const { data: profileData, error: profileError } = await supabase
+                        .from('profiles_duplicate')
+                        .select('display_name, group')
+                        .eq('user_id', userId)
+                        .single();
 
-                const displayName = profileData.display_name;
-                const llmType = profileData.group;
+                    if (profileError) throw profileError;
 
-                // Save chat history
-                await supabase.from('chat_history_duplicate').insert({
-                    user_id: userId,
-                    system_message: this.systemPrompt,
-                    conversation: this.messages,
-                    round: Math.ceil(this.messages.length / 2 - 1),
-                    user_chat: userMessageContent,
-                    model_reply: aiMessage,
-                    llm_type: llmType,
-                    time_spent: timeSpentFormatted,
-                    timestamp: new Date().toISOString(),
-                    initial_message: this.initialSystemMessage,
-                    question_number: this.profileData.question_queue[this.profileData.current_question_index || 0],
-                });
+                    const displayName = profileData.display_name;
+                    const llmType = profileData.group;
 
-                this.$nextTick(() => {
-                    this.scrollToBottom();
-                });
-            } catch (error) {
-                console.error('Error communicating with the OpenAI API', error);
-            } finally {
-                this.loading = false;
+                    // Save chat history
+                    await supabase.from('chat_history_duplicate').insert({
+                        user_id: userId,
+                        system_message: this.systemPrompt,
+                        conversation: this.messages,
+                        round: Math.ceil(this.messages.length / 2 - 1),
+                        user_chat: userMessageContent,
+                        model_reply: aiMessage,
+                        llm_type: llmType,
+                        time_spent: timeSpentFormatted,
+                        timestamp: new Date().toISOString(),
+                        initial_message: this.initialSystemMessage,
+                        question_number: this.profileData.question_queue[this.profileData.current_question_index || 0],
+                    });
+
+                    this.$nextTick(() => {
+                        this.scrollToBottom();
+                    });
+
+                    success = true; // Exit the loop if the request is successful
+                } catch (error) {
+                    console.error(`Error communicating with the OpenAI API on attempt ${attempts + 1}:`, error);
+
+                    if (attempts < maxRetries - 1) { // If it's not the last attempt
+                        console.log(`Retrying in ${retryDelay / 1000} seconds...`);
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                    } else { // After all attempts
+                        this.messages.push({
+                            role: 'assistant',
+                            content: "I apologize, but I'm having trouble continuing the conversation. Please try again later.",
+                        });
+                    }
+                } finally {
+                    attempts++;
+                }
             }
+
+            this.loading = false;
 
             if (this.remainingRounds === 0) {
                 this.messages.push({
