@@ -385,22 +385,39 @@ export default {
         temperature: 0.7,
       };
 
-      try {
-        const response = await axios.post('/api/openai', apiData);
-        const initialMessage = response.data.choices[0].message.content.trim();
-        this.messages.push({ role: 'assistant', content: initialMessage });
-      } catch (error) {
-        console.error('Error generating initial AI message:', error);
-        this.messages.push({
-          role: 'assistant',
-          content: "I apologize, but I'm having trouble starting our conversation.",
-        });
-      } finally {
-        this.loading = false;
-        // Scroll to bottom after AI responds
-        this.$nextTick(() => {
-          this.scrollToBottom();
-        });
+      const maxRetries = 3; // Maximum number of retries
+            const retryDelay = 5000; // Delay in milliseconds between retries
+            let attempts = 0;
+            let success = false;
+
+      while (attempts < maxRetries && !success) {
+
+        try {
+          const response = await axios.post('/api/openai', apiData);
+          const initialMessage = response.data.choices[0].message.content.trim();
+          this.messages.push({ role: 'assistant', content: initialMessage });
+          success = true; // Exit the loop if the request is successful
+
+        } catch (error) {
+          console.error('Error generating initial AI message:', error);
+          // Check the type of error and decide if it is worth retrying
+          if (attempts < maxRetries - 1) { // If it is not the last attempt
+              console.log(`Retrying in ${retryDelay / 1000} seconds...`);
+              await new Promise(resolve => setTimeout(resolve, retryDelay)); // Wait before retrying
+          } else { // After the last attempt
+              this.messages.push({
+                  role: 'assistant',
+                  content: "I apologize, but I'm having trouble starting our conversation. Could you please share your thoughts on the physics question you answered?",
+              });
+          }
+        } finally {
+          attempts++;
+          this.loading = false;
+          // Scroll to bottom after AI responds
+          this.$nextTick(() => {
+            this.scrollToBottom();
+          });
+        }
       }
     },
     // Send a message in the chat
@@ -419,31 +436,53 @@ export default {
         temperature: 0.7,
       };
 
+      const maxRetries = 3; // Maximum number of retries
+      const retryDelay = 5000; // Delay in milliseconds between retries
+      let attempts = 0;
+      let success = false;
       this.userMessage = '';
       this.loading = true;
 
-      try {
-        const response = await axios.post('/api/openai', apiData);
-        const aiMessage = response.data.choices[0].message.content.trim();
-        this.messages.push({ role: 'assistant', content: aiMessage });
+      while (attempts < maxRetries && !success) {
 
-        // Optionally, save chat history
-        await supabase.from('control_chat_history').insert({
-          user_id: this.user.username,
-          question_number: this.currentQuestion.question_number,
-          conversation: this.messages,
-          timestamp: new Date().toISOString(),
-        });
+        try {
+          const response = await axios.post('/api/openai', apiData);
+          const aiMessage = response.data.choices[0].message.content.trim();
+          this.messages.push({ role: 'assistant', content: aiMessage });
 
-        this.$nextTick(() => {
-          this.scrollToBottom();
-        });
-      } catch (error) {
-        console.error('Error communicating with the OpenAI API', error);
-        alert('There was an error communicating with the AI. Please try again.');
-      } finally {
-        this.loading = false;
+          // Optionally, save chat history
+          await supabase.from('control_chat_history').insert({
+            user_id: this.user.username,
+            question_number: this.currentQuestion.question_number,
+            conversation: this.messages,
+            timestamp: new Date().toISOString(),
+          });
+
+          this.$nextTick(() => {
+            this.scrollToBottom();
+          });
+          success = true; // Exit the loop if the request is successful
+
+        } catch (error) {
+          console.error('Error communicating with the OpenAI API', error);
+          // Check the type of error and decide if it is worth retrying
+          if (attempts < maxRetries - 1) { // If it's not the last attempt
+              console.log(`Retrying in ${retryDelay / 1000} seconds...`);
+              await new Promise(resolve => setTimeout(resolve, retryDelay));
+          } else { // After all attempts
+              this.messages.push({
+                  role: 'assistant',
+                  content: "I apologize, but I'm having trouble continuing the conversation. Please try again later.",
+              });
+          }
+
+          alert('There was an error communicating with the AI. Please try again.');
+        } finally {
+          attempts++;
+          this.loading = false;
+        }
       }
+      
 
       if (this.remainingRounds === 0) {
         this.messages.push({

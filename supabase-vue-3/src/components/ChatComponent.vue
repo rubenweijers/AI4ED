@@ -460,7 +460,7 @@ export default {
 
             while (attempts < maxRetries && !success) {
                 try {
-                    const response = await axios.post('http://localhost:3000/api/openai', apiData);
+                    const response = await axios.post('api/openai', apiData);
 
                     const initialMessage = response.data.choices[0].message.content.trim();
                     this.initialSystemMessage = initialMessage;
