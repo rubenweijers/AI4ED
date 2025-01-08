@@ -20,7 +20,7 @@ body {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  margin: 5px; /* Ensure no margin */
+  margin: 5px; /* Ensure no margin! */
   padding: 0px; /* Ensure no padding */
   text-align: center;
   color: black;
