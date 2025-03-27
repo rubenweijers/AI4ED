@@ -148,42 +148,74 @@ const handleSignUp = async (user) => {
   }
 }
 
-const autoSignUp = async () => {
+  const autoSignUp = async () => {
   loading.value = true;
   const userDetails = [];
-
-  const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
-  let controlCount = 0;
-  let treatmentCount = 0;
-
+  const usersToGenerate = 264; // Total users including backups
+  
+  const controlCount = Math.floor(usersToGenerate * 0.4); // 40%
+  const experimentalO3Count = Math.floor(usersToGenerate * 0.3); // 30%
+  const experimental4oCount = usersToGenerate - (controlCount + experimentalO3Count); // Remaining 30%
+  
+  let groups = [
+    ...Array(controlCount).fill('control'),
+    ...Array(experimentalO3Count).fill('experimental_o3'),
+    ...Array(experimental4oCount).fill('experimental_4o')
+  ];
+  
+  // Shuffle groups randomly
+  groups = groups.sort(() => Math.random() - 0.5);
+  
   for (let i = 0; i < usersToGenerate; i++) {
-    let group;
-    if (controlCount < usersToGenerate / 2 && treatmentCount < usersToGenerate / 2) {
-      // Randomly assign group if both are under half
-      group = Math.random() < 0.5 ? 'control' : 'treatment';
-    } else if (controlCount < usersToGenerate / 2) {
-      group = 'control';
-    } else {
-      group = 'treatment';
-    }
-
+    const group = groups[i];
     const newUser = generateRandomUser(group);
-
+    
     // Push a shallow copy of newUser to userDetails before handleSignUp
     userDetails.push({ ...newUser });
-
+    
     await handleSignUp(newUser);
-
-    if (group === 'control') {
-      controlCount++;
-    } else {
-      treatmentCount++;
-    }
   }
-
+  
   createAndDownloadTxtFile(userDetails);
   loading.value = false;
-}
+};
+
+// const autoSignUp = async () => {
+//   loading.value = true;
+//   const userDetails = [];
+
+//   const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
+//   let controlCount = 0;
+//   let treatmentCount = 0;
+
+//   for (let i = 0; i < usersToGenerate; i++) {
+//     let group;
+//     if (controlCount < usersToGenerate / 2 && treatmentCount < usersToGenerate / 2) {
+//       // Randomly assign group if both are under half
+//       group = Math.random() < 0.5 ? 'control' : 'treatment';
+//     } else if (controlCount < usersToGenerate / 2) {
+//       group = 'control';
+//     } else {
+//       group = 'treatment';
+//     }
+
+//     const newUser = generateRandomUser(group);
+
+//     // Push a shallow copy of newUser to userDetails before handleSignUp
+//     userDetails.push({ ...newUser });
+
+//     await handleSignUp(newUser);
+
+//     if (group === 'control') {
+//       controlCount++;
+//     } else {
+//       treatmentCount++;
+//     }
+//   }
+
+//   createAndDownloadTxtFile(userDetails);
+//   loading.value = false;
+// }
 </script>
 
 <style scoped>
