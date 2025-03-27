@@ -53,7 +53,7 @@ const handleLogin = async () => {
 
     // Fetch the hashed password from the database based on the username
     const { data: profile, error: profileError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .select('id, password, display_name')
       .eq('username', username.value)
       .single();
