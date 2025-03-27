@@ -38,17 +38,13 @@ const generateRandomString = (length, chars) => {
 };
 
 const generateRandomUser = (group) => {
-  // Generate a 6-character lowercase username
   const username = generateRandomString(5, 'abcdefghijklmnopqrstuvwxyz0123456789');
-  // Generate an 8-character alphanumeric password with both letters and numbers
   const password = generateRandomString(5, 'abcdefghijklmnopqrstuvwxyz0123456789');
   return {
     username: username,
     password: password,
     displayName: username,
-    // you can change groups directly here
-    // group: "treatment",
-    group: "control",
+    group: group,  // Use the passed group parameter
   }
 }
 
@@ -90,32 +86,6 @@ const handleSignUp = async (user) => {
       throw new Error('Username already exists');
     }
 
-    // Fetch the current count of participants in both groups
-    const { data: treatmentCountData, error: treatmentCountError } = await supabase
-      .from('2_profiles')
-      .select('id')
-      .eq('group', 'treatment');
-
-    const { data: controlCountData, error: controlCountError } = await supabase
-      .from('2_profiles')
-      .select('id')
-      .eq('group', 'control');
-
-    if (treatmentCountError) throw treatmentCountError;
-    if (controlCountError) throw controlCountError;
-
-    const treatmentCount = treatmentCountData.length;
-    const controlCount = controlCountData.length;
-
-    let group = 'control';
-    if (treatmentCount < controlCount) {
-      group = 'treatment';
-    } else if (treatmentCount > controlCount) {
-      group = 'control';
-    } else {
-      group = Math.random() < 0.5 ? 'treatment' : 'control';
-    }
-
     const now = new Date().toISOString();
 
     // Insert into 2_profiles table
@@ -127,16 +97,15 @@ const handleSignUp = async (user) => {
           username: user.username,
           display_name: user.displayName,
           password: hashedPassword,
-          group: user.group,
+          group: user.group,  // Use the group from the user object
           created_at: now,
         }
       ]);
 
     if (profileError) throw profileError;
 
-    // only alert if we are using individual sign-up
     const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
-    if (usersToGenerate < 1){
+    if (usersToGenerate < 1) {
       alert('User registered successfully!');
     }
 
