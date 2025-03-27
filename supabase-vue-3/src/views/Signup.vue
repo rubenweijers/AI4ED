@@ -77,7 +77,7 @@ const handleSignUp = async (user) => {
 
     // Check if username already exists
     const { data: existingUser, error: existingUserError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .select('username')
       .eq('username', user.username)
       .maybeSingle();
@@ -92,12 +92,12 @@ const handleSignUp = async (user) => {
 
     // Fetch the current count of participants in both groups
     const { data: treatmentCountData, error: treatmentCountError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .select('id')
       .eq('group', 'treatment');
 
     const { data: controlCountData, error: controlCountError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .select('id')
       .eq('group', 'control');
 
@@ -118,9 +118,9 @@ const handleSignUp = async (user) => {
 
     const now = new Date().toISOString();
 
-    // Insert into profiles_duplicate table
+    // Insert into 2_profiles table
     const { data: profile, error: profileError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .insert([
         {
           user_id: user.displayName,
