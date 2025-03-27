@@ -148,34 +148,44 @@ const handleSignUp = async (user) => {
   }
 }
 
-  const autoSignUp = async () => {
+// Utility function to shuffle an array (Fisher-Yates algorithm)
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+const autoSignUp = async () => {
   loading.value = true;
   const userDetails = [];
-  const usersToGenerate = 264; // Total users including backups
-  
-  const controlCount = Math.floor(usersToGenerate * 0.4); // 40%
-  const experimentalO3Count = Math.floor(usersToGenerate * 0.3); // 30%
-  const experimental4oCount = usersToGenerate - (controlCount + experimentalO3Count); // Remaining 30%
-  
-  let groups = [
+
+  const usersToGenerate = parseInt(numberOfUsersToGenerate.value, 10) || 0;
+
+  // Calculate the number of users for each group
+  const controlCount = Math.round(usersToGenerate * 0.4);           // 40% for control
+  const expO3Count = Math.round(usersToGenerate * 0.3);            // 30% for experimental_o3
+  const exp4oCount = usersToGenerate - controlCount - expO3Count;  // Remainder for experimental_4o
+
+  // Create an array with the exact number of group assignments
+  const groups = [
     ...Array(controlCount).fill('control'),
-    ...Array(experimentalO3Count).fill('experimental_o3'),
-    ...Array(experimental4oCount).fill('experimental_4o')
+    ...Array(expO3Count).fill('experimental_o3'),
+    ...Array(exp4oCount).fill('experimental_4o')
   ];
-  
-  // Shuffle groups randomly
-  groups = groups.sort(() => Math.random() - 0.5);
-  
+
+  // Shuffle the groups to randomize the order
+  shuffle(groups);
+
+  // Generate users with preassigned, shuffled groups
   for (let i = 0; i < usersToGenerate; i++) {
     const group = groups[i];
     const newUser = generateRandomUser(group);
-    
-    // Push a shallow copy of newUser to userDetails before handleSignUp
     userDetails.push({ ...newUser });
-    
     await handleSignUp(newUser);
   }
-  
+
   createAndDownloadTxtFile(userDetails);
   loading.value = false;
 };
