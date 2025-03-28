@@ -463,8 +463,9 @@ export default {
                     { role: "system", content: this.systemPrompt },
                     { role: "user", content: "Please start the conversation by addressing the user's misconception." },
                 ],
-                max_tokens: 2000,
+                max_completion_tokens: 2000,
                 temperature: this.temperature, // Use dynamic temperature
+                reasoning_effort: 'medium' // Add reasoning effort
             };
 
             try {
@@ -515,8 +516,9 @@ export default {
                     { role: "system", content: this.systemPrompt },
                     ...this.messages,
                 ],
-                max_tokens: 2000,
+                max_completion_tokens: 2000,
                 temperature: this.temperature, // Use dynamic temperature
+                reasoning_effort: "medium" // 
             };
 
             this.userMessage = '';
