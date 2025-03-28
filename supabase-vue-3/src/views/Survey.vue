@@ -97,7 +97,7 @@ const checkUser = async () => {
 const checkSubmissionStatus = async () => {
   try {
     const { data, error } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .select('has_submitted_survey')
       .eq('user_id', user.value.username)
       .single();
@@ -170,7 +170,7 @@ const submitAnswers = async () => {
     }));
 
     const { data, error } = await supabase
-      .from('survey_answers_duplicate')
+      .from('2_survey_answers')
       .upsert(surveyEntries, { onConflict: ['user_id', 'question_id'] });
 
     if (error) {
@@ -181,7 +181,7 @@ const submitAnswers = async () => {
 
     // Update user's submission status on the server
     const { error: updateError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .update({ has_submitted_survey: true })
       .eq('display_name', user.value.username);
 
