@@ -133,10 +133,10 @@
             <div v-for="(message, index) in messages" :key="index" :class="['message', message.role]">
                 <div v-if="message.role === 'assistant'" class="assistant-message">
                     <img src="/openai.png" alt="OpenAI" class="openai-icon" />
-                    <p v-html="marked(message.content)"></p>
+                    <div v-html="marked(message.content)"></div>
                 </div>
                 <div v-else class="user-message">
-                    <p>{{ message.content }}</p>
+                    <div v-html="marked(message.content)"></div>
                 </div>
             </div>
             <div v-if="loading && messages.length > 0" class="loading">
