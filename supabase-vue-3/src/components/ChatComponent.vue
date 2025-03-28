@@ -182,7 +182,7 @@ export default {
             questionText: '',
             explanation: '',
             initialSystemMessage: '',
-            remainingRounds: 3,
+            remainingRounds: 5,
             chatComplete: false,
             lastMessageTime: null,
             firstMsgTime: null,
@@ -193,12 +193,14 @@ export default {
             optionLabels: ["A", "B", "C", "D", "E"],
             questionsWithLabels: [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 29, 30],
             timerWatcherInterval: null,
+            modelToUse: 'gpt-4o', // Default model
+            temperature: 0.7,   // Default temperature
         };
     },
     async mounted() {
-        this.isLoading = true;
+        this.loading = true;
         await this.loadDataAndSetSystemPrompt();
-        this.isLoading = false;
+        this.loading = false;
         if (!this.incorrectQuestion) {
             console.error('Incorrect Question is not set.');
             return;
@@ -301,7 +303,7 @@ export default {
                 // console.log('User data loaded:', this.user);
 
                 const { data: profileData, error: profileError } = await supabase
-                    .from('profiles_duplicate')
+                    .from('2_profiles')
                     .select('*')
                     .eq('user_id', this.user.username)
                     .maybeSingle();
@@ -316,6 +318,19 @@ export default {
                 }
                 // console.log('Fetched profileData:', profileData);
                 this.profileData = profileData;
+
+                // Set model and temperature based on group
+                if (this.profileData.group === 'experimental_4o') {
+                    this.modelToUse = 'gpt-4o';
+                    this.temperature = 0.7;
+                } else if (this.profileData.group === 'experimental_o3') {
+                    this.modelToUse = 'o3-mini';
+                    this.temperature = 1.0;
+                } else {
+                    console.warn(`Unknown group: ${this.profileData.group}. Defaulting to GPT-4o.`);
+                    this.modelToUse = 'gpt-4o';
+                    this.temperature = 0.7;
+                }
 
                 const questionQueue = this.profileData.question_queue;
                 const currentQuestionIndex = parseInt(this.profileData.current_question_index, 10) || 0;
@@ -425,7 +440,7 @@ export default {
                 
                 The correct answer was option ${this.correctAnswer}, but the student chose ${this.userAnswer}. Furthermore, we asked the student to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: 
                 
-                ${this.explanation}
+                ${this.explanation || 'The user did not provide a detailed explanation'}
                 
                 Please generate a response that provides gradual support to clarify their understanding, beginning from familiar ideas and building step-by-step toward the correct concept. Use relatable examples and invite reflection, encouraging them to question and reconsider their assumptions based on their own reasoning. Use simple, clear language that an average person will be able to follow, and structure the conversation so they gain confidence at each step and adjust their thinking gradually. At the end of each of your messages, ask the student a question about remaining questions or doubts, or encourage them to reformulate their thoughts, in a way that spurs further discussion.`;
 
@@ -444,13 +459,13 @@ export default {
         async generateInitialAIMessage() {
             this.loading = true;
             const apiData = {
-                model: "gpt-4o",
+                model: this.modelToUse, // Use dynamic model
                 messages: [
                     { role: "system", content: this.systemPrompt },
                     { role: "user", content: "Please start the conversation by addressing the user's misconception." },
                 ],
                 max_tokens: 2000,
-                temperature: 0.7,
+                temperature: this.temperature, // Use dynamic temperature
             };
 
             try {
@@ -479,7 +494,7 @@ export default {
 
             // Set lastMessageTime to firstMsgTime during the first message
             if (this.remainingRounds === 3 && !this.lastMessageTime) {
-                this.lastMessageTime = this.firstMsgTime;
+                this.lastMessageTime = this.firstMsgTime || new Date();
             }
 
             // Calculate time spent since the last message
@@ -496,13 +511,13 @@ export default {
             this.remainingRounds--;
 
             const apiData = {
-                model: "gpt-4o",
+                model: this.modelToUse, // Use dynamic model
                 messages: [
                     { role: "system", content: this.systemPrompt },
                     ...this.messages,
                 ],
                 max_tokens: 2000,
-                temperature: 0.7,
+                temperature: this.temperature, // Use dynamic temperature
             };
 
             this.userMessage = '';
@@ -518,7 +533,7 @@ export default {
                 // Get user information from Supabase
                 const userId = this.user.username;
                 const { data: profileData, error: profileError } = await supabase
-                    .from('profiles_duplicate')
+                    .from('2_profiles')
                     .select('display_name, group')
                     .eq('user_id', userId)
                     .single();
@@ -555,7 +570,7 @@ export default {
             if (this.remainingRounds === 0) {
                 this.messages.push({
                     role: 'system',
-                    content: "Thank you for participating in this conversation. You have used all your available inputs.",
+                    content: "Thank you for participating in this conversation. You've used all 5 rounds.",
                 });
                 this.$nextTick(() => {
                     this.scrollToBottom();
@@ -582,9 +597,9 @@ export default {
             }
         },
         async nextPage() {
-        this.clearChatData(); // Clear chat data before moving to the next page
-        // Redirect to the post-chat belief rating page
-        this.$router.push('/beliefratingpostchat');
+            this.clearChatData(); // Clear chat data before moving to the next page
+            // Redirect to the post-chat belief rating page
+            this.$router.push('/beliefratingpostchat');
         },
         saveChatData() {
             const chatData = {
@@ -598,6 +613,7 @@ export default {
                 lastMessageTime: this.lastMessageTime,
                 incorrectQuestion: this.incorrectQuestion, // Ensure this is included
                 userAnswer: this.userAnswer, // Ensure this is included
+                firstMsgTime: this.firstMsgTime,
             };
             // console.log('Saving chatData:', chatData);
             localStorage.setItem('chatData', JSON.stringify(chatData));
