@@ -438,7 +438,7 @@ export default {
                 
                 ------End of Question Statement------
                 
-                The correct answer was option ${this.correctAnswer}, but the student chose ${this.userAnswer}. Furthermore, we asked the student to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: 
+                The correct answer was option ${this.correctAnswer}, but the student chose option ${this.userAnswer}. Furthermore, we asked the student to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: 
                 
                 ${this.explanation || 'The user did not provide a detailed explanation'}
                 
