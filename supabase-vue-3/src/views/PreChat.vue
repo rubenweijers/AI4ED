@@ -17,7 +17,7 @@
         </div>
       
       <div>
-        <p>This process is designed to <strong>explore and improve your physics intuition</strong> in depth.</p>
+        <p>This process is designed to <strong>explore your physics intuition</strong> in depth.</p>
       </div>
       
       <button @click="proceedToChat" class="submit-button">I have read and understood the above text.</button>
