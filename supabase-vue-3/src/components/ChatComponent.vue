@@ -581,8 +581,14 @@ export default {
             this.saveChatData();
         },
         marked(content) {
+            // Set marked options for better formatting (e.g., line breaks, GFM for bullet points)
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+            });
             return marked(content);
-        },
+        }
+        ,
         scrollToBottom() {
             const messagesContainer = this.$el.querySelector('.messages');
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -685,12 +691,14 @@ export default {
     border-radius: 20px;
     margin-left: auto;
     max-width: 70%;
+    text-align: left;
 }
 
 .assistant-message {
     display: flex;
     align-items: flex-start;
     max-width: 70%;
+    text-align: left;
 }
 
 .openai-icon {
@@ -714,6 +722,18 @@ export default {
     padding: 20px;
     background-color: #f9f9f9;
     border-top: 1px solid #ccc;
+}
+
+/* Ensure bullet lists display correctly */
+.assistant-message ul, .user-message ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    padding-left: 0;
+}
+
+/* Bold text styling */
+.assistant-message strong, .user-message strong {
+    font-weight: bold;
 }
 
 .input-wrapper {
