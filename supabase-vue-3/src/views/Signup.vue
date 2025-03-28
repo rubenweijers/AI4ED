@@ -44,7 +44,7 @@ const generateRandomUser = (group) => {
     username: username,
     password: password,
     displayName: username,
-    group: group,  // Use the passed group parameter
+    group: group,  // Use the passed group parameter instead of other
   }
 }
 
