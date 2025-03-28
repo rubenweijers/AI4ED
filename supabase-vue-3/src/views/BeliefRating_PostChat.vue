@@ -138,7 +138,7 @@ const fetchSummary = async () => {
 
     const questionNumber = questionQueue[currentQuestionIndex];
 
-    // Fetch llm_summary from 'answers_posttest_denton' for this question
+    // Fetch llm_summary from posttest table for this question
     const { data, error } = await supabase
       .from('2_posttest_answers')
       // .select('llm_summary')
