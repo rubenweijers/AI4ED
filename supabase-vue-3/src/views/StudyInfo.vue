@@ -67,7 +67,7 @@ const fetchUserProfile = async () => {
   // console.log('Fetching profile for user:', user.value);
   // Adjust the query according to your Supabase setup
   const { data, error } = await supabase
-    .from('profiles_duplicate')
+    .from('2_profiles')
     .select('*')
     .eq('user_id', user.value.username) // Ensure this matches your user data
     .single();
