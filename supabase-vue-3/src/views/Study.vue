@@ -173,7 +173,7 @@ const checkUser = async () => {
 
 const fetchUserProfile = async () => {
   const { data, error } = await supabase
-    .from('profiles_duplicate')
+    .from('2_profiles')
     .select('*')
     .eq('user_id', user.value.username)
     .single();
@@ -195,7 +195,7 @@ const fetchUserProfile = async () => {
 const checkSubmissionStatus = async () => {
   try {
       const { data, error } = await supabase
-    .from('profiles_duplicate')
+    .from('2_profiles')
     .select('has_submitted_study_one')
     .eq('user_id', user.value.username)
     .single();
@@ -215,7 +215,7 @@ const checkSubmissionStatus = async () => {
 const fetchQuestions = async () => {
   try {
     const { data, error } = await supabase
-      .from('questions_denton')
+      .from('questions_modified')
       .select('*')
       .order('question_number', { ascending: true });
 
@@ -335,7 +335,7 @@ const submitAnswers = async () => {
     });
 
     const { data: answerData, error: answerError } = await supabase
-      .from('answers_denton')
+      .from('2_answers_modified')
       .upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
 
     if (answerError) {
@@ -348,7 +348,7 @@ const submitAnswers = async () => {
     await generateQuestionQueue(); // Adjust if necessary
 
     const { error: updateError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .update({ has_submitted_study_one: true })
       .eq('user_id', user.value.username);
 
@@ -382,7 +382,7 @@ const submitAnswer = async (question, optionIndex) => {
     };
 
     const { data, error } = await supabase
-      .from('answers_denton') // Changed from 'answers_duplicate' to 'answers_denton'
+      .from('2_answers_modified') // Changed from 'answers_denton' to 2_answers_modified
       .upsert([answerEntry], { onConflict: ['user_id', 'question_id'] });
 
     if (error) {
@@ -562,7 +562,7 @@ const generateQuestionQueue = async () => {
   try {
     // Step 1: Fetch all user's answers
     const { data: userAnswers, error: userAnswersError } = await supabase
-      .from('answers_denton')
+      .from('2_answers_modified')
       .select('question_number, answer')
       .eq('user_id', user.value.username);
 
@@ -588,7 +588,7 @@ const generateQuestionQueue = async () => {
     const answeredQuestionNumbers = answeredUserAnswers.map(a => a.question_number);
 
     const { data: questionsData, error: questionsError } = await supabase
-      .from('questions_denton')
+      .from('questions_modified')
       .select('question_number, correct_answer, misconception_category')
       .in('question_number', answeredQuestionNumbers);
 
@@ -661,7 +661,7 @@ const generateQuestionQueue = async () => {
 
     // Step 4: Update user profile with the generated question queue
     const { data: updateData, error: updateError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .update({
         question_queue: questionQueue,
         current_question_index: 0,
