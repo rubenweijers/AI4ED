@@ -1,14 +1,16 @@
 <template>
     <div class="pre-chat-container">
-      <h2>Prepare for AI Conversation</h2>
+      <h2>Prepare for the AI Conversation</h2>
       
       <div>
-        <p>You are about to engage in a conversation with an advanced AI about your explanations. Here's what to expect:</p>
+        <p>You are about to engage in a conversation with an AI about your reasoning for the previous question.</p>
+        <p> Here's what to expect: <strong>Please read carefully</strong></p>
       </div>
       
       <div class="info-block">
         <ol>
-          <li>The conversation will consist of <strong>three rounds.</strong></li>
+          <li>The conversation will consist of <strong>max 5 rounds.</strong></li>
+          <li>If you feel like you got everything out of the conversation, you can end it after round 1.</li>
           <li>The <strong>AI will initiate</strong> the conversation.</li>
           <li>You and the AI will then <strong>alternate in a back-and-forth</strong> dialogue.</li>
           <li><strong>Each round</strong> gives you an opportunity to <strong>expand on or clarify</strong> your thoughts.</li>
@@ -16,7 +18,7 @@
       </div>
       
       <div>
-        <p>This process is designed to <strong>explore your physics intuition</strong> in depth and provide you with a unique opportunity for learning.</p>
+        <p>This process is designed to <strong>explore and improve your physics intuition</strong> in depth.</p>
       </div>
       
       <button @click="proceedToChat" class="submit-button">I have read and understood the above text.</button>
