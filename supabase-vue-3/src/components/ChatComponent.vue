@@ -828,4 +828,29 @@ input:disabled, button:disabled {
 .next-button:hover {
   background-color: #000066; /* Darker Blue */
 }
+
+/* ADD HEADERS */
+.assistant-message h1, .assistant-message h2, .assistant-message h3 {
+    color: #333;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.assistant-message h1 {
+    font-size: 1.4em; /* Larger than regular text, but not too big */
+}
+
+.assistant-message h2 {
+    font-size: 1.2em; /* Slightly smaller than h1 */
+}
+
+.assistant-message h3 {
+    font-size: 1.1em; /* Close to regular text, for minor headings */
+}
+
+/* Ensure text wraps properly to avoid overflow */
+.assistant-message {
+    word-wrap: break-word;
+}
 </style>
