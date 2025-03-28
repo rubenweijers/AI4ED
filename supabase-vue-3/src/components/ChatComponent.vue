@@ -850,8 +850,8 @@ input:disabled, button:disabled {
     font-size: 1.1em; /* Close to regular text, for minor headings */
 }
 
-/* Ensure text wraps properly to avoid overflow */
+/* Ensure text wraps properly to avoid overflow
 .assistant-message {
     word-wrap: break-word;
-}
+} */
 </style>
