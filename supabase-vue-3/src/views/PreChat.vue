@@ -14,6 +14,7 @@
           <li>The <strong>AI will initiate</strong> the conversation.</li>
           <li>You and the AI will then <strong>alternate in a back-and-forth</strong> dialogue.</li>
           <li><strong>Each round</strong> gives you an opportunity to <strong>expand on or clarify</strong> your thoughts.</li>
+          <li>After the dialogue is over, we will cover the next wrongly answered question.</li>
         </ol>
       </div>
       
