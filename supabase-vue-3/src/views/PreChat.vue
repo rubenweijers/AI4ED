@@ -1,22 +1,20 @@
 <template>
     <div class="pre-chat-container">
       <h2>Prepare for the AI Conversation</h2>
-      
-      <div>
-        <p>You are about to engage in a conversation with an AI about your reasoning for the previous question.</p>
-        <p> Here's what to expect: <strong>Please read carefully</strong></p>
-      </div>
-      
-      <div class="info-block">
-        <ol>
-          <li>The conversation will consist of <strong>max 5 rounds.</strong></li>
-          <li>If you feel like you got everything out of the conversation, you can end it after round 1.</li>
-          <li>The <strong>AI will initiate</strong> the conversation.</li>
-          <li>You and the AI will then <strong>alternate in a back-and-forth</strong> dialogue.</li>
-          <li><strong>Each round</strong> gives you an opportunity to <strong>expand on or clarify</strong> your thoughts.</li>
-          <li>After the dialogue is over, we will cover the next wrongly answered question.</li>
-        </ol>
-      </div>
+        <div>
+          <p>You’re about to discuss your reasoning from the previous question with an AI.</p>
+          <p><strong>Please read carefully</strong> to know what’s coming:</p>
+        </div>
+        <div class="info-block">
+          <ul>
+            <li>The conversation will have <strong>up to 5 rounds</strong>.</li>
+            <li>You can end it after round 1 if you feel satisfied.</li>
+            <li>The <strong>AI will start</strong> the dialogue.</li>
+            <li>You’ll then take turns in a <strong>back-and-forth</strong> exchange.</li>
+            <li>Each round lets you <strong>expand or clarify</strong> your ideas.</li>
+            <li>Afterward, we’ll move to the next incorrectly answered question.</li>
+          </ul>
+        </div>
       
       <div>
         <p>This process is designed to <strong>explore and improve your physics intuition</strong> in depth.</p>
