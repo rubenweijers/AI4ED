@@ -155,7 +155,7 @@ const checkUser = async () => {
 
 const fetchUserProfile = async () => {
   const { data, error } = await supabase
-    .from('profiles_duplicate')
+    .from('2_profiles')
     .select('*')
     .eq('user_id', user.value.username)
     .single();
@@ -169,7 +169,7 @@ const fetchUserProfile = async () => {
 
 const checkSubmissionStatus = async () => {
   const { data, error } = await supabase
-    .from('profiles_duplicate')
+    .from('2_profiles')
     .select('has_submitted_survey')
     .eq('user_id', user.value.username)
     .single();
@@ -242,7 +242,7 @@ const submitAnswers = async () => {
     });
 
     const { error: answerError } = await supabase
-      .from('answers_duplicate')
+      .from('2_answers_original')
       .upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
 
     if (answerError) {
@@ -252,7 +252,7 @@ const submitAnswers = async () => {
     }
 
     const { error: updateError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .update({ has_submitted_survey: true })
       .eq('user_id', user.value.username);
 
@@ -287,7 +287,7 @@ const submitAnswer = async (question, optionIndex) => {
   };
 
   const { error } = await supabase
-    .from('answers_duplicate')
+    .from('2_answers_original')
     .upsert([answerEntry], { onConflict: ['user_id', 'question_id'] });
 
   if (error) {

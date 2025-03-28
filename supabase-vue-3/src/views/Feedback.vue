@@ -43,7 +43,7 @@
         try {
           // Update the 'feedback' column in 'profiles_duplicate' table
           const { error } = await supabase
-            .from('profiles_duplicate')
+            .from('2_profiles')
             .update({ feedback: feedbackText.value })
             .eq('user_id', user.value.username);
   

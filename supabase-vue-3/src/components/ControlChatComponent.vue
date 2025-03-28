@@ -203,7 +203,7 @@ export default {
 
       // Fetch user profile from profiles_duplicate
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles_duplicate')
+        .from('2_profiles')
         .select('*')
         .eq('user_id', this.user.username)
         .single();
@@ -236,7 +236,7 @@ export default {
           // Initialize control_q to 0 and update the profile
           controlQIndex = 1;
           const { error: updateError } = await supabase
-            .from('profiles_duplicate')
+            .from('2_profiles')
             .update({ control_q: controlQIndex })
             .eq('user_id', this.user.username);
 
@@ -333,7 +333,7 @@ export default {
       }
 
       // Save the answer to answers_control table
-      const { error } = await supabase.from('answers_control').insert({
+      const { error } = await supabase.from('2_control_answers').insert({
         user_id: this.user.username,
         question_number: this.currentQuestion.question_number,
         answer: this.selectedAnswer,
@@ -428,7 +428,7 @@ export default {
         this.messages.push({ role: 'assistant', content: aiMessage });
 
         // Optionally, save chat history
-        await supabase.from('control_chat_history').insert({
+        await supabase.from('2_control_chat_history').insert({
           user_id: this.user.username,
           question_number: this.currentQuestion.question_number,
           conversation: this.messages,
@@ -470,7 +470,7 @@ export default {
 
         // Update control_q in profiles_duplicate
         const { error: updateControlQError } = await supabase
-          .from('profiles_duplicate')
+          .from('2_profiles')
           .update({ control_q: controlQIndex })
           .eq('user_id', this.user.username);
 
@@ -485,7 +485,7 @@ export default {
 
         // Fetch updated profile data
         const { data: updatedProfileData, error: profileFetchError } = await supabase
-          .from('profiles_duplicate')
+          .from('2_profiles')
           .select('current_question_index, question_queue')
           .eq('user_id', this.user.username)
           .single();
@@ -538,7 +538,7 @@ export default {
       try {
         // Fetch updated profile data
         const { data: updatedProfileData, error: profileFetchError } = await supabase
-          .from('profiles_duplicate')
+          .from('2_profiles')
           .select('current_question_index, question_queue')
           .eq('user_id', this.user.username)
           .single();

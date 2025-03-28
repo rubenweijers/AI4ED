@@ -96,7 +96,7 @@ const checkUser = async () => {
 
 const fetchUserProfile = async () => {
   const { data, error } = await supabase
-    .from('profiles_duplicate')
+    .from('2_profiles')
     .select('*')
     .eq('user_id', user.value.username)
     .single();
@@ -122,7 +122,7 @@ const fetchSummary = async () => {
 
     // Fetch profile data to get question queue and current index
     const { data: profileData, error: profileError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .select('*')
       .eq('user_id', user.value.username)
       .single();
@@ -140,7 +140,7 @@ const fetchSummary = async () => {
 
     // Fetch llm_summary from 'answers_posttest_denton' for this question
     const { data, error } = await supabase
-      .from('answers_posttest_denton')
+      .from('2_posttest_answers')
       // .select('llm_summary')
       .select('explanation') // GET USER EXPLANATION
       .eq('user_id', user.value.username)
@@ -186,7 +186,7 @@ const submitAnswers = async () => {
 
     // Fetch profile data to get question queue and current index
     const { data: profileData, error: profileError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .select('*')
       .eq('user_id', user.value.username)
       .single();
@@ -204,7 +204,7 @@ const submitAnswers = async () => {
 
     // Update belief_rating_2 in answers_posttest_denton for this question
     const { error } = await supabase
-      .from('answers_posttest_denton')
+      .from('2_posttest_answers')
       .update({ belief_rating_2: selectedRating.value })
       .eq('user_id', user.value.username)
       .eq('question_number', questionNumber);
@@ -222,7 +222,7 @@ const submitAnswers = async () => {
 
     // Update current_question_index in profiles_duplicate
     const { error: updateError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .update({ current_question_index: updatedIndex })
       .eq('user_id', user.value.username); // Use .username
 

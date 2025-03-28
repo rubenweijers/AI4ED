@@ -208,7 +208,7 @@ const checkUser = async () => {
 
 const fetchUserProfile = async () => {
   const { data, error } = await supabase
-    .from('profiles_duplicate')
+    .from('2_profiles')
     .select('*')
     .eq('user_id', user.value.username)
     .maybeSingle();
@@ -256,7 +256,7 @@ const fetchIncorrectQuestion = async () => {
 
     // Fetch the question from 'questions_denton' table
     const { data: questionData, error: questionError } = await supabase
-      .from('questions_denton')
+      .from('questions_modified')
       .select('*')
       .eq('question_number', nextQuestionNumber)
       .single();
@@ -270,7 +270,7 @@ const fetchIncorrectQuestion = async () => {
 
     // Fetch user's answer from 'answers_denton' table
     const { data: userAnswerData, error: userAnswerError } = await supabase
-      .from('answers_denton')
+      .from('2_answers_modified')
       .select('answer')
       .eq('user_id', user.value.username)
       .eq('question_number', nextQuestionNumber)
@@ -340,7 +340,7 @@ const submitExplanation = async () => {
 
       // Perform the upsert operation
       const { error } = await supabase
-        .from('answers_posttest_denton')
+        .from('2_posttest_answers')
         .upsert(upsertData, { 
           onConflict: 'user_id,question_number',
           returning: 'minimal' 
@@ -356,7 +356,7 @@ const submitExplanation = async () => {
 
       // Update the row with the summarized explanation
       const { error: updateError } = await supabase
-        .from('answers_posttest_denton')
+        .from('2_posttest_answers')
         .update({ llm_summary: summary })
         .eq('user_id', user.value.username)
         .eq('question_number', incorrectQuestion.value.question_number);
@@ -370,7 +370,7 @@ const submitExplanation = async () => {
     const newIndex = profile.value.current_question_index;
 
     const { error: profileUpdateError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .update({
         current_question_index: newIndex,
       })

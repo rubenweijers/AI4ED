@@ -353,7 +353,7 @@ export default {
 
                 // console.log('Fetching answer data for user:', this.user.username, 'and question number:', questionNumber);
                 const { data: answerData, error: answerError } = await supabase
-                    .from('answers_posttest_denton')
+                    .from('2_posttest_answers')
                     .select('belief_rating_1, llm_summary')
                     .eq('user_id', this.user.username)
                     .eq('question_number', questionNumber)
@@ -374,7 +374,7 @@ export default {
 
                 // console.log('Fetching question data for question number:', questionNumber);
                 const { data: questionData, error: questionError } = await supabase
-                    .from('questions_denton')
+                    .from('questions_modified')
                     .select('*')
                     .eq('question_number', questionNumber)
                     .single();
@@ -400,7 +400,7 @@ export default {
 
                 // console.log('Fetching user answer for question number:', questionNumber);
                 const { data: userAnswerData, error: userAnswerError } = await supabase
-                    .from('answers_denton')
+                    .from('2_answers_modified')
                     .select('answer')
                     .eq('user_id', this.user.username)
                     .eq('question_number', questionNumber)
@@ -416,7 +416,7 @@ export default {
                 // console.log('User answer set:', this.userAnswer);
 
                 const { data: correctAnswerData, error: correctAnswerError } = await supabase
-                    .from('questions_denton')
+                    .from('questions_modified')
                     .select('correct_answer')
                     .eq('question_number', questionNumber)
                     .single();
@@ -544,7 +544,7 @@ export default {
                 const llmType = profileData.group;
 
                 // Save chat history
-                await supabase.from('chat_history_duplicate').insert({
+                await supabase.from('2_experimental_chat_history').insert({
                     user_id: userId,
                     system_message: this.systemPrompt,
                     conversation: this.messages,

@@ -208,7 +208,7 @@ const checkUser = async () => {
 
 const fetchUserProfile = async () => {
   const { data, error } = await supabase
-    .from('profiles_duplicate')
+    .from('2_profiles')
     .select('*')
     .eq('user_id', user.value.username)
     .maybeSingle();
@@ -256,7 +256,7 @@ const fetchIncorrectQuestion = async () => {
 
     // Fetch the question data
     const { data: questionData, error: questionError } = await supabase
-      .from('questions_denton')
+      .from('questions_modified')
       .select('*')
       .eq('question_number', nextQuestionNumber)
       .single();
@@ -270,7 +270,7 @@ const fetchIncorrectQuestion = async () => {
 
     // Fetch user's previous answer
     const { data: userAnswerData, error: userAnswerError } = await supabase
-      .from('answers_denton')
+      .from('2_answers_modified')
       .select('answer')
       .eq('user_id', user.value.username)
       .eq('question_number', nextQuestionNumber)
@@ -340,7 +340,7 @@ const submitExplanation = async () => {
 
     // Perform the upsert operation
     const { error } = await supabase
-      .from('answers_posttest_denton')
+      .from('2_posttest_answers')
       .upsert(upsertData, { onConflict: 'user_id,question_number', returning: 'minimal' });
 
     if (error) {
@@ -351,7 +351,7 @@ const submitExplanation = async () => {
     // Increment the current_question_index in the profile
     const updatedIndex = (profile.value.current_question_index || 0) + 1;
     const { error: profileError } = await supabase
-      .from('profiles_duplicate')
+      .from('2_profiles')
       .update({ current_question_index: updatedIndex })
       .eq('user_id', user.value.username);
 

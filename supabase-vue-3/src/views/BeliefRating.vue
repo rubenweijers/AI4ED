@@ -96,7 +96,7 @@ const checkUser = async () => {
 
 const fetchUserProfile = async () => {
   const { data, error } = await supabase
-    .from('profiles_duplicate')
+    .from('2_profiles')
     .select('*')
     .eq('user_id', user.value.username)
     .single();
@@ -126,7 +126,7 @@ const fetchSummary = async () => {
 
     // Fetch the newest row based on created_at for this user and question
     const { data, error } = await supabase
-      .from('answers_posttest_denton')
+      .from('2_posttest_answers')
       .select('llm_summary, created_at')
       .eq('user_id', user.value.username)
       .eq('question_number', questionNumber)
@@ -175,7 +175,7 @@ const submitAnswers = async () => {
     const questionNumber = questionQueue[currentQuestionIndex];
 
     const { data, error } = await supabase
-      .from('answers_posttest_denton')
+      .from('2_posttest_answers')
       .update({ 'belief_rating_1': selectedRating.value })
       .eq('user_id', user.value.username)
       .eq('question_number', questionNumber);
