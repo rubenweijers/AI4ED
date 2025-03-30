@@ -441,7 +441,11 @@ export default {
                 The correct answer was option ${this.correctAnswer}, but the student chose option ${this.userAnswer}. Furthermore, we asked the student to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: 
                 
                 ${this.explanation || 'The user did not provide a detailed explanation'}
-                
+
+                IMPORTANT FORMATTING RULES:
+                - Use standard Markdown for formatting (bold, italics, lists, headers).
+                - When using subscript for simple text labels, variable names, or formulas, use HTML <sub> tags. For example: H<sub>2</sub>O, v<sub>final</sub>. Do NOT use LaTeX underscores (_) or other math-specific syntax.
+
                 Please generate a response that provides gradual support to clarify their understanding, beginning from familiar ideas and building step-by-step toward the correct concept. Use relatable examples and invite reflection, encouraging them to question and reconsider their assumptions based on their own reasoning. Use simple, clear language that an average person will be able to follow, and structure the conversation so they gain confidence at each step and adjust their thinking gradually. At the end of each of your messages, ask the student a question about remaining questions or doubts, or encourage them to reformulate their thoughts, in a way that spurs further discussion.`;
                 //old prompt
                 //this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
