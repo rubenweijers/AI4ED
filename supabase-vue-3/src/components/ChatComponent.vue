@@ -182,7 +182,7 @@ export default {
             questionText: '',
             explanation: '',
             initialSystemMessage: '',
-            remainingRounds: 5,
+            remainingRounds: 5, // User gets 5 messages
             chatComplete: false,
             lastMessageTime: null,
             firstMsgTime: null,
@@ -193,16 +193,19 @@ export default {
             optionLabels: ["A", "B", "C", "D", "E"],
             questionsWithLabels: [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 29, 30],
             timerWatcherInterval: null,
-            modelToUse: 'gpt-4o', // Default model
-            temperature: 0.7,   // Default temperature
+            // --- Defaults (will be potentially overwritten by localStorage or fetch) ---
+            modelToUse: 'gpt-4o', // Default model, might change based on group or localStorage
+            temperature: 0.7,   // Default temperature, might change based on group or localStorage
         };
     },
     async mounted() {
         this.loading = true;
-        await this.loadDataAndSetSystemPrompt();
+        await this.loadDataAndSetSystemPrompt(); // This will handle loading/fetching and setting the model
         this.loading = false;
-        if (!this.incorrectQuestion) {
-            console.error('Incorrect Question is not set.');
+        if (!this.incorrectQuestion && this.messages.length <= 1) { // Check if incorrectQuestion is null AND it's not just a refresh with existing messages
+            console.error('Incorrect Question is not set, and no prior chat data loaded.');
+             // Maybe redirect or show an error message
+             // this.$router.push('/error-page'); // Example redirect
             return;
         }
         this.$nextTick(() => {
@@ -211,8 +214,7 @@ export default {
         // Setup the timer watcher on component mount
         this.setupTimerWatcher();
     },
-    beforeUnmount() { // Use beforeUnmount instead of beforeDestroy
-        // Clear the timer interval when the component is destroyed
+    beforeUnmount() {
         if (this.timerWatcherInterval) {
             clearInterval(this.timerWatcherInterval);
         }
@@ -220,6 +222,7 @@ export default {
     methods: {
         clearChatData() {
             localStorage.removeItem('chatData');
+            // Reset all relevant data properties
             this.userMessage = '';
             this.messages = [];
             this.loading = false;
@@ -228,24 +231,26 @@ export default {
             this.questionText = '';
             this.explanation = '';
             this.initialSystemMessage = '';
-            this.remainingRounds = 3;
+            this.remainingRounds = 5; // Reset rounds
+            this.chatComplete = false; // Reset completion status
             this.lastMessageTime = null;
             this.firstMsgTime = null;
             this.incorrectQuestion = null;
             this.userAnswer = '';
+            this.modelToUse = 'gpt-4o'; // Reset to default model
+            this.temperature = 0.7; // Reset to default temperature
         },
 
         handleEnterKey() {
-        if (this.loading || this.isChatFinished()) {
-            // Do nothing if the model is generating a response or the chat is finished
-            return;
-        }
-        this.sendMessage();
-    },
+            if (this.loading || this.isChatFinished()) {
+                return;
+            }
+            this.sendMessage();
+        },
 
-        // Timer setup method
         setupTimerWatcher() {
-            this.timerWatcherInterval = setInterval(() => {
+            // ... (timer watcher code remains the same)
+             this.timerWatcherInterval = setInterval(() => {
                 const remainingTime = this.getRemainingTime();
                 if (remainingTime <= 0) {
                     clearInterval(this.timerWatcherInterval);
@@ -254,8 +259,8 @@ export default {
                 }
             }, 1000);
         },
-        // Method to calculate remaining time
         getRemainingTime() {
+            // ... (timer calculation remains the same)
             const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
             const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
             const now = Date.now();
@@ -265,32 +270,57 @@ export default {
         },
 
         async loadDataAndSetSystemPrompt() {
-        try {
-            const userData = localStorage.getItem('user');
-            if (!userData) {
-            // console.log('User not authenticated');
-            this.$router.push('/login');
-            return;
-            }
-            this.user = JSON.parse(userData);
+            try {
+                const userData = localStorage.getItem('user');
+                if (!userData) {
+                    this.$router.push('/login');
+                    return;
+                }
+                this.user = JSON.parse(userData);
 
-            const storedData = localStorage.getItem('chatData');
-            if (storedData) {
-            const parsedData = JSON.parse(storedData);
-            Object.assign(this, parsedData);
-            this.messages = this.messages || [{ role: 'assistant', content: this.initialSystemMessage }];
-            this.remainingRounds = this.remainingRounds !== undefined ? this.remainingRounds : 3;
-            } else {
-            await this.fetchDataAndSetSystemPrompt();
+                const storedData = localStorage.getItem('chatData');
+                if (storedData) {
+                    console.log('Loading chat data from localStorage...');
+                    const parsedData = JSON.parse(storedData);
+                    Object.assign(this, parsedData); // Load most data
+
+                    // *** CHANGE: Explicitly load model and temperature if available ***
+                    this.modelToUse = parsedData.modelToUse || this.modelToUse; // Keep loaded model or default if not found
+                    this.temperature = parsedData.temperature || this.temperature; // Keep loaded temp or default if not found
+
+                    // Ensure messages array exists, default to initial message if needed
+                    this.messages = this.messages && this.messages.length > 0
+                        ? this.messages
+                        : [{ role: 'assistant', content: this.initialSystemMessage || "Welcome back! Let's continue our discussion." }];
+
+                    // Ensure remainingRounds has a valid value
+                    this.remainingRounds = typeof this.remainingRounds === 'number' ? this.remainingRounds : 5;
+                    this.chatComplete = this.remainingRounds <= 0; // Recalculate chatComplete based on loaded rounds
+
+                    console.log('Loaded model:', this.modelToUse, 'Temperature:', this.temperature);
+                    console.log('Loaded rounds remaining:', this.remainingRounds);
+
+                } else {
+                    console.log('No chat data in localStorage, fetching fresh data...');
+                    // Only fetch fresh data if nothing is in localStorage
+                    await this.fetchDataAndSetSystemPrompt();
+                }
+            } catch (error) {
+                console.error('Error in loadDataAndSetSystemPrompt:', error);
+                // Provide feedback to the user
+                alert('An error occurred while loading your chat session. Please try refreshing the page or returning to the study section.');
+                 // Optionally clear potentially corrupted localStorage data
+                 // localStorage.removeItem('chatData');
+                 // Redirect user
+                 // this.$router.push('/study');
             }
-        } catch (error) {
-            console.error('Error in loadDataAndSetSystemPrompt:', error);
-            alert('An error occurred while loading data. Please try again.');
-        }
         },
 
+
         async fetchDataAndSetSystemPrompt() {
-            try {
+            // This function now primarily runs on the *first* visit or when localStorage is empty.
+            // It sets the model/temperature based on the group fetched from Supabase.
+             try {
                 // console.log('Starting fetchDataAndSetSystemPrompt...');
 
                 const userData = localStorage.getItem('user');
@@ -319,7 +349,7 @@ export default {
                 // console.log('Fetched profileData:', profileData);
                 this.profileData = profileData;
 
-                // Set model and temperature based on group
+                // *** CHANGE: Set model and temperature based on group for initial fetch ***
                 if (this.profileData.group === 'experimental_4o') {
                     this.modelToUse = 'gpt-4o';
                     this.temperature = 0.7;
@@ -328,9 +358,11 @@ export default {
                     this.temperature = 1.0;
                 } else {
                     console.warn(`Unknown group: ${this.profileData.group}. Defaulting to GPT-4o.`);
-                    this.modelToUse = 'gpt-4o';
-                    this.temperature = 0.7;
+                    this.modelToUse = 'gpt-4o'; // Fallback default
+                    this.temperature = 0.7;    // Fallback default
                 }
+                 console.log('Initial fetch set model:', this.modelToUse, 'Temperature:', this.temperature);
+
 
                 const questionQueue = this.profileData.question_queue;
                 const currentQuestionIndex = parseInt(this.profileData.current_question_index, 10) || 0;
@@ -432,14 +464,14 @@ export default {
 
                 this.correctAnswer = correctAnswerData.correct_answer || '';
                 // console.log('Correct answer set:', this.correctAnswer);
-                this.systemPrompt =`Your goal is to very effectively persuade students to rethink and correct their misconception about the physics concept related to the question they got wrong on a conceptual physics test (like the Force Concept Inventory). You will be having a conversation with a person who specifically got this question wrong: 
-                
+                this.systemPrompt =`Your goal is to very effectively persuade students to rethink and correct their misconception about the physics concept related to the question they got wrong on a conceptual physics test (like the Force Concept Inventory). You will be having a conversation with a person who specifically got this question wrong:
+
                 ${this.questionText}
-                
+
                 ------End of Question Statement------
-                
-                The correct answer was option ${this.correctAnswer}, but the student chose option ${this.userAnswer}. Furthermore, we asked the student to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows: 
-                
+
+                The correct answer was option ${this.correctAnswer}, but the student chose option ${this.userAnswer}. Furthermore, we asked the student to provide an open-ended response explaining their reasoning for the answer, which is summarized as follows:
+
                 ${this.explanation || 'The user did not provide a detailed explanation'}
 
                 IMPORTANT FORMATTING RULES:
@@ -447,20 +479,24 @@ export default {
                 - When using subscript for simple text labels, variable names, or formulas, use HTML <sub> tags. For example: H<sub>2</sub>O, v<sub>final</sub>. Do NOT use LaTeX underscores (_) or other math-specific syntax.
 
                 Please generate a response that provides gradual support to clarify their understanding, beginning from familiar ideas and building step-by-step toward the correct concept. Use relatable examples and invite reflection, encouraging them to question and reconsider their assumptions based on their own reasoning. Use simple, clear language that an average person will be able to follow, and structure the conversation so they gain confidence at each step and adjust their thinking gradually. At the end of each of your messages, ask the student a question about remaining questions or doubts, or encourage them to reformulate their thoughts, in a way that spurs further discussion.`;
-                //old prompt
-                //this.systemPrompt = `Your goal is to very effectively persuade users to rethink and correct their misconception about the physics concept related to the question they got wrong on the Force Concept Inventory test. You will be having a conversation with a person who, on a psychometric survey, expressed a belief level of ${this.userBeliefLevel} out of 100 (where 0 is Definitely False, 50 is Uncertain, and 100 is Definitely True) in their incorrect answer. The specific question they got wrong is: ${this.questionText}. Further, we asked the user to provide an open-ended response explaining their reasoning, which is summarized as follows: ${this.explanation}. Please generate a response that will persuade the user that their understanding is incorrect, based on their own reasoning. Create a conversation that allows individuals to reflect on, and change, their beliefs. Use simple language that an average person will be able to understand.`;
+
                 // console.log('System prompt set:', this.systemPrompt);
 
                 await this.generateInitialAIMessage();
+                // Save *after* initial message generation completes successfully
                 this.saveChatData();
+
             } catch (error) {
                 console.error('Error in fetchDataAndSetSystemPrompt:', error);
-                alert(error.message);
+                alert(`Failed to initialize the chat session: ${error.message}. Please try returning to the study section and starting again.`);
+                // Consider redirecting the user if initialization fails critically
                 this.$router.push('/study');
             }
         },
+
         async generateInitialAIMessage() {
-            this.loading = true;
+            // ... (generateInitialAIMessage remains largely the same) ...
+             this.loading = true;
             const apiData = {
                 model: this.modelToUse, // Use dynamic model
                 messages: [
@@ -479,22 +515,28 @@ export default {
             }
 
             try {
-                console.log('Model:', this.modelToUse);
-                console.log('API Data:', apiData);
+                console.log('Generating initial message with Model:', this.modelToUse);
+                // console.log('API Data for initial message:', apiData);
                 const response = await axios.post('/api/openai', apiData);
 
                 const initialMessage = response.data.choices[0].message.content.trim();
-                this.initialSystemMessage = initialMessage;
-                this.messages.push({ role: 'assistant', content: initialMessage });
-                this.firstMsgTime = new Date();
+                this.initialSystemMessage = initialMessage; // Store the very first AI message
+                this.messages = [{ role: 'assistant', content: initialMessage }]; // Initialize messages with the first AI response
+                this.firstMsgTime = new Date(); // Set time for the first message
             } catch (error) {
                 console.error('Error generating initial AI message:', error);
+                 // Provide a fallback message or handle the error appropriately
+                const errorMessage = "I apologize, but I encountered an issue starting our conversation. Please try refreshing the page. If the problem persists, please contact support.";
                 this.messages.push({
                     role: 'assistant',
-                    content: "I apologize, but I'm having trouble starting our conversation. Could you please share your thoughts on the physics question you answered?",
+                    content: errorMessage,
                 });
+                // Prevent further interaction if initialization fails badly
+                 this.chatComplete = true;
+                 alert(errorMessage); // Notify user
             } finally {
                 this.loading = false;
+                this.$nextTick(() => this.scrollToBottom()); // Scroll after initial message/error
             }
         },
 
@@ -503,32 +545,56 @@ export default {
 
             const currentTime = new Date();
             const userMessageContent = this.userMessage;
+            this.userMessage = ''; // Clear input immediately
 
-            // Set lastMessageTime to firstMsgTime during the first message
+            // Set first message time if not already set (should normally be set by initial AI msg)
+             if (!this.firstMsgTime) {
+                 this.firstMsgTime = currentTime;
+             }
+
+            // Set lastMessageTime to firstMsgTime during the first user message exchange
             if (this.remainingRounds === 5 && !this.lastMessageTime) {
-                this.lastMessageTime = this.firstMsgTime || new Date();
+                 // Use firstMsgTime if available (time AI message appeared), else current time
+                this.lastMessageTime = this.firstMsgTime || currentTime;
             }
 
-            // Calculate time spent since the last message
+            // Calculate time spent since the last message (user or AI)
             let timeSpent = 0;
             if (this.lastMessageTime) {
                 timeSpent = (currentTime - this.lastMessageTime) / 1000; // time spent in seconds
             }
 
-            // Update lastMessageTime to the current time for next calculation
+            // Update lastMessageTime to the current time (user sending message)
             this.lastMessageTime = currentTime;
 
             this.messages.push({ role: 'user', content: userMessageContent });
-            this.scrollToBottom();
-            this.remainingRounds--;
+            this.scrollToBottom(); // Scroll after adding user message
+            this.remainingRounds--; // Decrement rounds *before* API call
+
+            // *** CHANGE: Check for chat completion immediately after decrementing rounds ***
+            if (this.remainingRounds <= 0) {
+                console.log('Max rounds reached. Setting chatComplete to true.');
+                this.messages.push({
+                    role: 'system', // Use 'system' for non-chat messages
+                    content: "Thank you for participating. You have completed the chat portion for this question.",
+                });
+                this.chatComplete = true; // Set complete status
+                 this.saveChatData(); // Save the final state including the system message
+                 this.$nextTick(() => this.scrollToBottom());
+                return; // Stop processing, don't call AI again
+            }
+
+            // --- Prepare and send API request ---
+            this.loading = true; // Set loading state for AI response
 
             const apiData = {
-                model: this.modelToUse, // Use dynamic model
+                model: this.modelToUse,
                 messages: [
                     { role: "system", content: this.systemPrompt },
+                    // Send the current message history including the latest user message
                     ...this.messages,
                 ],
-                temperature: this.temperature, // Use dynamic temperature
+                temperature: this.temperature,
             };
 
             // Conditionally set parameters based on model
@@ -539,71 +605,88 @@ export default {
                 apiData.max_tokens = 2000;
             }
 
-            this.userMessage = '';
-            this.loading = true;
 
             try {
-                console.log('Model:', this.modelToUse);
-                console.log('API Data:', apiData);
+                console.log('Sending message to Model:', this.modelToUse, 'Round:', 5 - this.remainingRounds);
+                // console.log('API Data for send message:', apiData);
                 const response = await axios.post('/api/openai', apiData);
                 const aiMessage = response.data.choices[0].message.content.trim();
                 this.messages.push({ role: 'assistant', content: aiMessage });
 
-                const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
+                // Update lastMessageTime to AI response time for next calculation
+                this.lastMessageTime = new Date();
 
-                // Get user information from Supabase
-                const userId = this.user.username;
-                const { data: profileData, error: profileError } = await supabase
-                    .from('2_profiles')
-                    .select('display_name, group')
-                    .eq('user_id', userId)
-                    .single();
+                // --- Database logging ---
+                 const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
+                 const userId = this.user.username;
+                // Fetch display_name and group only if needed and not already stored/available
+                 let displayName = this.profileData?.display_name || 'N/A'; // Use cached profileData if available
+                 let llmType = this.profileData?.group || 'N/A';
 
-                if (profileError) throw profileError;
+                 if (displayName === 'N/A' || llmType === 'N/A') {
+                    const { data: profileInfo, error: profileError } = await supabase
+                        .from('2_profiles')
+                        .select('display_name, group')
+                        .eq('user_id', userId)
+                        .single();
+                    if (profileError) throw profileError;
+                    displayName = profileInfo.display_name;
+                    llmType = profileInfo.group;
+                 }
 
-                const displayName = profileData.display_name;
-                const llmType = profileData.group;
 
-                // Save chat history
                 await supabase.from('2_experimental_chat_history').insert({
                     user_id: userId,
-                    system_message: this.systemPrompt,
-                    conversation: this.messages,
-                    round: Math.ceil(this.messages.length / 2 - 1),
+                    system_message: this.systemPrompt, // Consider if this needs to be logged every time
+                    conversation: this.messages, // Log the state *after* AI response
+                    round: 5 - this.remainingRounds, // Current round number (1 to 5)
                     user_chat: userMessageContent,
                     model_reply: aiMessage,
-                    llm_type: llmType,
-                    time_spent: timeSpentFormatted,
+                    llm_type: llmType, // Log the group/model type
+                    time_spent: timeSpentFormatted, // Log time since last message
                     timestamp: new Date().toISOString(),
                     initial_message: this.initialSystemMessage,
-                    question_number: this.profileData.question_queue[this.profileData.current_question_index || 0],
+                    question_number: this.incorrectQuestion?.question_number || -1, // Ensure question number is logged
                 });
 
                 this.$nextTick(() => {
                     this.scrollToBottom();
                 });
+
             } catch (error) {
                 console.error('Error communicating with the OpenAI API', error);
-            } finally {
-                this.loading = false;
-            }
-
-            if (this.remainingRounds === 0) {
-                this.messages.push({
-                    role: 'system',
-                    content: "Thank you for participating in this conversation. You've used all 5 rounds.",
-                });
-                this.$nextTick(() => {
+                // Add error message to chat and potentially stop
+                 this.messages.push({
+                    role: 'assistant',
+                    content: "Sorry, I encountered an error trying to respond. Please try sending your message again shortly."
+                 });
+                 // Optionally revert round counter if desired, or just let user try again
+                 // this.remainingRounds++;
+                 this.$nextTick(() => {
                     this.scrollToBottom();
-                });
-                this.chatComplete = true;
+                 });
+            } finally {
+                this.loading = false; // Turn off loading indicator
+                this.saveChatData(); // Save state after AI response or error
             }
 
-            this.saveChatData();
+            // --- MOVED: Chat completion logic moved before API call ---
+            // if (this.remainingRounds === 0) {
+            //     this.messages.push({
+            //         role: 'system',
+            //         content: "Thank you for participating in this conversation. You've used all 5 rounds.",
+            //     });
+            //     this.$nextTick(() => {
+            //         this.scrollToBottom();
+            //     });
+            //     this.chatComplete = true;
+            // }
+            // this.saveChatData(); // Moved inside finally and also before API call if chat completes
         },
+
         marked(content) {
-            // Set marked options for better formatting (e.g., line breaks, GFM for bullet points)
-            marked.setOptions({
+            // ... (marked options remain the same) ...
+             marked.setOptions({
                 breaks: true,
                 gfm: true,
                 headerIds: true,       // Add ID attributes to headers
@@ -611,26 +694,33 @@ export default {
                 smartypants: true      // Enable smart punctuation conversion
             });
             return marked(content);
-        }
-        ,
-        scrollToBottom() {
-            const messagesContainer = this.$el.querySelector('.messages');
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         },
+
+        scrollToBottom() {
+            // Use nextTick to ensure DOM is updated before scrolling
+            this.$nextTick(() => {
+                const messagesContainer = this.$el?.querySelector('.messages'); // Use optional chaining
+                 if (messagesContainer) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                 }
+            });
+        },
+
         isChatFinished() {
-            // return this.remainingRounds <= 0;
             return this.chatComplete;
         },
+
         confirmNextPage() {
-            if (confirm('Are you sure you want to proceed to the next page?')) {
+            if (confirm('Are you sure you want to proceed to the next page? This will end the current chat.')) {
                 this.nextPage();
             }
         },
+
         async nextPage() {
-            this.clearChatData(); // Clear chat data before moving to the next page
-            // Redirect to the post-chat belief rating page
+            this.clearChatData(); // Clear chat data before moving
             this.$router.push('/beliefratingpostchat');
         },
+
         saveChatData() {
             const chatData = {
                 userBeliefLevel: this.userBeliefLevel,
@@ -641,32 +731,43 @@ export default {
                 messages: this.messages,
                 remainingRounds: this.remainingRounds,
                 lastMessageTime: this.lastMessageTime,
-                incorrectQuestion: this.incorrectQuestion, // Ensure this is included
-                userAnswer: this.userAnswer, // Ensure this is included
+                incorrectQuestion: this.incorrectQuestion,
+                userAnswer: this.userAnswer,
                 firstMsgTime: this.firstMsgTime,
+                // *** CHANGE: Save model and temperature ***
+                modelToUse: this.modelToUse,
+                temperature: this.temperature,
+                chatComplete: this.chatComplete // Save completion status too
             };
-            // console.log('Saving chatData:', chatData);
+             // console.log('Saving chatData:', chatData);
             localStorage.setItem('chatData', JSON.stringify(chatData));
         },
+
+        // --- Helper methods for displaying question ---
         shouldDisplayLabels(questionNumber) {
             return this.questionsWithLabels.includes(questionNumber);
         },
         getOptions(question) {
+            if (!question) return [];
             return [
                 question.option_1,
                 question.option_2,
                 question.option_3,
                 question.option_4,
                 question.option_5,
-            ].filter(option => option);
+            ].filter(option => option); // Filter out null/empty options
         },
         formatQuestionText(question) {
-            const numberText = question.question_number + '. ';
-            const formattedText = question.question_text.replace(/\\n/g, '<br>');
+             if (!question || !question.question_text) return '';
+            const numberText = (question.question_number ?? '') + '. ';
+            // Ensure question_text is treated as a string
+            const formattedText = String(question.question_text).replace(/\\n/g, '<br>');
             return numberText + formattedText;
         },
         formatOptionText(option) {
-            const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
+            if (!option) return '';
+            // Ensure option is treated as a string before replacing
+            const formattedOption = String(option).replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
             return formattedOption;
         },
     }
