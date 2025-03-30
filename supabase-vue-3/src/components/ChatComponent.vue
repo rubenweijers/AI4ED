@@ -3,7 +3,7 @@
         <!-- Existing chat messages -->
         <div class="messages">
             <!-- Start of question display -->
-            <div v-if="incorrectQuestion">
+            <div v-if="incorrectQuestion" class="question-content">
             <!-- Add reminder text for specific question numbers -->
         <!-- Q2 -->
         <div v-if="incorrectQuestion.question_number === 2" class="reminder-text">
@@ -1124,6 +1124,25 @@ input:disabled, button:disabled {
 /* Fix potential issue where last element has unwanted bottom margin */
 .assistant-message > div > *:last-child {
   margin-bottom: 0;
+}
+
+
+/* Question content */
+.question-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left;
+    padding: 20px;
+}
+
+.reminder-text, .additional-text {
+    text-align: left;
+    margin-bottom: 1em;
+}
+
+.option {
+    text-align: left;
+    margin: 8px 0;
 }
 
 </style>
