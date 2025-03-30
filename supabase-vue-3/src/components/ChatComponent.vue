@@ -602,40 +602,25 @@ export default {
 
                 // Update lastMessageTime to AI response time for next calculation
                 this.lastMessageTime = new Date();
-
                 this.remainingRounds--;
 
-                // *** CHANGE: Check for chat completion immediately after decrementing rounds ***
-                if (this.remainingRounds <= 0) {
-                    console.log('Max rounds reached. Setting chatComplete to true.');
-                    this.messages.push({
-                        role: 'system', // Use 'system' for non-chat messages
-                        content: "Thank you for participating. You have completed the chat portion for this question.",
-                    });
-                    this.chatComplete = true; // Set complete status
-                    this.saveChatData(); // Save the final state including the system message
-                    this.$nextTick(() => this.scrollToBottom());
-                    return; // Stop processing, don't call AI again
-                }
-
                 // --- Database logging ---
-                 const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
-                 const userId = this.user.username;
+                const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
+                const userId = this.user.username;
                 // Fetch display_name and group only if needed and not already stored/available
-                 let displayName = this.profileData?.display_name || 'N/A'; // Use cached profileData if available
-                 let llmType = this.profileData?.group || 'N/A';
+                let displayName = this.profileData?.display_name || 'N/A'; // Use cached profileData if available
+                let llmType = this.profileData?.group || 'N/A';
 
-                 if (displayName === 'N/A' || llmType === 'N/A') {
-                    const { data: profileInfo, error: profileError } = await supabase
-                        .from('2_profiles')
-                        .select('display_name, group')
-                        .eq('user_id', userId)
-                        .single();
-                    if (profileError) throw profileError;
-                    displayName = profileInfo.display_name;
-                    llmType = profileInfo.group;
-                 }
-
+                if (displayName === 'N/A' || llmType === 'N/A') {
+                const { data: profileInfo, error: profileError } = await supabase
+                    .from('2_profiles')
+                    .select('display_name, group')
+                    .eq('user_id', userId)
+                    .single();
+                if (profileError) throw profileError;
+                displayName = profileInfo.display_name;
+                llmType = profileInfo.group;
+                }
 
                 await supabase.from('2_experimental_chat_history').insert({
                     user_id: userId,
@@ -650,6 +635,19 @@ export default {
                     initial_message: this.initialSystemMessage,
                     question_number: this.incorrectQuestion?.question_number || -1, // Ensure question number is logged
                 });
+
+                // *** CHANGE: Check for chat completion immediately after decrementing rounds ***
+                if (this.remainingRounds <= 0) {
+                    console.log('Max rounds reached. Setting chatComplete to true.');
+                    this.messages.push({
+                        role: 'system', // Use 'system' for non-chat messages
+                        content: "Thank you for participating. You have completed the chat portion for this question.",
+                    });
+                    this.chatComplete = true; // Set complete status
+                    this.saveChatData(); // Save the final state including the system message
+                    this.$nextTick(() => this.scrollToBottom());
+                    return; // Stop processing, don't call AI again
+                }
 
                 this.$nextTick(() => {
                     this.scrollToBottom();
