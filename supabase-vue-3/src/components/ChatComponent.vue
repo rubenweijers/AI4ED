@@ -159,7 +159,7 @@
                 />
                 <button @click="sendMessage" :disabled="isChatFinished() || loading">Send</button>
             </div>
-            <button v-if="isChatFinished()" @click="confirmNextPage" class="next-button">Next</button>
+            <button v-if="isChatFinished() || messages.length > 1" @click="confirmNextPage" class="next-button">Next</button>
         </div>
     </div>
 
@@ -526,7 +526,7 @@ export default {
             } catch (error) {
                 console.error('Error generating initial AI message:', error);
                  // Provide a fallback message or handle the error appropriately
-                const errorMessage = "I apologize, but I encountered an issue starting our conversation. Please try refreshing the page. If the problem persists, please contact support.";
+                const errorMessage = "I apologize, but I encountered an issue starting our conversation. Please try refreshing the page. If the problem persists, please contact your TA.";
                 this.messages.push({
                     role: 'assistant',
                     content: errorMessage,
@@ -569,20 +569,7 @@ export default {
 
             this.messages.push({ role: 'user', content: userMessageContent });
             this.scrollToBottom(); // Scroll after adding user message
-            this.remainingRounds--; // Decrement rounds *before* API call
-
-            // *** CHANGE: Check for chat completion immediately after decrementing rounds ***
-            if (this.remainingRounds <= 0) {
-                console.log('Max rounds reached. Setting chatComplete to true.');
-                this.messages.push({
-                    role: 'system', // Use 'system' for non-chat messages
-                    content: "Thank you for participating. You have completed the chat portion for this question.",
-                });
-                this.chatComplete = true; // Set complete status
-                 this.saveChatData(); // Save the final state including the system message
-                 this.$nextTick(() => this.scrollToBottom());
-                return; // Stop processing, don't call AI again
-            }
+            // this.remainingRounds--; // Decrement rounds *before* API call
 
             // --- Prepare and send API request ---
             this.loading = true; // Set loading state for AI response
@@ -615,6 +602,21 @@ export default {
 
                 // Update lastMessageTime to AI response time for next calculation
                 this.lastMessageTime = new Date();
+
+                this.remainingRounds--;
+
+                // *** CHANGE: Check for chat completion immediately after decrementing rounds ***
+                if (this.remainingRounds <= 0) {
+                    console.log('Max rounds reached. Setting chatComplete to true.');
+                    this.messages.push({
+                        role: 'system', // Use 'system' for non-chat messages
+                        content: "Thank you for participating. You have completed the chat portion for this question.",
+                    });
+                    this.chatComplete = true; // Set complete status
+                    this.saveChatData(); // Save the final state including the system message
+                    this.$nextTick(() => this.scrollToBottom());
+                    return; // Stop processing, don't call AI again
+                }
 
                 // --- Database logging ---
                  const timeSpentFormatted = `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toFixed(0).padStart(2, '0')}`; // Format as mm:ss
@@ -667,6 +669,7 @@ export default {
                  });
             } finally {
                 this.loading = false; // Turn off loading indicator
+                this.scrollToBottom();
                 this.saveChatData(); // Save state after AI response or error
             }
 
