@@ -853,6 +853,7 @@ input:disabled, button:disabled {
     /* General typography */
     line-height: 1.6;
     color: #333; /* Adjust base text color as needed */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 /* --- Headings --- */
@@ -975,6 +976,14 @@ input:disabled, button:disabled {
     margin-right: 0;
     color: #666;
     font-style: italic;
+}
+
+.assistant-message > div sub {
+    font-size: 0.75em; /* Make it slightly smaller */
+    line-height: 0; /* Prevent affecting line height too much */
+    position: relative; /* Allows vertical alignment */
+    vertical-align: baseline; /* Align based on the parent's baseline */
+    top: 0.3em; /* Adjust vertical position slightly */
 }
 
 /* --- Horizontal Rules --- */
