@@ -463,12 +463,20 @@ export default {
                     { role: "system", content: this.systemPrompt },
                     { role: "user", content: "Please start the conversation by addressing the user's misconception." },
                 ],
-                max_completion_tokens: 2000,
                 temperature: this.temperature, // Use dynamic temperature
-                reasoning_effort: 'medium' // Add reasoning effort
             };
 
+            // Conditionally set parameters based on model
+            if (this.modelToUse === 'o3-mini') {
+                apiData.max_completion_tokens = 5000;
+                apiData.reasoning_effort = "medium";
+            } else {
+                apiData.max_tokens = 2000;
+            }
+
             try {
+                console.log('Model:', this.modelToUse);
+                console.log('API Data:', apiData);
                 const response = await axios.post('/api/openai', apiData);
 
                 const initialMessage = response.data.choices[0].message.content.trim();
@@ -493,7 +501,7 @@ export default {
             const userMessageContent = this.userMessage;
 
             // Set lastMessageTime to firstMsgTime during the first message
-            if (this.remainingRounds === 3 && !this.lastMessageTime) {
+            if (this.remainingRounds === 5 && !this.lastMessageTime) {
                 this.lastMessageTime = this.firstMsgTime || new Date();
             }
 
@@ -516,15 +524,23 @@ export default {
                     { role: "system", content: this.systemPrompt },
                     ...this.messages,
                 ],
-                max_completion_tokens: 2000,
                 temperature: this.temperature, // Use dynamic temperature
-                reasoning_effort: "medium" // 
             };
+
+            // Conditionally set parameters based on model
+            if (this.modelToUse === 'o3-mini') {
+                apiData.max_completion_tokens = 5000;
+                apiData.reasoning_effort = "medium";
+            } else {
+                apiData.max_tokens = 2000;
+            }
 
             this.userMessage = '';
             this.loading = true;
 
             try {
+                console.log('Model:', this.modelToUse);
+                console.log('API Data:', apiData);
                 const response = await axios.post('/api/openai', apiData);
                 const aiMessage = response.data.choices[0].message.content.trim();
                 this.messages.push({ role: 'assistant', content: aiMessage });
