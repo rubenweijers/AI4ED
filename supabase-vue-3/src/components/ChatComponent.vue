@@ -159,7 +159,7 @@
                 />
                 <button @click="sendMessage" :disabled="isChatFinished() || loading">Send</button>
             </div>
-            <button v-if="isChatFinished() || messages.length > 1" @click="confirmNextPage" class="next-button">Next</button>
+            <button v-if="isChatFinished() || messages.length > 1" @click="confirmNextPage" class="next-button" :disabled="loading">Next</button>
         </div>
     </div>
 
