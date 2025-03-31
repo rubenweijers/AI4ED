@@ -115,10 +115,10 @@
         >
           <div v-if="message.role === 'assistant'" class="assistant-message">
             <img src="/openai.png" alt="OpenAI" class="openai-icon" />
-            <p v-html="marked(message.content)"></p>
+            <div v-html="marked(message.content)"></div>
           </div>
           <div v-else class="user-message">
-            <p>{{ message.content }}</p>
+            <div v-html="marked(message.content)"></div>
           </div>
         </div>
 
@@ -604,7 +604,15 @@ export default {
     },
     // Markdown rendering for assistant messages
     marked(content) {
-      return marked(content);
+            // ... (marked options remain the same) ...
+             marked.setOptions({
+                breaks: true,
+                gfm: true,
+                headerIds: true,       // Add ID attributes to headers
+                headerPrefix: 'hdg-',  // Add prefix for header IDs
+                smartypants: true      // Enable smart punctuation conversion
+            });
+            return marked(content);
     },
     // Scroll to the bottom of the chat
     scrollToBottom() {
@@ -721,6 +729,175 @@ body, html {
   display: flex;
   align-items: flex-start;
   max-width: 70%;
+}
+
+.assistant-message > div { /* Target the div rendered by v-html */
+    /* General typography */
+    line-height: 1.6;
+    color: #333; /* Adjust base text color as needed */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* --- Headings --- */
+.assistant-message > div h1 {
+    font-size: 1.8em; /* Example size */
+    font-weight: bold;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    line-height: 1.3;
+    border-bottom: 1px solid #eee; /* Optional separator */
+}
+
+.assistant-message > div h2 {
+    font-size: 1.5em; /* Example size */
+    font-weight: bold;
+    margin-top: 1.3em;
+    margin-bottom: 0.7em;
+    line-height: 1.3;
+    border-bottom: 1px solid #eee; /* Optional separator */
+}
+
+.assistant-message > div h3 {
+    font-size: 1.3em; /* Example size */
+    font-weight: bold;
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+    line-height: 1.3;
+}
+
+.assistant-message > div h4,
+.assistant-message > div h5,
+.assistant-message > div h6 {
+    font-size: 1.1em; /* Example size */
+    font-weight: bold;
+    margin-top: 1.1em;
+    margin-bottom: 0.5em;
+    line-height: 1.3;
+}
+
+/* --- Basic Formatting --- */
+.assistant-message > div strong,
+.assistant-message > div b {
+    font-weight: bold; /* Ensure bold is visually distinct */
+}
+
+.assistant-message > div em,
+.assistant-message > div i {
+    font-style: italic; /* Ensure italic is visually distinct */
+}
+
+/* --- Lists --- */
+.assistant-message > div ul,
+.assistant-message > div ol {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+    padding-left: 2em; /* Indentation */
+}
+
+.assistant-message > div li {
+    margin-bottom: 0.4em; /* Spacing between list items */
+}
+
+.assistant-message > div ul {
+    list-style-type: disc; /* Standard bullets */
+}
+.assistant-message > div ul ul {
+    list-style-type: circle;
+}
+.assistant-message > div ul ul ul {
+     list-style-type: square;
+}
+
+
+.assistant-message > div ol {
+    list-style-type: decimal; /* Standard numbers */
+}
+
+/* Nested lists might need adjusted padding/margins */
+.assistant-message > div li > ul,
+.assistant-message > div li > ol {
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+}
+
+
+/* --- Code Blocks --- */
+/* Inline code */
+.assistant-message > div code {
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    background-color: #f5f5f5; /* Light gray background */
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+/* Fenced code blocks (```) */
+.assistant-message > div pre {
+    background-color: #f5f5f5; /* Background for the block */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1em;
+    overflow-x: auto; /* Allow horizontal scrolling for long lines */
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+}
+
+.assistant-message > div pre code {
+    background-color: transparent; /* Reset background for code inside pre */
+    padding: 0;
+    border: none;
+    font-size: 0.9em; /* Consistent font size */
+    line-height: 1.4; /* Better readability for code blocks */
+}
+
+/* --- Blockquotes --- */
+.assistant-message > div blockquote {
+    border-left: 4px solid #ccc;
+    padding-left: 1em;
+    margin-left: 0;
+    margin-right: 0;
+    color: #666;
+    font-style: italic;
+}
+
+.assistant-message > div sub {
+    font-size: 0.75em; /* Make it slightly smaller */
+    line-height: 0; /* Prevent affecting line height too much */
+    position: relative; /* Allows vertical alignment */
+    vertical-align: baseline; /* Align based on the parent's baseline */
+    top: 0.3em; /* Adjust vertical position slightly */
+}
+
+/* --- Horizontal Rules --- */
+.assistant-message > div hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+/* --- Links --- */
+.assistant-message > div a {
+  color: #007bff; /* Or your site's link color */
+  text-decoration: none;
+}
+.assistant-message > div a:hover {
+  text-decoration: underline;
+}
+
+/* --- Paragraphs --- */
+.assistant-message > div p {
+    margin-top: 0;
+    margin-bottom: 1em; /* Spacing between paragraphs */
+}
+
+/* Fix potential issue where first element has unwanted top margin */
+.assistant-message > div > *:first-child {
+  margin-top: 0;
+}
+/* Fix potential issue where last element has unwanted bottom margin */
+.assistant-message > div > *:last-child {
+  margin-bottom: 0;
 }
 
 .openai-icon {
