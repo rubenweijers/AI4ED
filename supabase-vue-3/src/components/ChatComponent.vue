@@ -222,7 +222,7 @@ export default {
     methods: {
         // Helper: Sends API request with retries
         async sendApiRequest(apiData) {
-            const maxAttempts = 3;
+            const maxAttempts = 5;
             const delayMs = 2000;
             let attempt = 0;
             while (attempt < maxAttempts) {

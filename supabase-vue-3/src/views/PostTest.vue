@@ -177,6 +177,27 @@ const questionsWithLabels = [1, 2, 3, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18, 20
 // Function to determine if labels should be displayed for a question
 const shouldDisplayLabels = (questionNumber) => questionsWithLabels.includes(questionNumber);
 
+// Helper: Sends API request with retry logic
+const sendApiRequest = async (url, data, config = {}) => {
+  const maxAttempts = 5;
+  const delayMs = 2000;
+  let attempt = 0;
+  while (attempt < maxAttempts) {
+    try {
+      return await axios.post(url, data, config);
+    } catch (error) {
+      attempt++;
+      console.error(`Attempt ${attempt} failed:`, error);
+      if (attempt < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      } else {
+        throw error;
+      }
+    }
+  }
+};
+
+
 // Toast notifications
 const showToastNotification = () => {
   if (profile.value.current_question_index > 0) {
@@ -424,7 +445,7 @@ const submitExplanation = async () => {
 
 const summarizeExplanation = async (explanation) => {
   try {
-    const response = await axios.post('/api/summarize', { explanation });
+    const response = await sendApiRequest('/api/summarize', { explanation });
     return response.data.summary;
   } catch (error) {
     console.error('Error communicating with the summarization API', error);
