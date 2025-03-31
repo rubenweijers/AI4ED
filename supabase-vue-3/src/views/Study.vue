@@ -349,7 +349,9 @@ const submitAnswers = async () => {
 
     const { error: updateError } = await supabase
       .from('2_profiles')
-      .update({ has_submitted_study_one: true })
+      .update({ has_submitted_study_one: true,
+        time_end_fci_1: new Date().toISOString()
+       })
       .eq('user_id', user.value.username);
 
     if (updateError) {

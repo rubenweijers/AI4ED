@@ -182,7 +182,9 @@ const submitAnswers = async () => {
     // Update user's submission status on the server
     const { error: updateError } = await supabase
       .from('2_profiles')
-      .update({ has_submitted_survey: true })
+      .update({ has_submitted_survey: true,
+        time_start_fci_1: new Date().toISOString()
+       })
       .eq('display_name', user.value.username);
 
     if (updateError) {
