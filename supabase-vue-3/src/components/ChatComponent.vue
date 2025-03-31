@@ -220,6 +220,26 @@ export default {
         }
     },
     methods: {
+        // Helper: Sends API request with retries
+        async sendApiRequest(apiData) {
+            const maxAttempts = 3;
+            const delayMs = 2000;
+            let attempt = 0;
+            while (attempt < maxAttempts) {
+                try {
+                    return await axios.post('/api/openai', apiData);
+                } catch (error) {
+                    attempt++;
+                    console.error(`Attempt ${attempt} failed:`, error);
+                    if (attempt < maxAttempts) {
+                        await new Promise(resolve => setTimeout(resolve, delayMs));
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+        },
+
         clearChatData() {
             localStorage.removeItem('chatData');
             // Reset all relevant data properties
@@ -517,7 +537,8 @@ export default {
             try {
                 console.log('Generating initial message with Model:', this.modelToUse);
                 // console.log('API Data for initial message:', apiData);
-                const response = await axios.post('/api/openai', apiData);
+                const response = await this.sendApiRequest(apiData);
+
 
                 const initialMessage = response.data.choices[0].message.content.trim();
                 this.initialSystemMessage = initialMessage; // Store the very first AI message
@@ -596,7 +617,7 @@ export default {
             try {
                 console.log('Sending message to Model:', this.modelToUse, 'Round:', 5 - this.remainingRounds);
                 // console.log('API Data for send message:', apiData);
-                const response = await axios.post('/api/openai', apiData);
+                const response = await this.sendApiRequest(apiData);
                 const aiMessage = response.data.choices[0].message.content.trim();
                 this.messages.push({ role: 'assistant', content: aiMessage });
 
