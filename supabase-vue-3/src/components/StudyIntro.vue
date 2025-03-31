@@ -4,13 +4,13 @@
       <p>Campus Protocol ID#: 2025-0305</p>
       <p>
         You are invited to take part in a research study conducted by a lab TA, supervised by Dr. Ying Wu, a
-        professor at Duke University.<br>
+        professor at Duke University.<br><br>
 
         The purpose of the study is to examine whether interacting with an AI companion can reduce
-        misconceptions in learning Newtonian physics.<br>
+        misconceptions in learning Newtonian physics.<br><br>
 
         Participation in the study involves completing a short survey that will ask you questions about your
-        opinions on the use of generative AI. <br>After this, you will be asked to complete a 30-question multiple
+        opinions on the use of generative AI. <br><br>After this, you will be asked to complete a 30-question multiple
         choice test designed to assess your understanding of fundamental concepts in Newtonian mechanics,
         including:
         <ul>
@@ -33,14 +33,14 @@
           question. Note that in each discussion, you must interact at least once with the AI companion. This part
           of the study lasts up to 40 minutes, depending on your test performance.
 
-          <br>After the AI interactions, you will complete a second test, similar to the first test, to evaluate the AI’s
+          <br><br><strong>After the AI interactions, you will complete a second test</strong>, similar to the first test, to evaluate the AI’s
           impact on your understanding of Newtonian Mechanics. You will also be asked to provide feedback on
           the study. You will have 30 minutes to finish this test.
 
-          <br>Please note that the system is capable of accurately grading your responses to the questions in the
+          <br><br>Please note that the system is capable of accurately grading your responses to the questions in the
           survey. However, during conversations with you to correct a misconception or an answer, the AI
           companion may make mistakes, or misinterpret or misunderstand your response, despite its best efforts.
-          It can answer up to <strong>40%</strong> of the questions incorrectly. As a
+          <strong>It can answer up to 40% of the questions incorrectly.</strong> As a
           result, its feedback may not always be accurate or helpful. You are expected to exercise your own
           judgment when considering feedback from the AI, just as you would when the feedback is from a human
           peer.
@@ -51,14 +51,14 @@
           question. Note that in each discussion, you must interact at least once with the AI companion. This part
           of the study lasts up to 40 minutes, depending on your test performance.
 
-          <br>After the AI interactions, you will complete a second test, similar to the first test, to evaluate the AI’s
+          <br><br><strong>After the AI interactions, you will complete a second test</strong>, similar to the first test, to evaluate the AI’s
           impact on your understanding of Newtonian Mechanics. You will also be asked to provide feedback on
           the study. You will have 30 minutes to finish this test.
 
-          <br>Please note that the system is capable of accurately grading your responses to the questions in the
+          <br><br>Please note that the system is capable of accurately grading your responses to the questions in the
           survey. However, during conversations with you to correct a misconception or an answer, the AI
           companion may make mistakes, or misinterpret or misunderstand your response, despite its best efforts.
-          It can answer up to <strong>20%</strong> of the questions incorrectly. As a
+          <strong>It can answer up to 20% of the questions incorrectly.</strong> As a
           result, its feedback may not always be accurate or helpful. You are expected to exercise your own
           judgment when considering feedback from the AI, just as you would when the feedback is from a human
           peer.
@@ -70,11 +70,11 @@
           for every question. Note that in each discussion, you must interact at least once with the AI companion.
           This part of the study lasts up to 40 minutes, depending on your test performance.
           
-          <br>After the AI interactions, you will complete a second test, similar to the first test, to evaluate the AI’s
+          <br><br><strong>After the AI interactions, you will complete a second test</strong>, similar to the first test, to evaluate the AI’s
           impact on your understanding of Newtonian Mechanics. You will also be asked to provide feedback on
           the study. You will have 30 minutes to finish this test.
 
-          <br>Please note that the system is capable of accurately grading your responses to the questions in the
+          <br><br>Please note that the system is capable of accurately grading your responses to the questions in the
           survey. However, during conversations with you the AI companion may make mistakes, or misinterpret
           or misunderstand your response, despite its best efforts. As a result, its information may not always be
           accurate or helpful. You are expected to exercise your own judgment when considering information
@@ -97,7 +97,7 @@
         presented to you as part of the pretest and posttest and during your interaction with the AI companion.
         The raw data collected by AI will be stored on Duke’s approved storage for analysis.
 
-        <br>Due to the unpredictability of how AI develops and also interprets and processes data, data entered into
+        <br><br>Due to the unpredictability of how AI develops and also interprets and processes data, data entered into
         the AI companion may be used in ways beyond our control or initial intentions.
 
         <br>Aggregated results may be made public or used for future research purposes. This is integral to the
@@ -113,7 +113,7 @@
         Review Board at campusirb@duke.edu or at 919-684-3030. If contacting the IRB, please reference
         protocol ID#2025-0305.
         
-        <br>If you are interested in taking part in this survey, please click to the next screen
+        <br><br>If you are interested in taking part in this survey, please click to the next screen
       </p>
       <br><br>
   </div>
