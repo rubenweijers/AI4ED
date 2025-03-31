@@ -77,7 +77,7 @@
 
               <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
 
-              <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
+              <br><br><u>This time however, they have equipped the sled with a pressurized air cannon aimed directly up the slope. Firing the cannon releases a sudden, momentary blast of air in the direction it is aimed.</u>
             </p>
         </div>
 

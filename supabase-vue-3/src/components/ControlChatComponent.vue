@@ -143,7 +143,7 @@
             />
             <button @click="sendMessage" :disabled="isChatFinished() || loading">Send</button>
           </div>
-          <button v-if="isChatFinished()" @click="nextQuestion" class="next-button">Next Question</button>
+          <button v-if="isChatFinished() || messages.length > 1" @click="nextQuestion" class="next-button">Next Question</button>
         </div>
       </div>
     </div>
@@ -163,7 +163,7 @@ export default {
       messages: [],
       loading: false,
       systemPrompt: '',
-      remainingRounds: 3,
+      remainingRounds: 5,
       chatComplete: false,
       user: null,
       profileData: null,
@@ -219,6 +219,25 @@ export default {
       // console.log('Fetched profileData:', profileData);
       this.profileData = profileData;
     },
+
+    async sendApiRequest(apiData) {
+            const maxAttempts = 5;
+            const delayMs = 2000;
+            let attempt = 0;
+            while (attempt < maxAttempts) {
+                try {
+                    return await axios.post('/api/openai', apiData);
+                } catch (error) {
+                    attempt++;
+                    console.error(`Attempt ${attempt} failed:`, error);
+                    if (attempt < maxAttempts) {
+                        await new Promise(resolve => setTimeout(resolve, delayMs));
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+        },
 
     handleEnterKey() {
         if (this.loading || this.isChatFinished()) {
@@ -362,7 +381,7 @@ export default {
 
       Your goal is to inform the user of the correct answer as well as provide additional relevant information. Ask them their reasoning for choosing that option and discuss their answer. Use simple, clear language that an average person will be able to follow, and structure the conversation so they gain new knowledge on the topic at each step. At the end of each message, provide additional questions on the topic to spur further discussion and increase the knowledge of the topic for the user. `;
 
-      this.remainingRounds = 3;
+      this.remainingRounds = 5;
       this.messages = [];
       this.questionAnswered = true;
 
@@ -386,7 +405,7 @@ export default {
       };
 
       try {
-        const response = await axios.post('/api/openai', apiData);
+        const response = await this.sendApiRequest(apiData);
         const initialMessage = response.data.choices[0].message.content.trim();
         this.messages.push({ role: 'assistant', content: initialMessage });
       } catch (error) {
@@ -423,7 +442,7 @@ export default {
       this.loading = true;
 
       try {
-        const response = await axios.post('/api/openai', apiData);
+        const response = await this.sendApiRequest(apiData);
         const aiMessage = response.data.choices[0].message.content.trim();
         this.messages.push({ role: 'assistant', content: aiMessage });
 
@@ -571,7 +590,7 @@ export default {
       this.questionAnswered = false;
       this.userMessage = '';
       this.messages = [];
-      this.remainingRounds = 3;
+      this.remainingRounds = 5;
       window.scrollTo(0, 0);
     },
     // Format options for displaying in the prompt

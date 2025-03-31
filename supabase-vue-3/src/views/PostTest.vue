@@ -86,7 +86,7 @@
 
               <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
 
-              <br><br><u>This time however, they have equipped the sled with a cannon aimed directly up the slope.</u>
+              <br><br><u>This time however, they have equipped the sled with a pressurized air cannon aimed directly up the slope. Firing the cannon releases a sudden, momentary blast of air in the direction it is aimed.</u>
             </p>
         </div>
 
@@ -412,36 +412,6 @@ const submitExplanation = async () => {
     console.error('An unexpected error occurred:', error);
   }
 };
-
-//  OLD (BEFORE SUMMARIZE.JS)
-// const summarizeExplanation = async (explanation) => {
-//   const apiData = {
-//     model: "gpt-4o",
-//     messages: [
-//       {
-//         role: "system",
-//         content: "Summarize the following passage, which describes a misconception, in a single sentence. Do not mention that it is a misconception, or a belief, or provide any kind of normative judgment. Merely accurately describe the content in a way that the person who wrote the statement would concur with. Frame it as an assertion. If the statement is already short, no need to change it very much. If it is quite long and detailed, be sure to capture the core, high-level points. Do not focus on the evidence provided for the belief --merely focus on the basic assertion",
-//       },
-//       { role: "user", content: explanation },
-//     ],
-//     max_tokens: 100,
-//     temperature: 0.7,
-//   };
-
-//   try {
-//     const response = await axios.post('https://api.openai.com/v1/chat/completions', apiData, {
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-//       },
-//     });
-
-//     return response.data.choices[0].message.content.trim();
-//   } catch (error) {
-//     console.error('Error communicating with the OpenAI API', error);
-//     return '';
-//   }
-// };
 
 const summarizeExplanation = async (explanation) => {
   try {
