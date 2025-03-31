@@ -973,22 +973,33 @@ button:disabled {
 }
 
 .next-button {
-  background-color: #28a745;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #00008B;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 .next-button:hover {
-  background-color: #218838;
+  background-color: #000066; /* Darker Blue */
 }
 
 .loading {
-  text-align: center;
-  color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .loading img {
-  width: 50px;
-  height: 50px;
-  margin-bottom: 5px;
+    width: 30px;
+    height: 30px;
 }
 
 .user-answer {

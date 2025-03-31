@@ -958,20 +958,6 @@ input:disabled, button:disabled {
     height: 30px;
 }
 
-.next-button {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background-color: #00008B; /* Dark Blue */
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-}
-
 .next-button:hover {
   background-color: #000066; /* Darker Blue */
 }
