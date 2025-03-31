@@ -653,6 +653,11 @@ body, html {
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.question-container, 
+.question-container p {
+  text-align: left;
+}
+
 .question-content {
   margin-bottom: 20px;
 }
