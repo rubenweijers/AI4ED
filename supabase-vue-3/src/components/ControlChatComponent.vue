@@ -728,12 +728,14 @@ body, html {
   border-radius: 20px;
   margin-left: auto;
   max-width: 70%;
+  text-align: left;
 }
 
 .assistant-message {
   display: flex;
   align-items: flex-start;
   max-width: 70%;
+  text-align: left;
 }
 
 .assistant-message > div { /* Target the div rendered by v-html */
