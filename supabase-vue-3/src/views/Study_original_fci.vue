@@ -120,12 +120,20 @@ const showToastNotification = () => {
 };
 
 const initializeTimer = () => {
-  // Only set the start time if it doesn't already exist in localStorage
-  const newStartTime = Date.now();
-  localStorage.setItem('studyStartTime', newStartTime.toString());
-  localStorage.setItem('studyTotalDuration', (1 * 60).toString()); // Set to 30 minutes in seconds
-  localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
-  localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+  let newStartTime = localStorage.getItem('studyStartTime');
+  const totalDuration = 30 * 60; // 30 minutes in seconds
+
+  if (!newStartTime) {
+    // If no start time exists, set a new one
+    newStartTime = Date.now();
+    localStorage.setItem('studyStartTime', newStartTime.toString());
+    localStorage.setItem('studyTotalDuration', totalDuration.toString());
+    localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+    localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+  } else {
+    // If start time exists, ensure total duration is set
+    localStorage.setItem('studyTotalDuration', totalDuration.toString());
+  }
 };
 
 const confirmSubmit = async () => {
@@ -340,18 +348,25 @@ const getRemainingTime = () => {
   const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
   const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
   const now = Date.now();
-  const elapsed = Math.floor((now - startTime) / 1000);
-  return totalDuration - elapsed;
-};
+  const elapsed = Math.floor((now - startTime) / 1000); // Elapsed time in seconds
+  let remaining = totalDuration - elapsed;
 
-onUnmounted(() => {
-  clearTimer();
-});
+  // Ensure remaining time doesn't go negative
+  if (remaining < 0) {
+    remaining = 0;
+  }
+
+  return remaining;
+};
 
 onMounted(() => {
   checkUser();
   initializeTimer(); // Ensures timer resets when entering this component
   setupTimerWatcher();
+});
+
+onUnmounted(() => {
+  clearTimer();
 });
 </script>
 
