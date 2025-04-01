@@ -229,8 +229,6 @@ const handleFormSubmission = () => {
   }
 
   if (formSubmitted.value) {
-    console.log('Form has already been submitted.');
-    alert('The form has already been submitted.');
     router.push('/feedback');
   } else {
     confirmSubmit();
