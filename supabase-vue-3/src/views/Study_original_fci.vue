@@ -9,25 +9,25 @@
         <div v-for="(question, index) in questions" :key="question.id" class="question-block">
 
           <!-- Insert manual texts at specified question numbers -->
-          <div v-if="question.question_number === 4" class="manual-text manual-text-header">
+          <div v-if="question.question_number === 5" class="manual-text manual-text-header">
             <p>
               USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (5 and 6).<br>
               The accompanying figure shows a frictionless channel in the shape of a segment of a circle with a center at <i>O</i>. The channel has been anchored to a frictionless horizontal table top. You are looking down at the table. Forces exerted by the air are negligible. A ball is shot at high speed into the channel at <i>p</i> and exits at <i>r</i>.
             </p>
           </div>
-          <div v-if="question.question_number === 7" class="manual-text manual-text-header">
+          <div v-if="question.question_number === 8" class="manual-text manual-text-header">
             <p>
               USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (8 through 11). <br>
               The figure below depicts a hockey puck sliding with constant speed <i>v<span class="subscript">o</span></i> in a straight line from point <i>a</i> to point <i>b</i> on a frictionless horizontal surface. Forces exerted by the air are negligible. You are looking down on the puck. When the puck reaches point <i>b</i>, it receives a swift horizontal kick in the direction of the heavy print arrow. Had the puck been at rest at point <i>a</i>, then the kick would have set the puck in horizontal motion with a speed <i>v<span class="subscript">k</span></i> in the direction of the kick.
             </p>
           </div>
-          <div v-if="question.question_number === 14" class="manual-text manual-text-header">
+          <div v-if="question.question_number === 15" class="manual-text manual-text-header">
             <p>
               USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT TWO QUESTIONS (15 and 16). <br>
               A large truck breaks down out on the road and receives a push back into town by a small compact car as shown in the figure below.
             </p>
           </div>
-          <div v-if="question.question_number === 20" class="manual-text manual-text-header">
+          <div v-if="question.question_number === 21" class="manual-text manual-text-header">
             <p>
               USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS (21 through 24). <br>
               A rocket drifts sideways in outer space from point <i>a</i> to point <i>b</i> as shown below. The rocket is subject to no outside forces. Starting at position <i>b</i>, the rocket's engine is turned on and produces a constant thrust (force on the rocket) at right angles to the line <i>ab</i>. The constant thrust is maintained until the rocket reaches a point <i>c</i> in space.
