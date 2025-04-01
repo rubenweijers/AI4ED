@@ -12,13 +12,8 @@
       <StudyIntro :profile="profile" />
       <StudyInfo1 />
 
-      <div class="consent-checkbox" :class="{ 'flash-red': isFlashing }">
-        <input type="checkbox" id="consent" v-model="consentChecked">
-        <label for="consent">I agree to the terms and services</label>
-      </div>
-
       <button @click="showToastNotification" class="submit-button">
-        I confirm to have read the above text.
+        I have read the above text and consent to the study.
       </button>
 
       <ToastNotification
@@ -49,7 +44,6 @@ const loading = ref(true);
 const user = ref(null);
 const profile = ref(null); // Define profile here
 const showToast = ref(false);
-const consentChecked = ref(false);
 
 const checkUser = async () => {
   const userData = localStorage.getItem('user');
@@ -84,17 +78,8 @@ onMounted(() => {
   checkUser();
 });
 
-const isFlashing = ref(false);
-
 const showToastNotification = () => {
-  if (consentChecked.value) {
-    showToast.value = true;
-  } else {
-    isFlashing.value = true;
-    setTimeout(() => {
-      isFlashing.value = false;
-    }, 1000); // Flash for 1 second
-  }
+  showToast.value = true;
 };
 
 const proceedToStudy = () => {

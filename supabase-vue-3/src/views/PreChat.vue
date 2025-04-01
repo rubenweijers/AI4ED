@@ -8,9 +8,10 @@
         <div class="info-block">
           <ul>
             <li>The conversation will have <strong>up to 5 rounds</strong>.</li>
-            <li>You can end the conversation after round 1 if you feel satisfied.</li>
+            <li>You can end the conversation at any point after round 1, if you feel satisfied.</li>
             <li>The <strong>AI will start</strong> the dialogue.</li>
             <li>You’ll then take turns in a <strong>back-and-forth</strong> exchange.</li>
+            <li>The AI may occasionally take up to a minute to respond.</li>
             <li>Each round lets you <strong>expand or clarify</strong> your ideas.</li>
             <li>Afterward, the experiment moves to the next incorrectly answered question.</li>
           </ul>

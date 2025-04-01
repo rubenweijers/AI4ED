@@ -27,7 +27,7 @@
 
         <h3><strong>2. AI Interaction:</strong></h3> 
         <!-- TREATMENT GROUP -->
-        <div v-if="profile && profile.group === 'experimental_4o'">
+        <div v-if="profile && (profile.group === 'experimental_4o' || profile.group === 'experimental_o3')">
           After that, you will interact with an AI companion to discuss the related physics concepts. Like a peer in
           a study group, the AI companion may not always provide the most accurate explanations for every
           question. Note that in each discussion, you must interact at least once with the AI companion. This part
@@ -41,24 +41,6 @@
           survey. However, during conversations with you to correct a misconception or an answer, the AI
           companion may make mistakes, or misinterpret or misunderstand your response, despite its best efforts.
           <strong>It can answer up to 40% of the questions incorrectly.</strong> As a
-          result, its feedback may not always be accurate or helpful. You are expected to exercise your own
-          judgment when considering feedback from the AI, just as you would when the feedback is from a human
-          peer.
-        </div>
-        <div v-if="profile && profile.group === 'experimental_o3'">
-          After that, you will interact with an AI companion to discuss the related physics concepts. Like a peer in
-          a study group, the AI companion may not always provide the most accurate explanations for every
-          question. Note that in each discussion, you must interact at least once with the AI companion. This part
-          of the study lasts up to 40 minutes, depending on your test performance.
-
-          <br><br><strong>After the AI interactions, you will complete a second test</strong>, similar to the first test, to evaluate the AI’s
-          impact on your understanding of Newtonian Mechanics. You will also be asked to provide feedback on
-          the study. You will have 30 minutes to finish this test.
-
-          <br><br>Please note that the system is capable of accurately grading your responses to the questions in the
-          survey. However, during conversations with you to correct a misconception or an answer, the AI
-          companion may make mistakes, or misinterpret or misunderstand your response, despite its best efforts.
-          <strong>It can answer up to 20% of the questions incorrectly.</strong> As a
           result, its feedback may not always be accurate or helpful. You are expected to exercise your own
           judgment when considering feedback from the AI, just as you would when the feedback is from a human
           peer.
@@ -83,8 +65,7 @@
 
         <h2><strong>Discussion with Peers</strong></h2>
         At the time you complete this study, some of your peers may not yet have participated in their lab
-        sessions. We ask you to please refrain from discussing the content in this study with other students until
-        they are finished.
+        sessions. We ask you to please refrain from discussing the content in this study with other students until April 3rd, when they are finished.
 
         <h2><strong>Voluntary Participation</strong></h2>
         The total time for completing the survey should not exceed the duration of your lab session. Your

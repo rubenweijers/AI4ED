@@ -58,7 +58,7 @@
   <h2>Discussion with Peers</h2>
   <p>
     At the time you complete this study, some of your peers may not yet have participated in their lab sections. We ask you to please refrain from discussing the content 
-    here with other students until Thursday, November 14th (2024).
+    here with other students until Thursday, April 3rd.
   </p>
 </section>
 
