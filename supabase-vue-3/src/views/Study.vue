@@ -5,77 +5,67 @@
   <div v-else-if="user">
     <div class="study-container">
       <h2>Force Concept Inventory Test #1</h2>
-      <!-- <button @click="selectAllOption1" class="select-all-button">Select All Option 1</button> -->
       <form @submit.prevent="confirmSubmission">
-        <div v-for="(question, index) in questions" :key="question.id">
-          <!-- Add images before the corresponding questions -->
-          <img v-if="question.question_number === 1" src="/fci_2/fci_q1.png" alt="Question related image" class="question-image with-line">
-          <!-- <div v-if="question.question_number === 1" class="horizontal-line"></div> -->
-          <img v-if="question.question_number === 4" src="/fci_2/fci_q4-7.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 4" src="/fci_2/fci_q4.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 6" src="/fci_2/fci_q6.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 11" src="/fci_2/fci_q11.png" alt="Question related image" class="question-image-range">
-          <img v-if="question.question_number === 12" src="/fci_2/fci_q12.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 13" src="/fci_2/fci_q13.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 14" src="/fci_2/fci_q14.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 16" src="/fci_2/fci_q16.png" alt="Question related image" class="question-image-range">
-          <img v-if="question.question_number === 19" src="/fci_2/fci_q19.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 23" src="/fci_2/fci_q23.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 24" src="/fci_2/fci_q24.png" alt="Question related image" class="question-image-range">
-          <img v-if="question.question_number === 28" src="/fci_2/fci_q28-30.png" alt="Question related image" class="question-image">
-          <img v-if="question.question_number === 28" src="/fci_2/fci_q28.png" alt="Question related image" class="question-image">
 
-          <!-- Render question text with line breaks -->
+        <div v-if="questions.length > 3" class="manual-text manual-text-header">
+          <p>
+            USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS<br><br>
+            A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+            <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+          </p>
+        </div>
+        
+        <div v-if="questions.length > 27" class="manual-text manual-text-header">
+           <p>
+            USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT THREE QUESTIONS<br><br>
+            A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+            <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+            <br><br><u>This time however, they have equipped the sled with a pressurized air cannon aimed directly up the slope. Firing the cannon releases a sudden, momentary blast of air in the direction it is aimed.</u>
+          </p>
+        </div>
+
+        <div v-for="(question, index) in questions" :key="question.id" class="question-block">
+
+          <div class="question-images-container">
+             <img v-if="question.question_number === 1" src="/fci_2/fci_q1.png" alt="Question 1 related image" class="question-image">
+            <img v-if="question.question_number === 4" src="/fci_2/fci_q4-7.png" alt="Question 4-7 related image" class="question-image">
+            <img v-if="question.question_number === 4" src="/fci_2/fci_q4.png" alt="Question 4 related image" class="question-image">
+            <img v-if="question.question_number === 6" src="/fci_2/fci_q6.png" alt="Question 6 related image" class="question-image">
+            <img v-if="question.question_number === 11" src="/fci_2/fci_q11.png" alt="Question 11 related image" class="question-image">
+            <img v-if="question.question_number === 12" src="/fci_2/fci_q12.png" alt="Question 12 related image" class="question-image">
+            <img v-if="question.question_number === 13" src="/fci_2/fci_q13.png" alt="Question 13 related image" class="question-image">
+            <img v-if="question.question_number === 14" src="/fci_2/fci_q14.png" alt="Question 14 related image" class="question-image">
+            <img v-if="question.question_number === 16" src="/fci_2/fci_q16.png" alt="Question 16 related image" class="question-image">
+            <img v-if="question.question_number === 19" src="/fci_2/fci_q19.png" alt="Question 19 related image" class="question-image">
+            <img v-if="question.question_number === 23" src="/fci_2/fci_q23.png" alt="Question 23 related image" class="question-image">
+            <img v-if="question.question_number === 24" src="/fci_2/fci_q24.png" alt="Question 24 related image" class="question-image">
+            <img v-if="question.question_number === 28" src="/fci_2/fci_q28-30.png" alt="Question 28-30 related image" class="question-image">
+            <img v-if="question.question_number === 28" src="/fci_2/fci_q28.png" alt="Question 28 related image" class="question-image">
+
+            <img v-if="question.image" :src="question.image" alt="Question related image" class="question-image">
+          </div>
+
           <label :for="'question-' + question.question_number" v-html="formatQuestionText(question)" class="studyquestion"></label>
 
-          <!-- Conditionally render image -->
-          <img v-if="question.image" :src="question.image" alt="Question related image" class="question-image">
-
-          <!-- Conditionally render additional text -->
           <p v-if="question.additionalText" class="additional-text">{{ question.additionalText }}</p>
 
-          <div class="option" v-for="(option, optionIndex) in getOptions(question)" :key="optionIndex">
-            <label class="radio-label" :for="'question-' + question.question_number + '-' + optionIndex">
-              <input type="radio"
-                :id="'question-' + question.question_number + '-' + optionIndex"
-                :name="'question-' + question.question_number"
-                :value="optionIndex"
-                v-model="answers[question.id]"
-                @change="submitAnswer(question, optionIndex)"
-              >
-              <span class="radio-custom"></span>
-              <span class="label-text" v-html="formatOptionText(option)"></span>
-            </label>
+          <div class="options-container">
+              <div class="option" v-for="(option, optionIndex) in getOptions(question)" :key="optionIndex">
+                <label class="radio-label" :for="'question-' + question.question_number + '-' + optionIndex">
+                  <input type="radio"
+                    :id="'question-' + question.question_number + '-' + optionIndex"
+                    :name="'question-' + question.question_number"
+                    :value="optionIndex"
+                    v-model="answers[question.id]"
+                    @change="submitAnswer(question, optionIndex)"
+                  >
+                  <span class="radio-custom"></span>
+                  <span class="label-text" v-html="formatOptionText(option)"></span>
+                </label>
+              </div>
           </div>
 
-          <!-- Add manual texts at specified positions -->
-          <div v-if="question.question_number === 3" class="manual-text">
-            <p>
-              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS<br><br>
-
-              A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
-
-              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-
-            </p>
-          </div>
-          <div v-if="question.question_number === 27" class="manual-text">
-            <p>
-              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT THREE QUESTIONS<br><br>
-
-              A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
-
-              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-
-              <br><br><u>This time however, they have equipped the sled with a pressurized air cannon aimed directly up the slope. Firing the cannon releases a sudden, momentary blast of air in the direction it is aimed.</u>
-            </p>
-          </div>
-        </div>
-        <!-- Old button -->
-        <!-- <button type="submit" class="submit-button">Submit Questionnaire</button> -->
-        
-        <!-- <button type="button" @click="handleFormSubmission" class="next-button">Submit FCI.</button> -->
-        <button @click="handleFormSubmission" class="submit-button" :disabled="!!formSubmitted.value">Submit FCI.</button>
+          </div> <button @click="handleFormSubmission" class="submit-button" :disabled="!!formSubmitted.value">Submit FCI.</button>
 
       </form>
       <ToastNotification
@@ -86,7 +76,6 @@
           @cancel="cancelSubmit"
         />
 
-        <!-- Error Toast -->
         <ToastNotification
           :isVisible="showErrorToast"
           title="Incomplete Submission"
@@ -701,48 +690,7 @@ onMounted(() => {
   font-size: smaller;
 }
 
-.study-info-container {
-  text-align: center;
-  margin: 50px auto;
-  padding: 20px;
-  max-width: 800px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.next-button {
-  display: block;
-  margin: 20px auto;
-  padding: 10px 20px;
-  background-color: rgb(29, 29, 184);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.next-button:hover {
-  background-color: rgb(23, 23, 250);
-}
-
-.select-all-button {
-  display: block;
-  margin: 20px auto;
-  padding: 10px 20px;
-  background-color: rgb(29, 29, 184);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.select-all-button:hover {
-  background-color: rgb(23, 23, 250);
-}
-
+/* --- Container Styles --- */
 .study-container {
   max-width: 800px;
   margin: 50px auto;
@@ -756,90 +704,168 @@ onMounted(() => {
 
 .study-container h2 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px; /* Increased margin */
   color: rgb(29, 29, 184);
 }
 
-label {
+/* --- General Button Styles (Keep existing) --- */
+.next-button, .select-all-button, .submit-button {
   display: block;
-  color: black; /* Ensure text is black */
-  /* font-size: 16px; */
-  margin-bottom: 10px;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: rgb(29, 29, 184);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: auto; /* Adjust if full width needed for some */
+}
+.submit-button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 40px; /* Add space above submit button */
+}
+.next-button:hover, .select-all-button:hover, .submit-button:hover {
+  background-color: rgb(23, 23, 250);
+}
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
-/* Old radio */
-/* .option {
+
+/* --- NEW: Question Block Styling --- */
+.question-block {
+  margin-bottom: 50px; /* Space BETWEEN each question block */
+  /* border-top: 1px solid #eee; */ /* Optional visual separator */
+  /* padding-top: 20px; */ /* Optional space above content in block */
+}
+
+/* --- NEW: Image Container --- */
+.question-images-container {
+  margin-bottom: 15px; /* FIXED space BELOW image(s) and ABOVE question text */
+  text-align: center; /* Center images within the container */
+}
+
+.question-image {
+  max-width: 100%;
+  display: block; /* Ensures block behavior for margin */
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 10px; /* Space between multiple images for the SAME question */
+}
+/* Remove bottom margin from the last image in a group */
+.question-image:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Modified Question Text Styling --- */
+.studyquestion {
+  display: block; /* Ensure label takes full width */
+  color: black;
+  /* font-size: 16px; */
+  margin-bottom: 15px; /* Space between question text and options */
+  border-left: 4px solid rgb(29, 29, 184);
+  padding-left: 15px;
+  /* margin-top: 60px; */ /* REMOVED - spacing now handled by image container */
+}
+
+/* --- Additional Text Styling (Keep existing) --- */
+.additional-text {
+  font-style: italic;
+  margin-bottom: 20px; /* Space below additional text */
+  padding-left: 19px; /* Align with question text */
+}
+
+
+/* --- Options Styling --- */
+.options-container {
+    margin-top: 15px; /* Space above options */
+    padding-left: 19px; /* Align with question text */
+}
+.option {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
   font-size: 16px;
   padding: 5px 0;
+  position: relative; /* Needed for radio button styling */
 }
 
-.option:hover {
-    background-color: #f9f9f9;
-    border-radius: 10px;
-  }
-
-input[type="radio"] {
-  margin-right: 10px;
-  margin-top: -10px;
-} */
-
-.studyquestion {
-  margin-top: 60px;
-  border-left: 4px solid rgb(29, 29, 184);
-  padding-left: 15px;
-  margin-bottom: 10px;
-}
-
-.submit-button {
-  display: block;
-  width: 100%;
-  background-color: rgb(29, 29, 184);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 12px;
+/* Keep your custom radio button styles */
+.radio-label {
+  display: flex;
+  align-items: center;
   cursor: pointer;
-  transition: background-color 0.3s;
+  width: 100%;
+}
+input[type="radio"] {
+  position: absolute;
+  opacity: 0; /* Hide original radio */
+  cursor: pointer;
+}
+.radio-custom {
+  height: 18px;
+  width: 18px;
+  background-color: #eee;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  display: inline-block;
+  position: relative;
+}
+.radio-label:hover input[type="radio"] ~ .radio-custom {
+  background-color: #ddd;
+}
+input[type="radio"]:checked ~ .radio-custom {
+  background-color: rgb(29, 29, 184);
+  border-color: rgb(29, 29, 184);
+}
+/* Inner dot */
+.radio-custom::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 5px;
+  top: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+}
+input[type="radio"]:checked ~ .radio-custom::after {
+  display: block;
+}
+.label-text {
+  flex: 1;
+  color: black; /* Ensure options text is black */
+}
+.label-text :deep(p) { /* Style paragraphs within v-html */
+    margin: 0;
 }
 
-.submit-button:hover {
-  background-color: rgb(23, 23, 250);
-}
-
-.question-image {
-  max-width: 100%;
-  margin: 0px 0;
-  margin-top: 20px;
-}
-
-.question-image-range {
-  max-width: 100%;
-  margin: 0px 0;
-  margin-top: -20px;
-  margin-bottom: 100px; /* Increase margin to bottom */
-}
-
-.horizontal-line {
-  border-top: 1px solid #ccc; /* Add horizontal line */
-  margin: 20px 0;
-}
-
-.additional-text {
-  font-style: italic;
-  margin-bottom: 20px;
-}
-
+/* --- Manual Text Blocks --- */
 .manual-text {
-  margin: 40px ;
-  font-weight: bold;
-  font-size: 16px;
+  margin: 40px 0; /* Vertical margin */
+  padding: 15px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  font-size: 15px; /* Slightly smaller */
   color: #333;
-  margin-bottom: 100px;
+  line-height: 1.5;
+}
+.manual-text p {
+    margin: 0;
+}
+.manual-text-header {
+  margin-bottom: 30px; /* Space below header text before the relevant questions start */
+  font-weight: bold;
 }
 
+
+/* --- Notifications (Keep existing) --- */
 .success-notification {
   text-align: center;
   margin: 20px auto;
@@ -850,12 +876,9 @@ input[type="radio"] {
   width: fit-content;
 }
 
-/* .question {
-  margin-top: 80px;
-  border-left: 4px solid rgb(29, 29, 184);
-  padding-left: 10px;
-  height: 50px;
-  display: inline-block;
-} */
+/* --- REMOVED or COMMENTED OUT Old/Redundant Styles --- */
+/* .question-image-range { ... } */ /* Removed, use .question-image */
+/* .horizontal-line { ... } */ /* Removed */
+/* .question { ... } */ /* Removed */
 
 </style>

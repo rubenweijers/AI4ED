@@ -223,7 +223,7 @@ export default {
         // Helper: Sends API request with retries
         async sendApiRequest(apiData) {
             const maxAttempts = 5;
-            const delayMs = 2000;
+            const delayMs = 1000;
             let attempt = 0;
             while (attempt < maxAttempts) {
                 try {
@@ -538,7 +538,6 @@ export default {
                 console.log('Generating initial message with Model:', this.modelToUse);
                 // console.log('API Data for initial message:', apiData);
                 const response = await this.sendApiRequest(apiData);
-
 
                 const initialMessage = response.data.choices[0].message.content.trim();
                 this.initialSystemMessage = initialMessage; // Store the very first AI message
