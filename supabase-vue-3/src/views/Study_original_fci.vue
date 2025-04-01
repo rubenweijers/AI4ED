@@ -120,21 +120,35 @@ const showToastNotification = () => {
 };
 
 const initializeTimer = () => {
-  let newStartTime = localStorage.getItem('studyStartTime');
-  const totalDuration = 30 * 60; // 30 minutes in seconds
+  const totalDuration = 0.6 * 60; // 30 minutes in seconds
+  let storedStartTime = localStorage.getItem('studyStartTime');
 
-  if (!newStartTime) {
-    // If no start time exists, set a new one
-    newStartTime = Date.now();
-    localStorage.setItem('studyStartTime', newStartTime.toString());
-    localStorage.setItem('studyTotalDuration', totalDuration.toString());
-    localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
-    localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+  if (storedStartTime) {
+    const startTime = parseInt(storedStartTime, 10);
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const remaining = totalDuration - elapsed;
+
+    if (remaining <= 0) {
+      // If the timer has expired, reset it
+      resetTimer(totalDuration);
+    } else {
+      // Timer is still running, keep it
+      localStorage.setItem('studyTotalDuration', totalDuration.toString());
+    }
   } else {
-    // If start time exists, ensure total duration is set
-    localStorage.setItem('studyTotalDuration', totalDuration.toString());
+    // No timer exists, initialize a new one
+    resetTimer(totalDuration);
   }
 };
+
+const resetTimer = (duration) => {
+  const newStartTime = Date.now();
+  localStorage.setItem('studyStartTime', newStartTime.toString());
+  localStorage.setItem('studyTotalDuration', duration.toString());
+  localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+  localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+};
+
 
 const confirmSubmit = async () => {
   showToast.value = false;
