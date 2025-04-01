@@ -121,7 +121,7 @@ const showToastNotification = () => {
 
 const initializeTimer = () => {
   let newStartTime = localStorage.getItem('studyStartTime');
-  const totalDuration = 0.1 * 60; // 30 minutes in seconds
+  const totalDuration = 0.5 * 60; // 30 minutes in seconds
 
   if (!newStartTime) {
     // If no start time exists, set a new one
