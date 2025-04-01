@@ -465,6 +465,13 @@ input[type="radio"] {
   background-color: rgb(23, 23, 250);
 }
 
+.radio-label {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  padding: 10px; /* optional: adjust padding for a larger clickable area */
+}
+
 .question-image {
   max-width: 100%;
   margin: 0px 0;
