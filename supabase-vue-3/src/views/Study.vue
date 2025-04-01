@@ -689,12 +689,54 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
 .subscript {
   vertical-align: sub;
   font-size: smaller;
 }
 
-/* --- Container Styles --- */
+.study-info-container {
+  text-align: center;
+  margin: 50px auto;
+  padding: 20px;
+  max-width: 800px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.next-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: rgb(29, 29, 184);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.next-button:hover {
+  background-color: rgb(23, 23, 250);
+}
+
+.select-all-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: rgb(29, 29, 184);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.select-all-button:hover {
+  background-color: rgb(23, 23, 250);
+}
+
 .study-container {
   max-width: 800px;
   margin: 50px auto;
@@ -708,137 +750,71 @@ onMounted(() => {
 
 .study-container h2 {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   color: rgb(29, 29, 184);
 }
 
-/* --- General Button Styles --- */
-.next-button, .select-all-button, .submit-button {
+label {
   display: block;
-  margin: 20px auto;
-  padding: 10px 20px;
-  background-color: rgb(29, 29, 184);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  width: auto;
-}
-.submit-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 40px;
-}
-.next-button:hover, .select-all-button:hover, .submit-button:hover {
-  background-color: rgb(23, 23, 250);
-}
-.submit-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-/* --- Question Block Styling --- */
-.question-block {
-  margin-bottom: 50px;
-}
-
-/* --- Image Container: now left-aligned --- */
-.question-images-container {
-  margin-bottom: 15px;
-  text-align: left;
-}
-
-.question-image {
-  max-width: 100%;
-  display: block;
+  color: black; /* Ensure text is black */
   margin-bottom: 10px;
 }
-.question-image:last-child {
-  margin-bottom: 0;
-}
 
-/* --- Modified Question Text Styling --- */
-.studyquestion {
-  display: block;
-  color: black;
-  margin-bottom: 15px;
-  border-left: 4px solid rgb(29, 29, 184);
-  padding-left: 15px;
-}
-
-/* --- Additional Text Styling --- */
-.additional-text {
-  font-style: italic;
-  margin-bottom: 20px;
-  padding-left: 19px;
-}
-
-/* --- Options Styling --- */
-.options-container {
-  margin-top: 15px;
-  padding-left: 19px;
-}
+/* Old radio buttons - Left aligned and instant update */
 .option {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
   font-size: 16px;
   padding: 5px 0;
-  position: relative;
 }
 
-.radio-label {
-  display: flex;
-  align-items: left;
-  cursor: pointer;
-  width: 100%;
+.option:hover {
+  background-color: #f9f9f9;
+  border-radius: 10px;
 }
+
 input[type="radio"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-}
-.radio-custom {
-  height: 18px;
-  width: 18px;
-  background-color: #eee;
-  border-radius: 50%;
   margin-right: 10px;
-  border: 1px solid #ccc;
-  display: inline-block;
-  position: relative;
-}
-.radio-label:hover input[type="radio"] ~ .radio-custom {
-  background-color: #ddd;
-}
-input[type="radio"]:checked ~ .radio-custom {
-  background-color: rgb(29, 29, 184);
-  border-color: rgb(29, 29, 184);
-}
-.radio-custom::after {
-  content: "";
-  position: absolute;
-  display: none;
-  left: 5px;
-  top: 5px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: white;
-}
-input[type="radio"]:checked ~ .radio-custom::after {
-  display: block;
-}
-.label-text {
-  flex: 1;
-  color: black;
-}
-.label-text :deep(p) {
-    margin: 0;
+  margin-top: -2px;
+  cursor: pointer;
+  accent-color: rgb(29, 29, 184); /* Ensures immediate color update */
 }
 
-/* --- Manual Text Blocks --- */
+.studyquestion {
+  margin-top: 60px;
+  border-left: 4px solid rgb(29, 29, 184);
+  padding-left: 15px;
+  margin-bottom: 10px;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  background-color: rgb(29, 29, 184);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: rgb(23, 23, 250);
+}
+
+.question-image {
+  max-width: 100%;
+  display: block;
+  margin: 20px auto; /* Center images */
+}
+
+.additional-text {
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
 .manual-text {
   margin: 40px 0;
   padding: 15px;
@@ -848,16 +824,9 @@ input[type="radio"]:checked ~ .radio-custom::after {
   font-size: 15px;
   color: #333;
   line-height: 1.5;
-}
-.manual-text p {
-    margin: 0;
-}
-.manual-text-header {
-  margin-bottom: 30px;
   font-weight: bold;
 }
 
-/* --- Notifications --- */
 .success-notification {
   text-align: center;
   margin: 20px auto;
@@ -867,4 +836,5 @@ input[type="radio"]:checked ~ .radio-custom::after {
   border-radius: 5px;
   width: fit-content;
 }
+
 </style>
