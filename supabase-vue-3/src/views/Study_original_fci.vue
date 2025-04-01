@@ -115,27 +115,21 @@ const submissionSuccess = ref(false);
 const showToast = ref(false);
 const formSubmitted = ref(false);
 
+// --- Timer Specific Variable ---
+let timerWatcherInterval = null; // Holds the interval ID
+
 const showToastNotification = () => {
   showToast.value = true;
 };
 
-// const initializeTimer = () => {
-//   const totalDuration = 30 * 60; // 30 minutes in seconds
-//   resetTimer(totalDuration);
-// };
-
-const setupTimerStorage = (duration) => {
-  const newStartTime = Date.now();
-  localStorage.setItem('studyStartTime', newStartTime.toString());
-  localStorage.setItem('studyTotalDuration', duration.toString());
-  // Optional: Reset warning flags if needed
-  // localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
-  // localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
-  console.log("New Timer Initialized in localStorage.");
-};
-
 const confirmSubmit = async () => {
   showToast.value = false;
+  // Check if all questions are answered before submitting manually
+  const unanswered = questions.value.filter(question => answers.value[question.id] === '');
+  if (unanswered.length > 0) {
+    alert('Please answer all questions before submitting.');
+    return;
+  }
   await submitAnswers();
 };
 
@@ -148,15 +142,25 @@ const checkUser = async () => {
   if (userData) {
     user.value = JSON.parse(userData);
     await fetchUserProfile();
-    await checkSubmissionStatus();
-    await fetchQuestions();
+    await checkSubmissionStatus(); // Check if already submitted *before* fetching questions/starting timer
+    if (!formSubmitted.value) { // Only fetch questions if not submitted
+        await fetchQuestions();
+    } else {
+        // If already submitted, maybe redirect immediately?
+        // console.log("User already submitted, redirecting...");
+        // router.push('/feedback'); // Or appropriate "already done" page
+        // Or just show a message and disable the form
+        loading.value = false; // Ensure loading state is handled
+        return; // Stop further setup if already submitted
+    }
   } else {
     router.push('/login');
   }
-  loading.value = false;
+  loading.value = false; // Set loading false after checks/fetches
 };
 
 const fetchUserProfile = async () => {
+  // No changes needed here
   const { data, error } = await supabase
     .from('2_profiles')
     .select('*')
@@ -171,9 +175,10 @@ const fetchUserProfile = async () => {
 };
 
 const checkSubmissionStatus = async () => {
+    // No changes needed here
   const { data, error } = await supabase
     .from('2_profiles')
-    .select('has_submitted_survey')
+    .select('has_submitted_survey') // Ensure this field name is correct for *this* survey
     .eq('user_id', user.value.username)
     .single();
 
@@ -186,6 +191,7 @@ const checkSubmissionStatus = async () => {
 };
 
 const fetchQuestions = async () => {
+    // No changes needed here
   const { data, error } = await supabase.from('questions').select('*').order('question_number', { ascending: true });
   if (error) {
     console.error('Error fetching questions:', error.message);
@@ -194,53 +200,127 @@ const fetchQuestions = async () => {
   questions.value = data;
 
   questions.value.forEach(question => {
-    answers.value[question.id] = '';
+    answers.value[question.id] = ''; // Initialize with empty string
   });
 
-  loadSavedAnswers();
+  loadSavedAnswers(); // Load any previously saved (but not submitted) answers
 };
 
 const getOptions = (question) => {
+    // No changes needed here
   return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
 };
 
 const formatQuestionText = (question) => {
+    // No changes needed here
   const numberText = question.question_number + '. ';
   const formattedText = question.question_text.replace(/\\n/g, '<br>');
   return numberText + formattedText;
 };
 
 const formatOptionText = (option) => {
+    // No changes needed here
   const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
   return formattedOption;
 };
 
 const optionMapping = ["A", "B", "C", "D", "E"];
 
-// Updated to ensure all questions are answered before submission
 const handleFormSubmission = () => {
-  // Check if every question has an answer
-  const unanswered = questions.value.filter(question => answers.value[question.id] === '');
-  if (unanswered.length > 0) {
-    alert('Please answer all questions before submitting.');
-    return;
-  }
-
+  // This function now triggers the confirmation popup first
+  // The actual check for all answers is inside confirmSubmit
   if (formSubmitted.value) {
-    router.push('/feedback');
+     // If somehow the button is clicked after submission, redirect or inform
+     // console.log("Form already submitted.");
+     router.push('/feedback'); // Or the correct post-submission page
   } else {
-    confirmSubmit();
+     showToastNotification(); // Show confirmation popup
   }
 };
 
+
+// --- Simplified Timer Functions ---
+
+const clearTimer = () => {
+  if (timerWatcherInterval) {
+    clearInterval(timerWatcherInterval);
+    timerWatcherInterval = null;
+  }
+  // Clear timer-related localStorage items
+  localStorage.removeItem('studyStartTime');
+  localStorage.removeItem('studyTotalDuration');
+  // Optional: Clear warning flags if they are used elsewhere for this timer
+  localStorage.removeItem('fifteenMinuteWarningDisplayed');
+  localStorage.removeItem('fiveMinuteWarningDisplayed');
+  // console.log("Timer cleared.");
+};
+
+const getRemainingTime = () => {
+  const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
+  const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
+
+  // Check if timer values are valid in localStorage
+  if (isNaN(startTime) || isNaN(totalDuration)) {
+    // console.error("Timer values not found or invalid in localStorage.");
+    return 0; // Treat as expired if values are missing/invalid
+  }
+
+  const now = Date.now();
+  const elapsed = Math.floor((now - startTime) / 1000); // Elapsed time in seconds
+  let remaining = totalDuration - elapsed;
+
+  // Ensure remaining time doesn't go negative
+  return remaining < 0 ? 0 : remaining;
+};
+
+const setupTimerWatcher = () => {
+  // Clear any previous interval before starting a new one
+  if (timerWatcherInterval) {
+    clearInterval(timerWatcherInterval);
+  }
+
+  // console.log("Setting up timer watcher...");
+  timerWatcherInterval = setInterval(() => {
+    const remainingTime = getRemainingTime();
+    // console.log(`Remaining time: ${remainingTime} seconds`); // For debugging
+
+    if (remainingTime <= 0) {
+      // Timer expired
+      // We don't need to call clearTimer() here because submitAnswers() will call it.
+      // We do need to stop the interval itself though.
+      clearInterval(timerWatcherInterval);
+      timerWatcherInterval = null;
+      // console.log("Timer expired. Submitting answers.");
+      alert('Your study time has ended. Submitting your answers now.');
+      submitAnswers(); // Submit whatever answers are present
+    }
+    // Add warnings logic here if needed based on remainingTime
+    // e.g., check for 15 min, 5 min remaining and display warnings
+  }, 1000); // Check every second
+};
+
+// --- End Simplified Timer Functions ---
+
+
 const submitAnswers = async () => {
+  // If already submitting or submitted, prevent concurrent submissions
+  if (formSubmitted.value && submissionSuccess.value) {
+      // console.log("Submission already succeeded.");
+      return;
+  }
+   if (formSubmitted.value && !submissionSuccess.value){
+      // console.log("Submission in progress or previously failed and retrying.");
+      // Allow retry? Or prevent? For now, let's assume retry is okay.
+   }
+
   try {
-    formSubmitted.value = true;
+    formSubmitted.value = true; // Mark as submitted early to prevent duplicates
     const answerEntries = questions.value.map(question => {
       const answerIndex = answers.value[question.id];
-      const answer = typeof answerIndex !== 'undefined' && answerIndex !== null && answerIndex !== '' 
-        ? optionMapping[answerIndex] 
-        : 'unanswered';
+      // Handle cases where an answer might not be selected (empty string or null/undefined)
+      const answer = (typeof answerIndex !== 'undefined' && answerIndex !== null && answerIndex !== '')
+        ? optionMapping[answerIndex]
+        : 'unanswered'; // Mark explicitly as unanswered if needed
 
       return {
         user_id: user.value.username,
@@ -250,53 +330,125 @@ const submitAnswers = async () => {
       };
     });
 
+    // console.log("Submitting answers:", answerEntries);
+
     const { error: answerError } = await supabase
-      .from('2_answers_original')
+      .from('2_answers_original') // Ensure this table name is correct
       .upsert(answerEntries, { onConflict: ['user_id', 'question_id'] });
 
     if (answerError) {
       console.error('Error submitting answers:', answerError.message);
-      formSubmitted.value = false;
-      return;
+      formSubmitted.value = false; // Reset submission status on error
+      alert(`Failed to submit answers: ${answerError.message}`); // Inform user
+      return; // Stop execution
     }
+
+    // console.log("Answers submitted to Supabase.");
 
     const { error: updateError } = await supabase
       .from('2_profiles')
-      .update({ has_submitted_survey: true,
-        time_end_fci_2: new Date().toISOString()
+      .update({
+          has_submitted_survey: true, // Ensure this field name is correct
+          time_end_fci_2: new Date().toISOString() // Record submission time
        })
       .eq('user_id', user.value.username);
 
     if (updateError) {
       console.error('Error updating submission status:', updateError.message);
-      return;
+      // Note: Answers were submitted, but status update failed. Decide how to handle this.
+      // Maybe still proceed but log the error?
+      alert(`Answers submitted, but failed to update profile status: ${updateError.message}`);
+      // Don't reset formSubmitted.value here, as answers *were* saved.
+    } else {
+        // console.log("Profile submission status updated.");
     }
 
-    submissionSuccess.value = true;
-    clearTimer(); // Clear the timer when submission is successful
-    router.push('/feedback');
+    submissionSuccess.value = true; // Mark submission as fully successful
+    clearTimer(); // Clear the timer *after* successful submission
+    // console.log("Submission successful, navigating to feedback...");
+    router.push('/feedback'); // Navigate to the next page (e.g., feedback or thank you)
+
   } catch (error) {
-    console.error('An unexpected error occurred:', error);
-    formSubmitted.value = false;
+    console.error('An unexpected error occurred during submission:', error);
+    formSubmitted.value = false; // Reset status on unexpected errors
+    alert(`An unexpected error occurred: ${error.message}`); // Inform user
   }
 };
 
-const clearTimer = () => {
-  if (timerWatcherInterval) {
-    clearInterval(timerWatcherInterval);
-    timerWatcherInterval = null; // Reset interval ID
-    console.log("Timer interval cleared.");
+
+// --- Local Storage for Answers ---
+
+const saveAnswersToLocalStorage = () => {
+  // Only save if the form hasn't been successfully submitted
+  if (!submissionSuccess.value) {
+    localStorage.setItem('studyAnswers2', JSON.stringify(answers.value));
+  } else {
+    // Optionally clear saved answers after successful submission
+    localStorage.removeItem('studyAnswers2');
   }
-  // Remove only timer-specific keys
-  localStorage.removeItem('studyStartTime');
-  localStorage.removeItem('studyTotalDuration');
-  // Optional: remove warning flags too
-  // localStorage.removeItem('fifteenMinuteWarningDisplayed');
-  // localStorage.removeItem('fiveMinuteWarningDisplayed');
-  console.log("Timer localStorage data cleared.");
 };
 
+const loadSavedAnswers = () => {
+  // Only load if the form hasn't been submitted yet
+  if (!formSubmitted.value) {
+    const savedAnswers = localStorage.getItem('studyAnswers2');
+    if (savedAnswers) {
+      try {
+        answers.value = JSON.parse(savedAnswers);
+      } catch (e) {
+        console.error("Error parsing saved answers from localStorage", e);
+        localStorage.removeItem('studyAnswers2'); // Clear corrupted data
+      }
+    }
+  }
+};
+
+// Watch answers to save them progressively
+watch(answers, saveAnswersToLocalStorage, { deep: true });
+
+
+// --- Lifecycle Hooks ---
+
+onMounted(async () => {
+  // console.log("Component mounted. Checking user and setting up timer.");
+  await checkUser(); // Check user, profile, and submission status first
+
+  // Only set up the timer if the user hasn't already submitted
+  if (!formSubmitted.value) {
+    // console.log("Form not submitted. Initializing timer...");
+    // --- Start New 30-Minute Timer ---
+    const totalDuration = 30 * 60; // 30 minutes in seconds
+    const newStartTime = Date.now();
+    localStorage.setItem('studyStartTime', newStartTime.toString());
+    localStorage.setItem('studyTotalDuration', totalDuration.toString());
+    // Reset warning flags (optional, depending on if you use them)
+    localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+    localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+    // console.log(`Timer started. Start time: ${newStartTime}, Duration: ${totalDuration}s`);
+    // --- End New Timer ---
+
+    setupTimerWatcher(); // Start watching the timer
+  } else {
+    // console.log("Form already submitted. Timer not started.");
+    // Optionally, redirect or show a message if already submitted
+    router.push('/feedback'); // Redirect if already done
+  }
+});
+
+onUnmounted(() => {
+  // console.log("Component unmounting. Clearing timer.");
+  // Clean up the timer interval and related localStorage when the component is destroyed
+  clearTimer();
+});
+
+// --- Development/Helper Functions (Keep if needed) ---
 const submitAnswer = async (question, optionIndex) => {
+  // This saves individual answers immediately - useful for robustness but can increase DB load.
+  // Consider if this is necessary alongside saving all answers to localStorage.
+  // Ensure it doesn't conflict with the final submission logic.
+  // Maybe only enable this if `saveAnswersToLocalStorage` fails?
+
+  // Basic implementation (ensure table/column names match final submission):
   const answerEntry = {
     user_id: user.value.username,
     question_id: question.id,
@@ -305,139 +457,23 @@ const submitAnswer = async (question, optionIndex) => {
   };
 
   const { error } = await supabase
-    .from('2_answers_original')
+    .from('2_answers_original') // Ensure correct table
     .upsert([answerEntry], { onConflict: ['user_id', 'question_id'] });
 
   if (error) {
-    console.error('Error submitting the answer:', error.message);
+    console.error('Error submitting single answer:', error.message);
   } else {
-    console.log(`Answer for question ${question.question_number} submitted successfully.`);
+    // console.log(`Answer for question ${question.question_number} saved individually.`);
   }
 };
 
-const selectAllOption1 = () => {
+const selectAllOption1 = () => { // For testing/debugging
   questions.value.forEach(question => {
-    answers.value[question.id] = 0;
+    answers.value[question.id] = 0; // 0 corresponds to Option A
   });
 };
 
-const saveAnswersToLocalStorage = () => {
-  localStorage.setItem('studyAnswers2', JSON.stringify(answers.value));
-};
 
-const loadSavedAnswers = () => {
-  const savedAnswers = localStorage.getItem('studyAnswers2');
-  if (savedAnswers) {
-    answers.value = JSON.parse(savedAnswers);
-  }
-};
-
-watch(answers, saveAnswersToLocalStorage, { deep: true });
-
-let timerWatcherInterval;
-
-const setupTimerWatcher = () => {
-  // Clear any existing interval first to prevent duplicates
-  if (timerWatcherInterval) {
-      clearInterval(timerWatcherInterval);
-  }
-
-  timerWatcherInterval = setInterval(async () => { // Make async to await submitAnswers
-    const remainingTime = getRemainingTime();
-    console.log(`Remaining time: ${remainingTime} seconds`); // Optional: Debug log
-
-    // Add checks for warning messages if needed here
-    // Example: Check and show 15-minute warning
-    // const fifteenMinWarningKey = 'fifteenMinuteWarningDisplayed';
-    // if (remainingTime <= 15 * 60 && localStorage.getItem(fifteenMinWarningKey) !== 'true') {
-    //   alert('You have 15 minutes remaining.');
-    //   localStorage.setItem(fifteenMinWarningKey, 'true');
-    // }
-     // Example: Check and show 5-minute warning
-    // const fiveMinWarningKey = 'fiveMinuteWarningDisplayed';
-    // if (remainingTime <= 5 * 60 && localStorage.getItem(fiveMinWarningKey) !== 'true') {
-    //   alert('You have 5 minutes remaining.');
-    //   localStorage.setItem(fiveMinWarningKey, 'true');
-    // }
-
-
-    if (remainingTime <= 0) {
-      console.log("Time expired. Submitting answers automatically.");
-      clearTimer(); // Stop the interval immediately
-      alert('Your study time has ended. Submitting your answers now.');
-      // Ensure answers are saved before submitting automatically
-      saveAnswersToLocalStorage();
-      await submitAnswers(); // Await the submission
-    }
-  }, 1000); // Check every second
-};
-
-
-const getRemainingTime = () => {
-  const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
-  const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
-
-  // Check if timer data exists in localStorage
-  if (isNaN(startTime) || isNaN(totalDuration)) {
-    console.warn("Timer data not found in localStorage.");
-    return 0; // Or handle as appropriate (e.g., return a default duration)
-  }
-
-  const now = Date.now();
-  const elapsed = Math.floor((now - startTime) / 1000); // Elapsed time in seconds
-  let remaining = totalDuration - elapsed;
-
-  // Ensure remaining time doesn't go negative
-  return Math.max(0, remaining);
-};
-
-onMounted(async () => { // Make onMounted async
-  await checkUser(); // Wait for user check to complete
-
-  // Check if the user has already submitted this specific survey
-  if (formSubmitted.value) {
-      console.log("User has already submitted. Redirecting...");
-      router.push('/feedback'); // Redirect if already submitted
-      return; // Stop further execution in this component
-  }
-
-  // --- Timer Logic ---
-  const existingStartTime = localStorage.getItem('studyStartTime');
-  const existingDuration = localStorage.getItem('studyTotalDuration');
-
-  if (existingStartTime && existingDuration) {
-    // Timer data exists, check if it has already expired
-    const remaining = getRemainingTime();
-    if (remaining <= 0) {
-      console.log("Timer already expired on mount. Triggering submission.");
-       alert('Your study time has expired. Submitting your previous answers now.');
-       // Ensure latest answers (if any changes were made before refresh) are saved
-       saveAnswersToLocalStorage();
-       await submitAnswers(); // Submit immediately
-       // No need to start the watcher if time is already up and submitted
-    } else {
-       console.log("Resuming existing timer.");
-       setupTimerWatcher(); // Resume watcher for existing timer
-    }
-  } else {
-    // No timer data found - this is the first load for this session
-    console.log("Initializing new 30-minute timer.");
-    const totalDuration = 30 * 60; // 30 minutes in seconds
-    setupTimerStorage(totalDuration); // Setup localStorage for the new timer
-    setupTimerWatcher(); // Start the watcher for the new timer
-  }
-  // --- End Timer Logic ---
-
-});
-
-onUnmounted(() => {
-  // Clear the interval timer when the component is unmounted
-  // Do NOT clear localStorage here, as that would prevent resuming on refresh
-  if (timerWatcherInterval) {
-    clearInterval(timerWatcherInterval);
-    console.log("Timer interval cleared on unmount.");
-  }
-});
 </script>
 
 
