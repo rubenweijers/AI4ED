@@ -807,8 +807,11 @@ input[type="radio"] {
 .question-image {
   max-width: 100%;
   display: block;
-  margin: 0px 0 20px 0; /* Added space above images */
+}
 
+.question-block {
+  margin-top: 30px; /* Added top margin for spacing */
+  margin-bottom: 20px;
 }
 
 .additional-text {
