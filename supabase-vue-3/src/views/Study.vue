@@ -790,7 +790,7 @@ onMounted(() => {
 
 .radio-label {
   display: flex;
-  align-items: center;
+  align-items: left;
   cursor: pointer;
   width: 100%;
 }
