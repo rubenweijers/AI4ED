@@ -120,20 +120,12 @@ const showToastNotification = () => {
 };
 
 const initializeTimer = () => {
-  let newStartTime = localStorage.getItem('studyStartTime');
   const totalDuration = 30 * 60; // 30 minutes in seconds
-
-  if (!newStartTime) {
-    // If no start time exists, set a new one
-    newStartTime = Date.now();
-    localStorage.setItem('studyStartTime', newStartTime.toString());
-    localStorage.setItem('studyTotalDuration', totalDuration.toString());
-    localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
-    localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
-  } else {
-    // If start time exists, ensure total duration is set
-    localStorage.setItem('studyTotalDuration', totalDuration.toString());
-  }
+  const newStartTime = Date.now(); // always set a new start time
+  localStorage.setItem('studyStartTime', newStartTime.toString());
+  localStorage.setItem('studyTotalDuration', totalDuration.toString());
+  localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+  localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 };
 
 const confirmSubmit = async () => {
