@@ -119,32 +119,20 @@ const showToastNotification = () => {
   showToast.value = true;
 };
 
-const initializeTimer = () => {
-  const totalDuration = 30 * 60; // 30 minutes in seconds
+// const initializeTimer = () => {
+//   const totalDuration = 30 * 60; // 30 minutes in seconds
+//   resetTimer(totalDuration);
+// };
 
-  // Determine if this page load is a refresh.
-  const navEntries = performance.getEntriesByType('navigation');
-  const isReload = navEntries.length > 0 && navEntries[0].type === 'reload';
-
-  if (!isReload) {
-    // For a fresh navigation, reset the timer to 30 minutes.
-    resetTimer(totalDuration);
-  } else {
-    // On refresh, make sure totalDuration is set.
-    if (!localStorage.getItem('studyTotalDuration')) {
-      localStorage.setItem('studyTotalDuration', totalDuration.toString());
-    }
-  }
-};
-
-const resetTimer = (duration) => {
+const setupTimerStorage = (duration) => {
   const newStartTime = Date.now();
   localStorage.setItem('studyStartTime', newStartTime.toString());
   localStorage.setItem('studyTotalDuration', duration.toString());
-  localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
-  localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+  // Optional: Reset warning flags if needed
+  // localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
+  // localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
+  console.log("New Timer Initialized in localStorage.");
 };
-
 
 const confirmSubmit = async () => {
   showToast.value = false;
@@ -294,11 +282,18 @@ const submitAnswers = async () => {
 };
 
 const clearTimer = () => {
-  clearInterval(timerWatcherInterval);
+  if (timerWatcherInterval) {
+    clearInterval(timerWatcherInterval);
+    timerWatcherInterval = null; // Reset interval ID
+    console.log("Timer interval cleared.");
+  }
+  // Remove only timer-specific keys
   localStorage.removeItem('studyStartTime');
   localStorage.removeItem('studyTotalDuration');
-  localStorage.removeItem('fifteenMinuteWarningDisplayed');
-  localStorage.removeItem('fiveMinuteWarningDisplayed');
+  // Optional: remove warning flags too
+  // localStorage.removeItem('fifteenMinuteWarningDisplayed');
+  // localStorage.removeItem('fiveMinuteWarningDisplayed');
+  console.log("Timer localStorage data cleared.");
 };
 
 const submitAnswer = async (question, optionIndex) => {
@@ -342,39 +337,106 @@ watch(answers, saveAnswersToLocalStorage, { deep: true });
 let timerWatcherInterval;
 
 const setupTimerWatcher = () => {
-  timerWatcherInterval = setInterval(() => {
+  // Clear any existing interval first to prevent duplicates
+  if (timerWatcherInterval) {
+      clearInterval(timerWatcherInterval);
+  }
+
+  timerWatcherInterval = setInterval(async () => { // Make async to await submitAnswers
     const remainingTime = getRemainingTime();
+    console.log(`Remaining time: ${remainingTime} seconds`); // Optional: Debug log
+
+    // Add checks for warning messages if needed here
+    // Example: Check and show 15-minute warning
+    // const fifteenMinWarningKey = 'fifteenMinuteWarningDisplayed';
+    // if (remainingTime <= 15 * 60 && localStorage.getItem(fifteenMinWarningKey) !== 'true') {
+    //   alert('You have 15 minutes remaining.');
+    //   localStorage.setItem(fifteenMinWarningKey, 'true');
+    // }
+     // Example: Check and show 5-minute warning
+    // const fiveMinWarningKey = 'fiveMinuteWarningDisplayed';
+    // if (remainingTime <= 5 * 60 && localStorage.getItem(fiveMinWarningKey) !== 'true') {
+    //   alert('You have 5 minutes remaining.');
+    //   localStorage.setItem(fiveMinWarningKey, 'true');
+    // }
+
+
     if (remainingTime <= 0) {
-      clearTimer();
+      console.log("Time expired. Submitting answers automatically.");
+      clearTimer(); // Stop the interval immediately
       alert('Your study time has ended. Submitting your answers now.');
-      submitAnswers();
+      // Ensure answers are saved before submitting automatically
+      saveAnswersToLocalStorage();
+      await submitAnswers(); // Await the submission
     }
-  }, 1000);
+  }, 1000); // Check every second
 };
+
 
 const getRemainingTime = () => {
   const startTime = parseInt(localStorage.getItem('studyStartTime'), 10);
   const totalDuration = parseInt(localStorage.getItem('studyTotalDuration'), 10);
+
+  // Check if timer data exists in localStorage
+  if (isNaN(startTime) || isNaN(totalDuration)) {
+    console.warn("Timer data not found in localStorage.");
+    return 0; // Or handle as appropriate (e.g., return a default duration)
+  }
+
   const now = Date.now();
   const elapsed = Math.floor((now - startTime) / 1000); // Elapsed time in seconds
   let remaining = totalDuration - elapsed;
 
   // Ensure remaining time doesn't go negative
-  if (remaining < 0) {
-    remaining = 0;
-  }
-
-  return remaining;
+  return Math.max(0, remaining);
 };
 
-onMounted(() => {
-  checkUser();
-  initializeTimer(); // Ensures timer resets when entering this component
-  setupTimerWatcher();
+onMounted(async () => { // Make onMounted async
+  await checkUser(); // Wait for user check to complete
+
+  // Check if the user has already submitted this specific survey
+  if (formSubmitted.value) {
+      console.log("User has already submitted. Redirecting...");
+      router.push('/feedback'); // Redirect if already submitted
+      return; // Stop further execution in this component
+  }
+
+  // --- Timer Logic ---
+  const existingStartTime = localStorage.getItem('studyStartTime');
+  const existingDuration = localStorage.getItem('studyTotalDuration');
+
+  if (existingStartTime && existingDuration) {
+    // Timer data exists, check if it has already expired
+    const remaining = getRemainingTime();
+    if (remaining <= 0) {
+      console.log("Timer already expired on mount. Triggering submission.");
+       alert('Your study time has expired. Submitting your previous answers now.');
+       // Ensure latest answers (if any changes were made before refresh) are saved
+       saveAnswersToLocalStorage();
+       await submitAnswers(); // Submit immediately
+       // No need to start the watcher if time is already up and submitted
+    } else {
+       console.log("Resuming existing timer.");
+       setupTimerWatcher(); // Resume watcher for existing timer
+    }
+  } else {
+    // No timer data found - this is the first load for this session
+    console.log("Initializing new 30-minute timer.");
+    const totalDuration = 30 * 60; // 30 minutes in seconds
+    setupTimerStorage(totalDuration); // Setup localStorage for the new timer
+    setupTimerWatcher(); // Start the watcher for the new timer
+  }
+  // --- End Timer Logic ---
+
 });
 
 onUnmounted(() => {
-  clearTimer();
+  // Clear the interval timer when the component is unmounted
+  // Do NOT clear localStorage here, as that would prevent resuming on refresh
+  if (timerWatcherInterval) {
+    clearInterval(timerWatcherInterval);
+    console.log("Timer interval cleared on unmount.");
+  }
 });
 </script>
 
