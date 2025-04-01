@@ -7,27 +7,31 @@
       <h2>Force Concept Inventory Test #1</h2>
       <form @submit.prevent="confirmSubmission">
 
-        <div v-if="questions.length > 3" class="manual-text manual-text-header">
-          <p>
-            USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS<br><br>
-            A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
-            <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-          </p>
-        </div>
-        
-        <div v-if="questions.length > 27" class="manual-text manual-text-header">
-           <p>
-            USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT THREE QUESTIONS<br><br>
-            A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
-            <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
-            <br><br><u>This time however, they have equipped the sled with a pressurized air cannon aimed directly up the slope. Firing the cannon releases a sudden, momentary blast of air in the direction it is aimed.</u>
-          </p>
-        </div>
+        <!-- Removed the two manual text blocks from above the questions loop -->
 
         <div v-for="(question, index) in questions" :key="question.id" class="question-block">
+          
+          <!-- Insert the first manual text before question #4 images -->
+          <div v-if="question.question_number === 4" class="manual-text manual-text-header">
+            <p>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT FOUR QUESTIONS<br><br>
+              A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+            </p>
+          </div>
+          
+          <!-- Insert the second manual text before question #28 images -->
+          <div v-if="question.question_number === 28" class="manual-text manual-text-header">
+            <p>
+              USE THE STATEMENT AND FIGURE BELOW TO ANSWER THE NEXT THREE QUESTIONS<br><br>
+              A person is sitting on a sled which is on a slope so icy that friction is negligible. They are trying to cross from one side of the slope to the other without falling down the slope. To do this, they have mounted a rocket on the sled which provides a force up the slope, against the direction they would fall.
+              <br><br>Suppose the person kicks off from the side rail in the direction of the other side rail. The rocket is firing with force <i>F<span class="subscript">rocket</span></i> , hard enough to keep them from falling down the slope. They have an initial speed <i>v<span class="subscript"></span></i> moving directly across the slope.
+              <br><br><u>This time however, they have equipped the sled with a pressurized air cannon aimed directly up the slope. Firing the cannon releases a sudden, momentary blast of air in the direction it is aimed.</u>
+            </p>
+          </div>
 
           <div class="question-images-container">
-             <img v-if="question.question_number === 1" src="/fci_2/fci_q1.png" alt="Question 1 related image" class="question-image">
+            <img v-if="question.question_number === 1" src="/fci_2/fci_q1.png" alt="Question 1 related image" class="question-image">
             <img v-if="question.question_number === 4" src="/fci_2/fci_q4-7.png" alt="Question 4-7 related image" class="question-image">
             <img v-if="question.question_number === 4" src="/fci_2/fci_q4.png" alt="Question 4 related image" class="question-image">
             <img v-if="question.question_number === 6" src="/fci_2/fci_q6.png" alt="Question 6 related image" class="question-image">
@@ -41,7 +45,6 @@
             <img v-if="question.question_number === 24" src="/fci_2/fci_q24.png" alt="Question 24 related image" class="question-image">
             <img v-if="question.question_number === 28" src="/fci_2/fci_q28-30.png" alt="Question 28-30 related image" class="question-image">
             <img v-if="question.question_number === 28" src="/fci_2/fci_q28.png" alt="Question 28 related image" class="question-image">
-
             <img v-if="question.image" :src="question.image" alt="Question related image" class="question-image">
           </div>
 
@@ -65,7 +68,8 @@
               </div>
           </div>
 
-          </div> <button @click="handleFormSubmission" class="submit-button" :disabled="!!formSubmitted.value">Submit FCI.</button>
+        </div>
+        <button @click="handleFormSubmission" class="submit-button" :disabled="!!formSubmitted.value">Submit FCI.</button>
 
       </form>
       <ToastNotification
@@ -76,7 +80,7 @@
           @cancel="cancelSubmit"
         />
 
-        <ToastNotification
+      <ToastNotification
           :isVisible="showErrorToast"
           title="Incomplete Submission"
           :message="errorMessage"
@@ -704,11 +708,11 @@ onMounted(() => {
 
 .study-container h2 {
   text-align: center;
-  margin-bottom: 30px; /* Increased margin */
+  margin-bottom: 30px;
   color: rgb(29, 29, 184);
 }
 
-/* --- General Button Styles (Keep existing) --- */
+/* --- General Button Styles --- */
 .next-button, .select-all-button, .submit-button {
   display: block;
   margin: 20px auto;
@@ -719,12 +723,12 @@ onMounted(() => {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-  width: auto; /* Adjust if full width needed for some */
+  width: auto;
 }
 .submit-button {
   width: 100%;
   padding: 12px;
-  margin-top: 40px; /* Add space above submit button */
+  margin-top: 40px;
 }
 .next-button:hover, .select-all-button:hover, .submit-button:hover {
   background-color: rgb(23, 23, 250);
@@ -734,55 +738,46 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-
-/* --- NEW: Question Block Styling --- */
+/* --- Question Block Styling --- */
 .question-block {
-  margin-bottom: 50px; /* Space BETWEEN each question block */
-  /* border-top: 1px solid #eee; */ /* Optional visual separator */
-  /* padding-top: 20px; */ /* Optional space above content in block */
+  margin-bottom: 50px;
 }
 
-/* --- NEW: Image Container --- */
+/* --- Image Container: now left-aligned --- */
 .question-images-container {
-  margin-bottom: 15px; /* FIXED space BELOW image(s) and ABOVE question text */
-  text-align: center; /* Center images within the container */
+  margin-bottom: 15px;
+  text-align: left;
 }
 
 .question-image {
   max-width: 100%;
-  display: block; /* Ensures block behavior for margin */
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 10px; /* Space between multiple images for the SAME question */
+  display: block;
+  margin-bottom: 10px;
 }
-/* Remove bottom margin from the last image in a group */
 .question-image:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 /* --- Modified Question Text Styling --- */
 .studyquestion {
-  display: block; /* Ensure label takes full width */
+  display: block;
   color: black;
-  /* font-size: 16px; */
-  margin-bottom: 15px; /* Space between question text and options */
+  margin-bottom: 15px;
   border-left: 4px solid rgb(29, 29, 184);
   padding-left: 15px;
-  /* margin-top: 60px; */ /* REMOVED - spacing now handled by image container */
 }
 
-/* --- Additional Text Styling (Keep existing) --- */
+/* --- Additional Text Styling --- */
 .additional-text {
   font-style: italic;
-  margin-bottom: 20px; /* Space below additional text */
-  padding-left: 19px; /* Align with question text */
+  margin-bottom: 20px;
+  padding-left: 19px;
 }
-
 
 /* --- Options Styling --- */
 .options-container {
-    margin-top: 15px; /* Space above options */
-    padding-left: 19px; /* Align with question text */
+  margin-top: 15px;
+  padding-left: 19px;
 }
 .option {
   display: flex;
@@ -790,10 +785,9 @@ onMounted(() => {
   margin-bottom: 10px;
   font-size: 16px;
   padding: 5px 0;
-  position: relative; /* Needed for radio button styling */
+  position: relative;
 }
 
-/* Keep your custom radio button styles */
 .radio-label {
   display: flex;
   align-items: center;
@@ -802,7 +796,7 @@ onMounted(() => {
 }
 input[type="radio"] {
   position: absolute;
-  opacity: 0; /* Hide original radio */
+  opacity: 0;
   cursor: pointer;
 }
 .radio-custom {
@@ -822,7 +816,6 @@ input[type="radio"]:checked ~ .radio-custom {
   background-color: rgb(29, 29, 184);
   border-color: rgb(29, 29, 184);
 }
-/* Inner dot */
 .radio-custom::after {
   content: "";
   position: absolute;
@@ -839,20 +832,20 @@ input[type="radio"]:checked ~ .radio-custom::after {
 }
 .label-text {
   flex: 1;
-  color: black; /* Ensure options text is black */
+  color: black;
 }
-.label-text :deep(p) { /* Style paragraphs within v-html */
+.label-text :deep(p) {
     margin: 0;
 }
 
 /* --- Manual Text Blocks --- */
 .manual-text {
-  margin: 40px 0; /* Vertical margin */
+  margin: 40px 0;
   padding: 15px;
   border: 1px solid #ddd;
   background-color: #f9f9f9;
   border-radius: 5px;
-  font-size: 15px; /* Slightly smaller */
+  font-size: 15px;
   color: #333;
   line-height: 1.5;
 }
@@ -860,12 +853,11 @@ input[type="radio"]:checked ~ .radio-custom::after {
     margin: 0;
 }
 .manual-text-header {
-  margin-bottom: 30px; /* Space below header text before the relevant questions start */
+  margin-bottom: 30px;
   font-weight: bold;
 }
 
-
-/* --- Notifications (Keep existing) --- */
+/* --- Notifications --- */
 .success-notification {
   text-align: center;
   margin: 20px auto;
@@ -875,10 +867,4 @@ input[type="radio"]:checked ~ .radio-custom::after {
   border-radius: 5px;
   width: fit-content;
 }
-
-/* --- REMOVED or COMMENTED OUT Old/Redundant Styles --- */
-/* .question-image-range { ... } */ /* Removed, use .question-image */
-/* .horizontal-line { ... } */ /* Removed */
-/* .question { ... } */ /* Removed */
-
 </style>
