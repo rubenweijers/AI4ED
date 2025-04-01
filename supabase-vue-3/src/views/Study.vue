@@ -813,7 +813,6 @@ input[type="radio"] {
   display: block;
   width: 100%;
   cursor: pointer;
-  padding: 10px; /* optional: adjust padding for a larger clickable area */
 }
 
 .question-block {
