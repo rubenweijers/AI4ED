@@ -2,7 +2,12 @@
   <div class="thank-you-container">
     <h1>Thank you for participating!</h1>    
     <p>We appreciate your participation in the study. Your responses are valuable and have been successfully recorded.</p>
-    <p>You have completed the study: <u>Thank you for your time and effort!</u></p><br>
+    <p>You have completed the study: <u>Thank you for your time and effort!</u></p><br><br>
+
+    <p>
+    At the time you complete this study, some of your peers may not yet have participated in their lab sections. <strong>We ask you to please refrain from discussing the content 
+    here with other students until Thursday, April 3rd.</strong>
+    </p>
 
     <section>
       <h2>Senior Investigators</h2>
@@ -53,15 +58,6 @@
     Thank you again for engaging critically with the explanations provided; your insights are invaluable to our research.
   </p>
 </section>
-
-<section>
-  <h2>Discussion with Peers</h2>
-  <p>
-    At the time you complete this study, some of your peers may not yet have participated in their lab sections. We ask you to please refrain from discussing the content 
-    here with other students until Thursday, April 3rd.
-  </p>
-</section>
-
 
   <!-- <section>
     <button @click="clearLocalStorage" class="clear-storage-button">Clear Login Data</button>
