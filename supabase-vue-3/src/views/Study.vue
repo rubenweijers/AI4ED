@@ -809,6 +809,13 @@ input[type="radio"] {
   display: block;
 }
 
+.radio-label {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  padding: 10px; /* optional: adjust padding for a larger clickable area */
+}
+
 .question-block {
   margin-top: 30px; /* Added top margin for spacing */
   margin-bottom: 100px;
