@@ -10,8 +10,8 @@
         misconceptions in learning Newtonian physics.<br><br>
 
         Participation in the study involves completing a short survey that will ask you questions about your
-        opinions on the use of generative AI. <br><br>After this, you will be asked to complete a 30-question multiple
-        choice test designed to assess your understanding of fundamental concepts in Newtonian mechanics,
+        opinions on the use of generative AI. <br><br><strong>After this, you will be asked to complete a 30-question multiple
+        choice test</strong> designed to assess your understanding of fundamental concepts in Newtonian mechanics,
         including:
         <ul>
               <li>Velocity</li>
@@ -40,7 +40,7 @@
           <br><br>Please note that the system is capable of accurately grading your responses to the questions in the
           survey. However, during conversations with you to correct a misconception or an answer, the AI
           companion may make mistakes, or misinterpret or misunderstand your response, despite its best efforts.
-          <strong>It can answer up to 40% of the questions incorrectly.</strong> As a
+          <br><br><strong>The AI can answer up to 40% of the questions incorrectly.</strong> <br><br>As a
           result, its feedback may not always be accurate or helpful. You are expected to exercise your own
           judgment when considering feedback from the AI, just as you would when the feedback is from a human
           peer.

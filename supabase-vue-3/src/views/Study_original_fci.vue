@@ -222,7 +222,7 @@ const optionMapping = ["A", "B", "C", "D", "E"];
 // Updated to ensure all questions are answered before submission
 const handleFormSubmission = () => {
   // Check if every question has an answer
-  const unanswered = questions.value.filter(question => !answers.value[question.id]);
+  const unanswered = questions.value.filter(question => answers.value[question.id] === '');
   if (unanswered.length > 0) {
     alert('Please answer all questions before submitting.');
     return;
