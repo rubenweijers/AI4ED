@@ -121,23 +121,19 @@ const showToastNotification = () => {
 
 const initializeTimer = () => {
   const totalDuration = 30 * 60; // 30 minutes in seconds
-  let storedStartTime = localStorage.getItem('studyStartTime');
 
-  if (storedStartTime) {
-    const startTime = parseInt(storedStartTime, 10);
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    const remaining = totalDuration - elapsed;
+  // Determine if this page load is a refresh.
+  const navEntries = performance.getEntriesByType('navigation');
+  const isReload = navEntries.length > 0 && navEntries[0].type === 'reload';
 
-    if (remaining <= 0) {
-      // If the timer has expired, reset it
-      resetTimer(totalDuration);
-    } else {
-      // Timer is still running, keep it
+  if (!isReload) {
+    // For a fresh navigation, reset the timer to 30 minutes.
+    resetTimer(totalDuration);
+  } else {
+    // On refresh, make sure totalDuration is set.
+    if (!localStorage.getItem('studyTotalDuration')) {
       localStorage.setItem('studyTotalDuration', totalDuration.toString());
     }
-  } else {
-    // No timer exists, initialize a new one
-    resetTimer(totalDuration);
   }
 };
 
