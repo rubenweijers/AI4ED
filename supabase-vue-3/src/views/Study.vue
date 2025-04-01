@@ -811,7 +811,7 @@ input[type="radio"] {
 
 .question-block {
   margin-top: 30px; /* Added top margin for spacing */
-  margin-bottom: 50px;
+  margin-bottom: 200px;
 }
 
 .additional-text {
