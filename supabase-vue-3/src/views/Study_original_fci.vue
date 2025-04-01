@@ -114,17 +114,16 @@ const router = useRouter();
 const submissionSuccess = ref(false);
 const showToast = ref(false);
 const formSubmitted = ref(false);
-const showErrorToast = ref(false);
-const errorMessage = ref('');
 
 const showToastNotification = () => {
   showToast.value = true;
 };
 
 const initializeTimer = () => {
+  // Only set the start time if it doesn't already exist in localStorage
   const newStartTime = Date.now();
   localStorage.setItem('studyStartTime', newStartTime.toString());
-  localStorage.setItem('studyTotalDuration', (30 * 60).toString());
+  localStorage.setItem('studyTotalDuration', (30 * 60).toString()); // Set to 30 minutes in seconds
   localStorage.setItem('fifteenMinuteWarningDisplayed', 'false');
   localStorage.setItem('fiveMinuteWarningDisplayed', 'false');
 };
@@ -136,27 +135,6 @@ const confirmSubmit = async () => {
 
 const cancelSubmit = () => {
   showToast.value = false;
-};
-
-const areAllQuestionsAnswered = () => {
-  return questions.value.every(question => {
-    const answerIndex = answers.value[question.id];
-    return typeof answerIndex !== 'undefined' && answerIndex !== null && answerIndex !== '';
-  });
-};
-
-const handleFormSubmission = () => {
-  if (formSubmitted.value) {
-    alert('The form has already been submitted.');
-    router.push('/feedback');
-  } else {
-    if (areAllQuestionsAnswered()) {
-      showToastNotification();
-    } else {
-      errorMessage.value = 'Please answer all questions before submitting.';
-      showErrorToast.value = true;
-    }
-  }
 };
 
 const checkUser = async () => {
@@ -197,6 +175,7 @@ const checkSubmissionStatus = async () => {
     console.error('Error checking submission status:', error.message);
     return;
   }
+
   formSubmitted.value = data?.has_submitted_survey || false;
 };
 
@@ -207,13 +186,48 @@ const fetchQuestions = async () => {
     return;
   }
   questions.value = data;
+
   questions.value.forEach(question => {
     answers.value[question.id] = '';
   });
+
   loadSavedAnswers();
 };
 
+const getOptions = (question) => {
+  return [question.option_1, question.option_2, question.option_3, question.option_4, question.option_5].filter(option => option);
+};
+
+const formatQuestionText = (question) => {
+  const numberText = question.question_number + '. ';
+  const formattedText = question.question_text.replace(/\\n/g, '<br>');
+  return numberText + formattedText;
+};
+
+const formatOptionText = (option) => {
+  const formattedOption = option.replace(/_sub_(.*?)_end_/g, '<span class="subscript">$1</span>');
+  return formattedOption;
+};
+
 const optionMapping = ["A", "B", "C", "D", "E"];
+
+// Updated to ensure all questions are answered before submission
+const handleFormSubmission = () => {
+  // Check if every question has an answer
+  const unanswered = questions.value.filter(question => !answers.value[question.id]);
+  if (unanswered.length > 0) {
+    alert('Please answer all questions before submitting.');
+    return;
+  }
+
+  if (formSubmitted.value) {
+    console.log('Form has already been submitted.');
+    alert('The form has already been submitted.');
+    router.push('/feedback');
+  } else {
+    confirmSubmit();
+  }
+};
 
 const submitAnswers = async () => {
   try {
@@ -223,6 +237,7 @@ const submitAnswers = async () => {
       const answer = typeof answerIndex !== 'undefined' && answerIndex !== null && answerIndex !== '' 
         ? optionMapping[answerIndex] 
         : 'unanswered';
+
       return {
         user_id: user.value.username,
         question_id: question.id,
@@ -243,7 +258,9 @@ const submitAnswers = async () => {
 
     const { error: updateError } = await supabase
       .from('2_profiles')
-      .update({ has_submitted_survey: true, time_end_fci_2: new Date().toISOString() })
+      .update({ has_submitted_survey: true,
+        time_end_fci_2: new Date().toISOString()
+       })
       .eq('user_id', user.value.username);
 
     if (updateError) {
@@ -252,7 +269,7 @@ const submitAnswers = async () => {
     }
 
     submissionSuccess.value = true;
-    clearTimer();
+    clearTimer(); // Clear the timer when submission is successful
     router.push('/feedback');
   } catch (error) {
     console.error('An unexpected error occurred:', error);
@@ -268,6 +285,35 @@ const clearTimer = () => {
   localStorage.removeItem('fiveMinuteWarningDisplayed');
 };
 
+const submitAnswer = async (question, optionIndex) => {
+  const answerEntry = {
+    user_id: user.value.username,
+    question_id: question.id,
+    answer: optionMapping[optionIndex],
+    question_number: question.question_number,
+  };
+
+  const { error } = await supabase
+    .from('2_answers_original')
+    .upsert([answerEntry], { onConflict: ['user_id', 'question_id'] });
+
+  if (error) {
+    console.error('Error submitting the answer:', error.message);
+  } else {
+    console.log(`Answer for question ${question.question_number} submitted successfully.`);
+  }
+};
+
+const selectAllOption1 = () => {
+  questions.value.forEach(question => {
+    answers.value[question.id] = 0;
+  });
+};
+
+const saveAnswersToLocalStorage = () => {
+  localStorage.setItem('studyAnswers2', JSON.stringify(answers.value));
+};
+
 const loadSavedAnswers = () => {
   const savedAnswers = localStorage.getItem('studyAnswers2');
   if (savedAnswers) {
@@ -275,11 +321,10 @@ const loadSavedAnswers = () => {
   }
 };
 
-watch(answers, () => {
-  localStorage.setItem('studyAnswers2', JSON.stringify(answers.value));
-}, { deep: true });
+watch(answers, saveAnswersToLocalStorage, { deep: true });
 
 let timerWatcherInterval;
+
 const setupTimerWatcher = () => {
   timerWatcherInterval = setInterval(() => {
     const remainingTime = getRemainingTime();
@@ -305,11 +350,10 @@ onUnmounted(() => {
 
 onMounted(() => {
   checkUser();
-  initializeTimer();
+  initializeTimer(); // Ensures timer resets when entering this component
   setupTimerWatcher();
 });
 </script>
-
 
 
 <style scoped>
